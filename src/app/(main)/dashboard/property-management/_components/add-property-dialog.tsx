@@ -1,0 +1,163 @@
+"use client";
+
+import * as React from "react";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+
+import { addPropertySchema, type AddPropertyFormData } from "./schema";
+
+interface AddPropertyDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAddProperty: (property: AddPropertyFormData) => void;
+}
+
+export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddPropertyDialogProps) {
+  const form = useForm<AddPropertyFormData>({
+    resolver: zodResolver(addPropertySchema),
+    defaultValues: {
+      apartmentNumber: undefined,
+      location: "",
+      rooms: 1,
+      readinessStatus: "UNFURNISHED",
+      urgentMatter: "",
+    },
+  });
+
+  const onSubmit = async (data: AddPropertyFormData) => {
+    try {
+      onAddProperty(data);
+      toast.success("Property added successfully");
+      form.reset();
+    } catch {
+      toast.error("Failed to add property");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Property</DialogTitle>
+          <DialogDescription>Add a new property to your portfolio. Fill in the details below.</DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="apartmentNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apartment Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="101"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Downtown District, Floor 1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="rooms"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Rooms</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="10"
+                      placeholder="2"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="readinessStatus"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Readiness Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="FURNISHED">Furnished</SelectItem>
+                      <SelectItem value="UNFURNISHED">Unfurnished</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="urgentMatter"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Urgent Matter (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Any urgent issues or maintenance needed..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Add Property</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
