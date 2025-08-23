@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { PlusCircleIcon, MailIcon, ChevronRight } from "lucide-react";
+import { PlusCircleIcon, MailIcon, ChevronRight, Building2, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -103,25 +103,37 @@ const NavItemCollapsed = ({
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
+  if (!item.subItems?.length) {
+    return (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild aria-disabled={item.comingSoon} tooltip={item.title} isActive={isActive(item.url)}>
+          <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
   return (
     <SidebarMenuItem key={item.title}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             disabled={item.comingSoon}
-            tooltip={item.title}
             isActive={isActive(item.url, item.subItems)}
+            tooltip={item.title}
           >
             {item.icon && <item.icon />}
             <span>{item.title}</span>
-            <ChevronRight />
+            {item.comingSoon && <IsComingSoon />}
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-50 space-y-1" side="right" align="start">
-          {item.subItems?.map((subItem) => (
+        <DropdownMenuContent side="right" align="start" className="w-48">
+          {item.subItems.map((subItem) => (
             <DropdownMenuItem key={subItem.title} asChild>
               <SidebarMenuSubButton
-                key={subItem.title}
                 asChild
                 className="focus-visible:ring-0"
                 aria-disabled={subItem.comingSoon}
@@ -162,13 +174,31 @@ export function NavMain({ items }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton
-                tooltip="Quick Create"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-              >
-                <PlusCircleIcon />
-                <span>Quick Create</span>
-              </SidebarMenuButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    tooltip="Quick Create"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+                  >
+                    <PlusCircleIcon />
+                    <span>Quick Create</span>
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="right" align="start" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/property-management/properties" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      <span>Add Property</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/property-management/tenants" className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>Add Tenant</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 size="icon"
                 className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
