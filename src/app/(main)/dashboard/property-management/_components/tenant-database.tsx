@@ -49,34 +49,34 @@ export function TenantDatabase() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tenants</CardTitle>
+            <CardTitle className="text-sm font-medium">Всего Арендаторов</CardTitle>
             <Users className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.length}</div>
-            <p className="text-muted-foreground text-xs">{getActiveTenants().length} currently active</p>
+            <p className="text-muted-foreground text-xs">{getActiveTenants().length} в настоящее время активны</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Occupied Properties</CardTitle>
+            <CardTitle className="text-sm font-medium">Занятая Недвижимость</CardTitle>
             <Building2 className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{getActiveTenants().length}</div>
-            <p className="text-muted-foreground text-xs">of {mockProperties.length} total properties</p>
+            <p className="text-muted-foreground text-xs">из {mockProperties.length} общей недвижимости</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vacant Properties</CardTitle>
+            <CardTitle className="text-sm font-medium">Свободная Недвижимость</CardTitle>
             <Building2 className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{getVacantProperties().length}</div>
-            <p className="text-muted-foreground text-xs">Available for new tenants</p>
+            <p className="text-muted-foreground text-xs">Доступна для новых арендаторов</p>
           </CardContent>
         </Card>
       </div>
@@ -86,19 +86,19 @@ export function TenantDatabase() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Tenant Database
+            База Данных Арендаторов
           </CardTitle>
-          <CardDescription>Manage all tenant records and their property assignments</CardDescription>
+          <CardDescription>Управляйте всеми записями арендаторов и их назначениями в недвижимость</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-green-600">
-                  {getActiveTenants().length} Active
+                  {getActiveTenants().length} Активные
                 </Badge>
                 <Badge variant="outline" className="text-gray-600">
-                  {data.filter((t) => t.exitDate).length} Inactive
+                  {data.filter((t) => t.exitDate).length} Неактивные
                 </Badge>
               </div>
             </div>
@@ -106,7 +106,7 @@ export function TenantDatabase() {
               <DataTableViewOptions table={table} />
               <Button onClick={() => setAddTenantDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Tenant
+                Добавить Арендатора
               </Button>
             </div>
           </div>

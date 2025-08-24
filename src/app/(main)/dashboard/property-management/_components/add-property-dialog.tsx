@@ -43,10 +43,10 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
   const onSubmit = async (data: AddPropertyFormData) => {
     try {
       onAddProperty(data);
-      toast.success("Property added successfully");
+      toast.success("Недвижимость успешно добавлена");
       form.reset();
     } catch {
-      toast.error("Failed to add property");
+      toast.error("Не удалось добавить недвижимость");
     }
   };
 
@@ -54,8 +54,8 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Property</DialogTitle>
-          <DialogDescription>Add a new property to your portfolio. Fill in the details below.</DialogDescription>
+          <DialogTitle>Добавить Новую Недвижимость</DialogTitle>
+          <DialogDescription>Добавьте новую недвижимость в ваш портфель. Заполните детали ниже.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -64,7 +64,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
               name="apartmentNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Apartment Number</FormLabel>
+                  <FormLabel>Номер Квартиры</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -83,7 +83,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel>Расположение</FormLabel>
                   <FormControl>
                     <Input placeholder="Downtown District, Floor 1" {...field} />
                   </FormControl>
@@ -97,7 +97,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
               name="rooms"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Number of Rooms</FormLabel>
+                  <FormLabel>Количество Комнат</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -118,16 +118,16 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
               name="readinessStatus"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Readiness Status</FormLabel>
+                  <FormLabel>Статус Готовности</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                        <SelectValue placeholder="Выберите статус" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="FURNISHED">Furnished</SelectItem>
-                      <SelectItem value="UNFURNISHED">Unfurnished</SelectItem>
+                      <SelectItem value="FURNISHED">Меблированная</SelectItem>
+                      <SelectItem value="UNFURNISHED">Немеблированная</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -140,7 +140,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
               name="urgentMatter"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Urgent Matter (Optional)</FormLabel>
+                  <FormLabel>Срочные Вопросы (Необязательно)</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Any urgent issues or maintenance needed..." {...field} />
                   </FormControl>
@@ -151,9 +151,9 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                Отмена
               </Button>
-              <Button type="submit">Add Property</Button>
+              <Button type="submit">Добавить Недвижимость</Button>
             </DialogFooter>
           </form>
         </Form>

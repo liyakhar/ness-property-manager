@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { PrismaClient, Property } from "@prisma/client";
+import { Property, ReadinessStatus } from "@prisma/client";
 import { err, ok, Result } from "neverthrow";
+import { z } from "zod";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 type ApiResponse<T> = Result<T, { message: string; status: number }>;
 
@@ -20,15 +21,28 @@ async function getProperties(): Promise<ApiResponse<Property[]>> {
   }
 }
 
+const createPropertySchema = z.object({
+  apartmentNumber: z.number().int().nonnegative(),
+  location: z.string().min(1),
+  rooms: z.number().int().positive(),
+  readinessStatus: z.nativeEnum(ReadinessStatus).default("UNFURNISHED"),
+  urgentMatter: z.string().optional().nullable(),
+});
+
 async function createProperty(data: Partial<Property>): Promise<ApiResponse<Property>> {
   try {
+    const parsed = createPropertySchema.safeParse(data);
+    if (!parsed.success) {
+      return err({ message: "Invalid request body", status: 400 });
+    }
+
     const property = await prisma.property.create({
       data: {
-        apartmentNumber: data.apartmentNumber!,
-        location: data.location!,
-        rooms: data.rooms!,
-        readinessStatus: data.readinessStatus!,
-        urgentMatter: data.urgentMatter,
+        apartmentNumber: parsed.data.apartmentNumber,
+        location: parsed.data.location,
+        rooms: parsed.data.rooms,
+        readinessStatus: parsed.data.readinessStatus,
+        urgentMatter: parsed.data.urgentMatter ?? undefined,
       },
     });
     return ok(property);

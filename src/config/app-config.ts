@@ -3,12 +3,12 @@ import packageJson from "../../package.json";
 const currentYear = new Date().getFullYear();
 
 export const APP_CONFIG = {
-  name: "Ness Property Manager",
+  name: "Ness Управление Недвижимостью",
   version: packageJson.version,
-  copyright: `© ${currentYear}, Ness Property Manager.`,
+  copyright: `© ${currentYear}, Ness Управление Недвижимостью.`,
   meta: {
-    title: "Ness Property Manager - Property Management Dashboard",
+    title: "Ness Управление Недвижимостью - Панель Управления",
     description:
-      "Ness Property Manager is a comprehensive property management dashboard built with Next.js 15, Tailwind CSS v4, and shadcn/ui. Perfect for managing properties, tenants, and occupancy tracking.",
+      "Ness Управление Недвижимостью - это комплексная панель управления недвижимостью, построенная на Next.js 15, Tailwind CSS v4 и shadcn/ui. Идеально подходит для управления недвижимостью, арендаторами и отслеживания занятости.",
   },
 };

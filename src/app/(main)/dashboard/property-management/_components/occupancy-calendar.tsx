@@ -6,7 +6,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval }
 import { Calendar, Plus, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePropertyManagementStore } from "@/stores/property-management";
 
@@ -60,7 +60,7 @@ export function OccupancyCalendar() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Occupancy Calendar
+            Календарь Занятости
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -68,20 +68,20 @@ export function OccupancyCalendar() {
             <div className="flex items-center gap-4">
               <Select value={selectedProperty} onValueChange={setSelectedProperty}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select property" />
+                  <SelectValue placeholder="Выберите недвижимость" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Properties</SelectItem>
+                  <SelectItem value="all">Вся Недвижимость</SelectItem>
                   {mockProperties.map((property) => (
                     <SelectItem key={property.id} value={property.id}>
-                      Apartment #{property.apartmentNumber}
+                      Квартира #{property.apartmentNumber}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-sm">Legend:</span>
+                <span className="text-muted-foreground text-sm">Легенда:</span>
                 {filteredProperties.slice(0, 6).map((property) => (
                   <div key={property.id} className="flex items-center gap-1">
                     <div className={`h-3 w-3 rounded-full ${getPropertyColor(property.id)}`} />
@@ -93,12 +93,12 @@ export function OccupancyCalendar() {
 
             <Button onClick={() => setAddTenantDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Tenant
+              Добавить Арендатора
             </Button>
           </div>
 
           <div className="mb-4 grid grid-cols-7 gap-1">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+            {["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"].map((day) => (
               <div key={day} className="text-muted-foreground p-2 text-center text-sm font-medium">
                 {day}
               </div>
@@ -146,7 +146,7 @@ export function OccupancyCalendar() {
                 size="sm"
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
               >
-                Previous Month
+                Предыдущий Месяц
               </Button>
               <span className="text-sm font-medium">{format(currentMonth, "MMMM yyyy")}</span>
               <Button
@@ -154,13 +154,13 @@ export function OccupancyCalendar() {
                 size="sm"
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
               >
-                Next Month
+                Следующий Месяц
               </Button>
             </div>
 
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Users className="h-4 w-4" />
-              {mockTenants.length} Active Tenants
+              {mockTenants.length} Активных Арендаторов
             </div>
           </div>
         </CardContent>

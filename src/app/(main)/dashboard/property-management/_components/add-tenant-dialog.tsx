@@ -48,10 +48,10 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
   const onSubmit = async (data: AddTenantFormData) => {
     try {
       onAddTenant(data);
-      toast.success("Tenant added successfully");
+      toast.success("Арендатор успешно добавлен");
       form.reset();
     } catch {
-      toast.error("Failed to add tenant");
+      toast.error("Не удалось добавить арендатора");
     }
   };
 
@@ -62,9 +62,9 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Tenant</DialogTitle>
+          <DialogTitle>Добавить Нового Арендатора</DialogTitle>
           <DialogDescription>
-            Add a new tenant and assign them to a property. Fill in the details below.
+            Добавьте нового арендатора и назначьте его в недвижимость. Заполните детали ниже.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -74,7 +74,7 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tenant Name</FormLabel>
+                  <FormLabel>Имя Арендатора</FormLabel>
                   <FormControl>
                     <Input placeholder="John Smith" {...field} />
                   </FormControl>
@@ -88,17 +88,17 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
               name="apartmentId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Assigned Apartment</FormLabel>
+                  <FormLabel>Назначенная Квартира</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an apartment" />
+                        <SelectValue placeholder="Выберите квартиру" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {availableProperties.map((property) => (
                         <SelectItem key={property.id} value={property.id}>
-                          Apartment #{property.apartmentNumber} - {property.location}
+                          Квартира #{property.apartmentNumber} - {property.location}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -113,15 +113,12 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
               name="entryDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Entry Date</FormLabel>
+                  <FormLabel>Дата Заезда</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-                        >
-                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                        <Button variant="outline" className="w-full pl-3 text-left font-normal">
+                          {field.value ? format(field.value, "PPP") : <span>Выберите дату</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -146,7 +143,7 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes (Optional)</FormLabel>
+                  <FormLabel>Заметки (Необязательно)</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Any special requirements or notes about the tenant..." {...field} />
                   </FormControl>
@@ -157,9 +154,9 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                Отмена
               </Button>
-              <Button type="submit">Add Tenant</Button>
+              <Button type="submit">Добавить Арендатора</Button>
             </DialogFooter>
           </form>
         </Form>

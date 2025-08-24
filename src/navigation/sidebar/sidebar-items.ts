@@ -27,20 +27,20 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    label: "Property Management",
+    label: "Управление Недвижимостью",
     items: [
       {
-        title: "Properties",
+        title: "Недвижимость",
         url: "/dashboard/property-management/properties",
         icon: Building2,
       },
       {
-        title: "Calendar",
+        title: "Календарь",
         url: "/dashboard/property-management/calendar",
         icon: Calendar,
       },
       {
-        title: "Tenants",
+        title: "Арендаторы",
         url: "/dashboard/property-management/tenants",
         icon: Users,
       },

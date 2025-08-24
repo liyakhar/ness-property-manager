@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { PrismaClient, Tenant } from "@prisma/client";
+import { Tenant } from "@prisma/client";
 import { err, ok, Result } from "neverthrow";
+import { z } from "zod";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 type ApiResponse<T> = Result<T, { message: string; status: number }>;
 
@@ -20,14 +21,37 @@ async function getTenants(): Promise<ApiResponse<Tenant[]>> {
   }
 }
 
+const createTenantSchema = z.object({
+  name: z.string().min(1),
+  apartmentId: z.string().min(1),
+  entryDate: z.union([z.string(), z.date()]).transform((v) => (typeof v === "string" ? new Date(v) : v)),
+  notes: z.string().optional().nullable(),
+});
+
 async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>> {
   try {
+    const parsed = createTenantSchema.safeParse(data);
+    if (!parsed.success) {
+      return err({ message: "Invalid request body", status: 400 });
+    }
+
+    // Prevent overlapping active tenants on create
+    const overlapping = await prisma.tenant.findFirst({
+      where: {
+        apartmentId: parsed.data.apartmentId,
+        OR: [{ exitDate: null }, { exitDate: { gte: parsed.data.entryDate } }],
+      },
+    });
+    if (overlapping) {
+      return err({ message: "Another active tenant overlaps for this apartment", status: 409 });
+    }
+
     const tenant = await prisma.tenant.create({
       data: {
-        name: data.name!,
-        apartmentId: data.apartmentId!,
-        entryDate: new Date(data.entryDate!),
-        notes: data.notes,
+        name: parsed.data.name,
+        apartmentId: parsed.data.apartmentId,
+        entryDate: parsed.data.entryDate,
+        notes: parsed.data.notes ?? undefined,
       },
       include: {
         apartment: true,
