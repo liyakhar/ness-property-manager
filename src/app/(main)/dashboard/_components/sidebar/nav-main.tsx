@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { PlusCircleIcon, MailIcon, ChevronRight, Building2, Users } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -170,47 +169,6 @@ export function NavMain({ items }: NavMainProps) {
 
   return (
     <>
-      <SidebarGroup>
-        <SidebarGroupContent className="flex flex-col gap-2">
-          <SidebarMenu>
-            <SidebarMenuItem className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton
-                    tooltip="Quick Create"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-                  >
-                    <PlusCircleIcon />
-                    <span>Quick Create</span>
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="right" align="start" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/property-management/properties" className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      <span>Add Property</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/property-management/tenants" className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      <span>Add Tenant</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button
-                size="icon"
-                className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
-                variant="outline"
-              >
-                <MailIcon />
-                <span className="sr-only">Inbox</span>
-              </Button>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
       {items.map((group) => (
         <SidebarGroup key={group.id}>
           {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
