@@ -1,12 +1,8 @@
-import createNextIntlPlugin from 'next-intl/plugin';
-
-const withNextIntl = createNextIntlPlugin();
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    typedRoutes: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
   },
-};
+}
 
-export default withNextIntl(nextConfig);
+export default nextConfig

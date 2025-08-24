@@ -41,7 +41,6 @@
     "lucide-react": "^0.453.0",
     "neverthrow": "^8.2.0",
     "next": "^15.5.0",
-    "next-intl": "^4.3.5",
     "next-themes": "^0.4.6",
     "prisma": "^6.14.0",
     "radix-ui": "^1.4.3",

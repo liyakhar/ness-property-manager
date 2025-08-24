@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { mockProperties, mockTenants } from "@/app/(main)/dashboard/property-management/_components/mock-data";
+import { mockProperties, mockTenants } from "@/app/[locale]/(main)/dashboard/property-management/_components/mock-data";
 import {
   Property,
   Tenant,
   AddPropertyFormData,
   AddTenantFormData,
-} from "@/app/(main)/dashboard/property-management/_components/schema";
+} from "@/app/[locale]/(main)/dashboard/property-management/_components/schema";
 
 interface PropertyManagementState {
   // Data
