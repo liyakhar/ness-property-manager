@@ -44,7 +44,6 @@ export function PropertiesTable() {
             <Building2 className="h-5 w-5" />
             Properties Overview
           </CardTitle>
-          <CardDescription>Manage all properties and their current status</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
