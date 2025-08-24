@@ -62,7 +62,6 @@ export function OccupancyCalendar() {
             <Calendar className="h-5 w-5" />
             Occupancy Calendar
           </CardTitle>
-          <CardDescription>Visual timeline showing tenant occupancy periods across all properties</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-6 flex items-center justify-between">
