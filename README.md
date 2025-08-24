@@ -1,21 +1,24 @@
-# Next.js Admin Template with TypeScript & Shadcn UI
+# Ness Property Manager - Next.js Property Management Dashboard
 
-Includes multiple dashboards, authentication layouts, customizable theme presets, and more.
+A comprehensive property management dashboard built with Next.js 15, TypeScript & Shadcn UI. Includes property management, tenant tracking, occupancy calendar, and more.
 
 <img src="https://github.com/arhamkhnz/next-shadcn-admin-dashboard/blob/main/media/dashboard.png?version=4" alt="Dashboard Screenshot">
 
 The idea behind this dashboard aims to offer an alternative to typical admin templates. Most I came across, paid or free, felt cluttered, outdated, or too rigid in design.
 
-I’ve taken design inspiration from various sources. Feel free to open an issue or reach out for credits.
+I've taken design inspiration from various sources. Feel free to open an issue or reach out for credits.
 
-> **View demo:** [studio admin](https://next-shadcn-admin-dashboard.vercel.app)
+> **View demo:** [Ness Property Manager](https://next-shadcn-admin-dashboard.vercel.app)
 
 > [!TIP]
-> I’m also working on Nuxt.js, Svelte, and React (Vite + TanStack Router) versions of this dashboard. They’ll be live soon.
+> I'm also working on Nuxt.js, Svelte, and React (Vite + TanStack Router) versions of this dashboard. They'll be live soon.
 
 ## Features
 
 - Built with Next.js 15, TypeScript, and Shadcn UI
+- Comprehensive property management system
+- Tenant tracking and management
+- Occupancy calendar with visual timeline
 - Responsive and mobile-friendly design
 - Customizable theme presets (light/dark modes with color schemes like Tangerine, Brutalist, and more)
 - Multiple layout options (collapsible sidebar, content width variations)
