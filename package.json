@@ -13,6 +13,7 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "prepare": "husky",
+    "type": "bun tsc --noEmit",
     "generate:presets": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' src/scripts/generate-theme-presets.ts"
   },
   "lint-staged": {
