@@ -54,11 +54,9 @@ export const createTenantColumns = (
   {
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Имя Арендатора" />,
-    cell: ({ row, column }) => (
+    cell: ({ row }) => (
       <EditableCell
         value={row.original.name}
-        row={row}
-        column={column}
         onSave={(value) => onUpdateTenant(row.original.id, { name: value })}
         type="text"
       />
@@ -69,14 +67,12 @@ export const createTenantColumns = (
   {
     accessorKey: "apartmentId",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира" />,
-    cell: ({ row, column }) => {
+    cell: ({ row }) => {
       const property = properties.find((p) => p.id === row.original.apartmentId);
       return (
         <div className="flex items-center gap-2">
           <EditableCell
             value={row.original.apartmentId}
-            row={row}
-            column={column}
             onSave={(value) => onUpdateTenant(row.original.id, { apartmentId: value })}
             type="apartment"
             properties={properties}
@@ -92,11 +88,9 @@ export const createTenantColumns = (
   {
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
-    cell: ({ row, column }) => (
+    cell: ({ row }) => (
       <EditableCell
         value={row.original.status}
-        row={row}
-        column={column}
         onSave={(value) => onUpdateTenant(row.original.id, { status: value })}
         type="status"
       />
@@ -106,11 +100,9 @@ export const createTenantColumns = (
   {
     accessorKey: "entryDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Дата Заезда" />,
-    cell: ({ row, column }) => (
+    cell: ({ row }) => (
       <EditableCell
         value={row.original.entryDate}
-        row={row}
-        column={column}
         onSave={(value) => onUpdateTenant(row.original.id, { entryDate: value })}
         type="date"
       />

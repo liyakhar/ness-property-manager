@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Check, X, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,8 +14,6 @@ import { cn } from "@/lib/utils";
 
 interface EditableCellProps {
   value: unknown;
-  row: unknown;
-  column: unknown;
   onSave: (value: unknown) => void;
   type?: "text" | "number" | "date" | "select" | "textarea" | "status" | "apartment";
   options?: { value: string; label: string }[];
@@ -31,7 +28,9 @@ export function EditableCell({
   properties = []
 }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+  const [editValue, setEditValue] = useState<string | number | Date | undefined>(
+    typeof value === 'string' || typeof value === 'number' || value instanceof Date ? value : undefined
+  );
   const [tempDate, setTempDate] = useState<Date | undefined>(
     value instanceof Date ? value : undefined
   );
@@ -61,7 +60,9 @@ export function EditableCell({
   };
 
   const handleCancel = () => {
-    setEditValue(value);
+    setEditValue(
+      typeof value === 'string' || typeof value === 'number' || value instanceof Date ? value : undefined
+    );
     setTempDate(value instanceof Date ? value : undefined);
     setIsEditing(false);
   };
@@ -81,7 +82,7 @@ export function EditableCell({
         return (
           <Textarea
             ref={textareaRef}
-            value={editValue || ""}
+            value={typeof editValue === 'string' ? editValue : ""}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             className="min-h-[80px] w-full"
@@ -117,7 +118,7 @@ export function EditableCell({
       
       case "select":
         return (
-          <Select value={editValue} onValueChange={setEditValue}>
+          <Select value={typeof editValue === 'string' ? editValue : ""} onValueChange={setEditValue}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Выберите значение" />
             </SelectTrigger>
@@ -133,7 +134,7 @@ export function EditableCell({
       
       case "status":
         return (
-          <Select value={editValue} onValueChange={setEditValue}>
+          <Select value={typeof editValue === 'string' ? editValue : ""} onValueChange={setEditValue}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Выберите статус" />
             </SelectTrigger>
@@ -148,7 +149,7 @@ export function EditableCell({
       
       case "apartment":
         return (
-          <Select value={editValue} onValueChange={setEditValue}>
+          <Select value={typeof editValue === 'string' ? editValue : ""} onValueChange={setEditValue}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Выберите квартиру" />
             </SelectTrigger>
@@ -167,7 +168,7 @@ export function EditableCell({
           <Input
             ref={inputRef}
             type="number"
-            value={editValue || ""}
+            value={typeof editValue === 'string' || typeof editValue === 'number' ? String(editValue) : ""}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             className="w-full"
@@ -179,7 +180,7 @@ export function EditableCell({
         return (
           <Input
             ref={inputRef}
-            value={editValue || ""}
+            value={typeof editValue === 'string' ? editValue : ""}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             className="w-full"
@@ -236,7 +237,7 @@ export function EditableCell({
         }
       };
       
-      const statusDisplay = getStatusDisplay(value);
+      const statusDisplay = getStatusDisplay(typeof value === 'string' ? value : '');
       return (
         <Badge variant={statusDisplay.variant} className={statusDisplay.className}>
           {statusDisplay.text}
@@ -258,14 +259,14 @@ export function EditableCell({
           </div>
         );
       }
-      return value ?? <span className="text-muted-foreground text-sm">-</span>;
+      return value ? String(value) : <span className="text-muted-foreground text-sm">-</span>;
     }
     
     if (type === "textarea") {
       return value ? (
         <div className="max-w-[200px]">
-          <div className="text-muted-foreground truncate text-sm" title={value}>
-            {value}
+          <div className="text-muted-foreground truncate text-sm" title={String(value)}>
+            {String(value)}
           </div>
         </div>
       ) : (
@@ -273,7 +274,7 @@ export function EditableCell({
       );
     }
     
-    return value ?? <span className="text-muted-foreground text-sm">-</span>;
+    return value ? String(value) : <span className="text-muted-foreground text-sm">-</span>;
   };
 
   return (
