@@ -10,24 +10,22 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Edit2, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface EditableCellProps {
-  value: any;
-  row: any;
-  column: any;
-  onSave: (value: any) => void;
+  value: unknown;
+  row: unknown;
+  column: unknown;
+  onSave: (value: unknown) => void;
   type?: "text" | "number" | "date" | "select" | "textarea" | "status" | "apartment";
   options?: { value: string; label: string }[];
-  properties?: any[];
+  properties?: Array<{ id: string; apartmentNumber: string; location: string }>;
 }
 
-export function EditableCell({ 
-  value, 
-  row, 
-  column, 
-  onSave, 
+export function EditableCell({
+  value,
+  onSave,
   type = "text",
   options = [],
   properties = []
@@ -260,7 +258,7 @@ export function EditableCell({
           </div>
         );
       }
-      return value || <span className="text-muted-foreground text-sm">-</span>;
+      return value ?? <span className="text-muted-foreground text-sm">-</span>;
     }
     
     if (type === "textarea") {
@@ -275,7 +273,7 @@ export function EditableCell({
       );
     }
     
-    return value || <span className="text-muted-foreground text-sm">-</span>;
+    return value ?? <span className="text-muted-foreground text-sm">-</span>;
   };
 
   return (
