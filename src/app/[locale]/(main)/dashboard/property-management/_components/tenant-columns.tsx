@@ -7,6 +7,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { mockProperties } from "./mock-data";
 import { Tenant } from "./schema";
 
+// Helper function to get status badge variant and text
+const getStatusDisplay = (status: string) => {
+  switch (status) {
+    case "current":
+      return { variant: "default" as const, text: "Текущий", className: "bg-green-100 text-green-800 hover:bg-green-100" };
+    case "past":
+      return { variant: "secondary" as const, text: "Прошлый", className: "bg-gray-100 text-gray-800 hover:bg-gray-100" };
+    case "future":
+      return { variant: "outline" as const, text: "Будущий", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" };
+    case "upcoming":
+      return { variant: "outline" as const, text: "Скоро", className: "bg-orange-100 text-orange-800 hover:bg-orange-100" };
+    default:
+      return { variant: "secondary" as const, text: "Неизвестно", className: "bg-gray-100 text-gray-800 hover:bg-gray-100" };
+  }
+};
+
 export const tenantColumns: ColumnDef<Tenant>[] = [
   {
     id: "select",
@@ -15,7 +31,7 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
+          aria-label="Выбрать все"
         />
       </div>
     ),
@@ -24,7 +40,7 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label="Выбрать строку"
         />
       </div>
     ),
@@ -33,14 +49,14 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Tenant Name" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Имя Арендатора" />,
     cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
     enableSorting: true,
     enableHiding: false,
   },
   {
     accessorKey: "apartmentId",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Apartment" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира" />,
     cell: ({ row }) => {
       const property = mockProperties.find((p) => p.id === row.original.apartmentId);
       return (
@@ -48,35 +64,58 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
           <Badge variant="outline" className="font-mono">
             #{property?.apartmentNumber ?? "Unknown"}
           </Badge>
-          <span className="text-muted-foreground text-sm">{property?.location ?? "Unknown"}</span>
+          <span className="text-muted-foreground text-sm">{property?.location ?? "Неизвестно"}</span>
         </div>
       );
     },
     enableSorting: true,
   },
   {
+    accessorKey: "status",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
+    cell: ({ row }) => {
+      const statusDisplay = getStatusDisplay(row.original.status);
+      return (
+        <Badge variant={statusDisplay.variant} className={statusDisplay.className}>
+          {statusDisplay.text}
+        </Badge>
+      );
+    },
+    enableSorting: true,
+  },
+  {
     accessorKey: "entryDate",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Entry Date" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Дата Заезда" />,
     cell: ({ row }) => <div className="text-sm">{new Date(row.original.entryDate).toLocaleDateString()}</div>,
     enableSorting: true,
   },
   {
     accessorKey: "exitDate",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Exit Date" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Дата Выезда" />,
     cell: ({ row }) => (
       <div className="text-sm">
         {row.original.exitDate ? (
           new Date(row.original.exitDate).toLocaleDateString()
         ) : (
-          <Badge variant="secondary">Active</Badge>
+          <span className="text-muted-foreground">-</span>
         )}
       </div>
     ),
     enableSorting: true,
   },
   {
+    accessorKey: "receivePaymentDate",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Получение Платежа" />,
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {new Date(row.original.receivePaymentDate).toLocaleDateString()}
+      </div>
+    ),
+    enableSorting: true,
+  },
+  {
     accessorKey: "notes",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Notes" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Заметки" />,
     cell: ({ row }) => (
       <div className="max-w-[200px]">
         {row.original.notes ? (
@@ -92,7 +131,7 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Создано" />,
     cell: ({ row }) => (
       <div className="text-muted-foreground text-sm">{new Date(row.original.createdAt).toLocaleDateString()}</div>
     ),

@@ -1,0 +1,294 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import { Check, X, Edit2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface EditableCellProps {
+  value: any;
+  row: any;
+  column: any;
+  onSave: (value: any) => void;
+  type?: "text" | "number" | "date" | "select" | "textarea" | "status" | "apartment";
+  options?: { value: string; label: string }[];
+  properties?: any[];
+}
+
+export function EditableCell({ 
+  value, 
+  row, 
+  column, 
+  onSave, 
+  type = "text",
+  options = [],
+  properties = []
+}: EditableCellProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value);
+  const [tempDate, setTempDate] = useState<Date | undefined>(
+    value instanceof Date ? value : undefined
+  );
+  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleSave = () => {
+    let finalValue = editValue;
+    
+    if (type === "date" && tempDate) {
+      finalValue = tempDate;
+    }
+    
+    onSave(finalValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(value);
+    setTempDate(value instanceof Date ? value : undefined);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === "Escape") {
+      handleCancel();
+    }
+  };
+
+  const renderEditInput = () => {
+    switch (type) {
+      case "textarea":
+        return (
+          <Textarea
+            ref={textareaRef}
+            value={editValue || ""}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="min-h-[80px] w-full"
+            placeholder="Введите текст..."
+          />
+        );
+      
+      case "date":
+        return (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !tempDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {tempDate ? format(tempDate, "PPP") : <span>Выберите дату</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={tempDate}
+                onSelect={setTempDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        );
+      
+      case "select":
+        return (
+          <Select value={editValue} onValueChange={setEditValue}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите значение" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      
+      case "status":
+        return (
+          <Select value={editValue} onValueChange={setEditValue}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите статус" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="current">Текущий</SelectItem>
+              <SelectItem value="past">Прошлый</SelectItem>
+              <SelectItem value="future">Будущий</SelectItem>
+              <SelectItem value="upcoming">Скоро</SelectItem>
+            </SelectContent>
+          </Select>
+        );
+      
+      case "apartment":
+        return (
+          <Select value={editValue} onValueChange={setEditValue}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите квартиру" />
+            </SelectTrigger>
+            <SelectContent>
+              {properties.map((property) => (
+                <SelectItem key={property.id} value={property.id}>
+                  #{property.apartmentNumber} - {property.location}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      
+      case "number":
+        return (
+          <Input
+            ref={inputRef}
+            type="number"
+            value={editValue || ""}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full"
+            placeholder="Введите число..."
+          />
+        );
+      
+      default:
+        return (
+          <Input
+            ref={inputRef}
+            value={editValue || ""}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full"
+            placeholder="Введите текст..."
+          />
+        );
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-1">
+        {renderEditInput()}
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleSave}
+            className="h-8 w-8 p-0"
+          >
+            <Check className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleCancel}
+            className="h-8 w-8 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const renderDisplayValue = () => {
+    if (type === "date" && value instanceof Date) {
+      return format(value, "dd/MM/yyyy");
+    }
+    
+    if (type === "status") {
+      const getStatusDisplay = (status: string) => {
+        switch (status) {
+          case "current":
+            return { variant: "default" as const, text: "Текущий", className: "bg-green-100 text-green-800 hover:bg-green-100" };
+          case "past":
+            return { variant: "secondary" as const, text: "Прошлый", className: "bg-gray-100 text-gray-800 hover:bg-gray-100" };
+          case "future":
+            return { variant: "outline" as const, text: "Будущий", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" };
+          case "upcoming":
+            return { variant: "outline" as const, text: "Скоро", className: "bg-orange-100 text-orange-800 hover:bg-orange-100" };
+          default:
+            return { variant: "secondary" as const, text: "Неизвестно", className: "bg-gray-100 text-gray-800 hover:bg-gray-100" };
+        }
+      };
+      
+      const statusDisplay = getStatusDisplay(value);
+      return (
+        <Badge variant={statusDisplay.variant} className={statusDisplay.className}>
+          {statusDisplay.text}
+        </Badge>
+      );
+    }
+    
+    if (type === "apartment") {
+      if (!value) return <span className="text-muted-foreground text-sm">-</span>;
+      
+      const property = properties.find(p => p.id === value);
+      if (property) {
+        return (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="font-mono">
+              #{property.apartmentNumber}
+            </Badge>
+            <span className="text-muted-foreground text-sm">{property.location}</span>
+          </div>
+        );
+      }
+      return value || <span className="text-muted-foreground text-sm">-</span>;
+    }
+    
+    if (type === "textarea") {
+      return value ? (
+        <div className="max-w-[200px]">
+          <div className="text-muted-foreground truncate text-sm" title={value}>
+            {value}
+          </div>
+        </div>
+      ) : (
+        <span className="text-muted-foreground text-sm">-</span>
+      );
+    }
+    
+    return value || <span className="text-muted-foreground text-sm">-</span>;
+  };
+
+  return (
+    <div className="group flex items-center gap-2">
+      <div className="flex-1">{renderDisplayValue()}</div>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => setIsEditing(true)}
+        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <Edit2 className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+}

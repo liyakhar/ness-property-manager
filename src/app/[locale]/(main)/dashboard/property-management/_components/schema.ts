@@ -6,6 +6,8 @@ export const propertySchema = z.object({
   location: z.string().min(1),
   rooms: z.number().min(1).max(10),
   readinessStatus: z.enum(["FURNISHED", "UNFURNISHED"]),
+  propertyType: z.enum(["FOR_RENT", "FOR_SALE"]),
+  occupancyStatus: z.enum(["OCCUPIED", "NOT_OCCUPIED"]),
   urgentMatter: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -18,6 +20,8 @@ export const tenantSchema = z.object({
   entryDate: z.date(),
   exitDate: z.date().optional(),
   notes: z.string().optional(),
+  status: z.enum(["current", "past", "future", "upcoming"]),
+  receivePaymentDate: z.date(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -28,7 +32,12 @@ export const addTenantSchema = z.object({
   entryDate: z.date({
     required_error: "Entry date is required",
   }),
+  status: z.enum(["current", "past", "future", "upcoming"]).default("current"),
   notes: z.string().optional(),
+  receivePaymentDate: z.date().default(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }),
 });
 
 export const addPropertySchema = z.object({
@@ -36,6 +45,8 @@ export const addPropertySchema = z.object({
   location: z.string().min(1, "Location is required"),
   rooms: z.number().min(1, "Number of rooms must be at least 1").max(10, "Number of rooms cannot exceed 10"),
   readinessStatus: z.enum(["FURNISHED", "UNFURNISHED"]),
+  propertyType: z.enum(["FOR_RENT", "FOR_SALE"]),
+  occupancyStatus: z.enum(["OCCUPIED", "NOT_OCCUPIED"]),
   urgentMatter: z.string().optional(),
 });
 

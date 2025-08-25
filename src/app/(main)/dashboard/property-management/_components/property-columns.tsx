@@ -58,17 +58,42 @@ export const propertyColumns: ColumnDef<Property>[] = [
   },
   {
     accessorKey: "readinessStatus",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
+    cell: ({ row }) => (
+      <Badge variant="outline" className={row.original.readinessStatus === "UNFURNISHED" 
+        ? "text-red-600" 
+        : ""
+      }>
+        {row.original.readinessStatus === "FURNISHED" ? "Меблированная" : "Немеблированная"}
+      </Badge>
+    ),
+    enableSorting: true,
+  },
+  {
+    accessorKey: "propertyType",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Тип" />,
+    cell: ({ row }) => (
+      <Badge variant="outline" className={row.original.propertyType === "FOR_RENT" 
+        ? "bg-amber-50 hover:bg-amber-50" 
+        : "bg-stone-200 hover:bg-stone-200"
+      }>
+        {row.original.propertyType === "FOR_RENT" ? "Аренда" : "Продажа"}
+      </Badge>
+    ),
+    enableSorting: true,
+  },
+  {
+    accessorKey: "occupancyStatus",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
     cell: ({ row }) => (
-      <Badge
-        variant={row.original.readinessStatus === "FURNISHED" ? "default" : "secondary"}
-        className={
-          row.original.readinessStatus === "FURNISHED"
-            ? "bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-300"
-            : "bg-orange-100 text-orange-800 hover:bg-orange-100 dark:bg-orange-900 dark:text-orange-300"
+      <Badge 
+        variant="outline" 
+        className={row.original.occupancyStatus === "OCCUPIED" 
+          ? "bg-orange-100 text-orange-800 hover:bg-orange-100" 
+          : "bg-green-100 text-green-800 hover:bg-green-100"
         }
       >
-        {row.original.readinessStatus}
+        {row.original.occupancyStatus === "OCCUPIED" ? "Занята" : "Свободна"}
       </Badge>
     ),
     enableSorting: true,
@@ -77,17 +102,11 @@ export const propertyColumns: ColumnDef<Property>[] = [
     accessorKey: "urgentMatter",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Срочные Вопросы" />,
     cell: ({ row }) => (
-      <div className="max-w-[200px]">
-        {row.original.urgentMatter ? (
-          <Badge variant="destructive" className="text-xs">
-            {row.original.urgentMatter}
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground text-sm">-</span>
-        )}
+      <div className="max-w-[200px] truncate" title={row.original.urgentMatter}>
+        {row.original.urgentMatter || "—"}
       </div>
     ),
-    enableSorting: false,
+    enableSorting: true,
   },
   {
     accessorKey: "createdAt",

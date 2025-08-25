@@ -14,7 +14,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
+          aria-label="Выбрать все"
         />
       </div>
     ),
@@ -23,7 +23,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label="Выбрать строку"
         />
       </div>
     ),
@@ -32,13 +32,13 @@ export const propertyColumns: ColumnDef<Property>[] = [
   },
   {
     accessorKey: "apartmentNumber",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Apartment #" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
     cell: ({ row }) => <div className="font-mono font-medium">#{row.original.apartmentNumber}</div>,
     enableSorting: true,
   },
   {
     accessorKey: "location",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Location" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Расположение" />,
     cell: ({ row }) => (
       <div className="max-w-[200px] truncate" title={row.original.location}>
         {row.original.location}
@@ -48,7 +48,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
   },
   {
     accessorKey: "rooms",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Rooms" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Комнаты" />,
     cell: ({ row }) => (
       <Badge variant="outline" className="w-16 justify-center">
         {row.original.rooms}
@@ -58,28 +58,53 @@ export const propertyColumns: ColumnDef<Property>[] = [
   },
   {
     accessorKey: "readinessStatus",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
     cell: ({ row }) => (
-      <Badge
-        variant={row.original.readinessStatus === "FURNISHED" ? "default" : "secondary"}
-        className={
-          row.original.readinessStatus === "FURNISHED"
-            ? "bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-300"
-            : "bg-orange-100 text-orange-800 hover:bg-orange-100 dark:bg-orange-900 dark:text-orange-300"
+      <Badge variant="outline" className={row.original.readinessStatus === "UNFURNISHED" 
+        ? "text-red-600" 
+        : ""
+      }>
+        {row.original.readinessStatus === "FURNISHED" ? "Меблированная" : "Немеблированная"}
+      </Badge>
+    ),
+    enableSorting: true,
+  },
+  {
+    accessorKey: "propertyType",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Тип" />,
+    cell: ({ row }) => (
+      <Badge variant="outline" className={row.original.propertyType === "FOR_RENT" 
+        ? "bg-amber-50 hover:bg-amber-50" 
+        : "bg-stone-200 hover:bg-stone-200"
+      }>
+        {row.original.propertyType === "FOR_RENT" ? "Аренда" : "Продажа"}
+      </Badge>
+    ),
+    enableSorting: true,
+  },
+  {
+    accessorKey: "occupancyStatus",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
+    cell: ({ row }) => (
+      <Badge 
+        variant="outline" 
+        className={row.original.occupancyStatus === "OCCUPIED" 
+          ? "bg-orange-100 text-orange-800 hover:bg-orange-100" 
+          : "bg-green-100 text-green-800 hover:bg-green-100"
         }
       >
-        {row.original.readinessStatus}
+        {row.original.occupancyStatus === "OCCUPIED" ? "Занята" : "Свободна"}
       </Badge>
     ),
     enableSorting: true,
   },
   {
     accessorKey: "urgentMatter",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Urgent Matter" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Срочные Вопросы" />,
     cell: ({ row }) => (
       <div className="max-w-[200px]">
         {row.original.urgentMatter ? (
-          <Badge variant="destructive" className="text-xs">
+          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-100">
             {row.original.urgentMatter}
           </Badge>
         ) : (
@@ -91,7 +116,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Создано" />,
     cell: ({ row }) => (
       <div className="text-muted-foreground text-sm">{new Date(row.original.createdAt).toLocaleDateString()}</div>
     ),

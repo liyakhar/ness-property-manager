@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { mockProperties, mockTenants } from "@/app/[locale]/(main)/dashboard/property-management/_components/mock-data";
+import { mockProperties, mockTenants } from "@/app/(main)/dashboard/property-management/_components/mock-data";
 import {
   Property,
   Tenant,
   AddPropertyFormData,
   AddTenantFormData,
-} from "@/app/[locale]/(main)/dashboard/property-management/_components/schema";
+} from "@/app/(main)/dashboard/property-management/_components/schema";
 
 interface PropertyManagementState {
   // Data
@@ -91,6 +91,7 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
         const newTenant: Tenant = {
           id: `tenant-${Date.now()}`,
           ...tenantData,
+          status: "current", // Default status for new tenants
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -127,21 +128,15 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
 
       getVacantProperties: () => {
         const state = get();
-        const occupiedPropertyIds = state.tenants
-          .filter((tenant) => !tenant.exitDate)
-          .map((tenant) => tenant.apartmentId);
-        return state.properties.filter((prop) => !occupiedPropertyIds.includes(prop.id));
+        return state.properties.filter((prop) => prop.occupancyStatus === "NOT_OCCUPIED");
       },
 
       getOccupiedProperties: () => {
         const state = get();
-        const occupiedPropertyIds = state.tenants
-          .filter((tenant) => !tenant.exitDate)
-          .map((tenant) => tenant.apartmentId);
-        return state.properties.filter((prop) => occupiedPropertyIds.includes(prop.id));
+        return state.properties.filter((prop) => prop.occupancyStatus === "OCCUPIED");
       },
 
-      getActiveTenants: () => get().tenants.filter((tenant) => !tenant.exitDate),
+      getActiveTenants: () => get().tenants.filter((tenant) => tenant.status === "current"),
     }),
     {
       name: "property-management-store",

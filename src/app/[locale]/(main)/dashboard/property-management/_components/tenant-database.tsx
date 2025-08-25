@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Plus, Users, Building2 } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
@@ -16,6 +16,8 @@ import { usePropertyManagementStore } from "@/stores/property-management";
 import { AddTenantDialog } from "./add-tenant-dialog";
 import type { AddTenantFormData } from "./schema";
 import { tenantColumns } from "./tenant-columns";
+import { ColumnDef } from "@tanstack/react-table";
+import { Tenant } from "./schema";
 
 export function TenantDatabase() {
   const {
@@ -26,9 +28,66 @@ export function TenantDatabase() {
     setAddTenantDialogOpen,
   } = usePropertyManagementStore();
 
+  // State for custom columns
+  const [customColumns, setCustomColumns] = React.useState<ColumnDef<Tenant>[]>(() => {
+    // Load custom columns from localStorage on component mount
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tenant-custom-columns');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse saved custom columns:', e);
+        }
+      }
+    }
+    return [];
+  });
+
+  // Function to handle adding new columns
+  const handleAddColumn = (columnData: { id: string; header: string; type: string }) => {
+    const newColumn: ColumnDef<Tenant> = {
+      id: columnData.id,
+      accessorKey: columnData.id,
+      header: ({ column }) => <div className="font-medium">{columnData.header}</div>,
+      cell: ({ row }) => {
+        // For now, show placeholder data based on type
+        switch (columnData.type) {
+          case "text":
+            return <div className="text-sm text-muted-foreground">-</div>;
+          case "number":
+            return <div className="text-sm text-muted-foreground">0</div>;
+          case "date":
+            return <div className="text-sm text-muted-foreground">-</div>;
+          case "select":
+            return <div className="text-sm text-muted-foreground">-</div>;
+          case "boolean":
+            return <div className="text-sm text-muted-foreground">Нет</div>;
+          default:
+            return <div className="text-sm text-muted-foreground">-</div>;
+        }
+      },
+      enableSorting: true,
+      enableHiding: true,
+    };
+
+    const updatedColumns = [...customColumns, newColumn];
+    setCustomColumns(updatedColumns);
+    
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tenant-custom-columns', JSON.stringify(updatedColumns));
+    }
+  };
+
+  // Combine default columns with custom columns
+  const allColumns = React.useMemo(() => {
+    return [...tenantColumns, ...customColumns];
+  }, [customColumns]);
+
   const table = useDataTableInstance({
     data,
-    columns: tenantColumns,
+    columns: allColumns,
     getRowId: (row) => row.id,
   });
 
@@ -37,82 +96,51 @@ export function TenantDatabase() {
     setAddTenantDialogOpen(false);
   };
 
-  const getActiveTenants = () => data.filter((tenant) => !tenant.exitDate);
-  const getVacantProperties = () => {
-    const occupiedPropertyIds = data.filter((tenant) => !tenant.exitDate).map((tenant) => tenant.apartmentId);
-    return mockProperties.filter((property) => !occupiedPropertyIds.includes(property.id));
-  };
+  const getActiveTenants = () => data.filter((tenant) => tenant.status === "current");
+  const getPastTenants = () => data.filter((tenant) => tenant.status === "past");
+  const getFutureTenants = () => data.filter((tenant) => tenant.status === "future");
+  const getUpcomingTenants = () => data.filter((tenant) => tenant.status === "upcoming");
 
   return (
     <div className="space-y-4">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tenants</CardTitle>
-            <Users className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.length}</div>
-            <p className="text-muted-foreground text-xs">{getActiveTenants().length} currently active</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Occupied Properties</CardTitle>
-            <Building2 className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{getActiveTenants().length}</div>
-            <p className="text-muted-foreground text-xs">of {mockProperties.length} total properties</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vacant Properties</CardTitle>
-            <Building2 className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{getVacantProperties().length}</div>
-            <p className="text-muted-foreground text-xs">Available for new tenants</p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Tenant Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Tenant Database
+            База Данных Арендаторов
           </CardTitle>
-          <CardDescription>Manage all tenant records and their property assignments</CardDescription>
+          <CardDescription>Управление всеми записями арендаторов и их назначениями в недвижимость</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-green-600">
-                  {getActiveTenants().length} Active
+                <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                  {getActiveTenants().length} Текущие
                 </Badge>
-                <Badge variant="outline" className="text-gray-600">
-                  {data.filter((t) => t.exitDate).length} Inactive
+                <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                  {getUpcomingTenants().length} Скоро
+                </Badge>
+                <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                  {getFutureTenants().length} Будущие
+                </Badge>
+                <Badge variant="outline" className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+                  {getPastTenants().length} Прошлые
                 </Badge>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <DataTableViewOptions table={table} />
+              <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
               <Button onClick={() => setAddTenantDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Tenant
+                Добавить Арендатора
               </Button>
             </div>
           </div>
 
           <div className="overflow-hidden rounded-md border">
-            <DataTable table={table} columns={tenantColumns} />
+            <DataTable table={table} columns={allColumns} />
           </div>
 
           <DataTablePagination table={table} />

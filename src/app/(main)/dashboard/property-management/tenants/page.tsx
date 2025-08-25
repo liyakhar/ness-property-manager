@@ -1,16 +1,32 @@
 "use client";
 
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
 import { TenantDatabase } from "../_components/tenant-database";
 
 export default function TenantsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Арендаторы</h1>
-        <p className="text-muted-foreground">Управляйте всеми записями арендаторов и их назначениями в недвижимость</p>
       </div>
 
-      <TenantDatabase />
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Поиск по имени, номеру квартиры, заметкам..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <TenantDatabase searchQuery={searchQuery} />
     </div>
   );
 }

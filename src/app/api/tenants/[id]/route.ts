@@ -59,15 +59,16 @@ async function getTargetDates(
 
 async function updateTenant(
   id: string,
-  data: Partial<Pick<Tenant, "name" | "apartmentId" | "entryDate" | "exitDate" | "notes">>,
+  data: Partial<Pick<Tenant, "name" | "apartmentId" | "entryDate" | "exitDate" | "status" | "notes" | "receivePaymentDate">>,
 ): Promise<ApiResponse<Tenant>> {
   try {
     // Convert date strings to Date if provided
-    const preparedData: Partial<Pick<Tenant, "name" | "apartmentId" | "entryDate" | "exitDate" | "notes">> = {
+    const preparedData: Partial<Pick<Tenant, "name" | "apartmentId" | "entryDate" | "exitDate" | "status" | "notes" | "receivePaymentDate">> = {
       ...data,
     };
     if (preparedData.entryDate) preparedData.entryDate = new Date(preparedData.entryDate);
     if (preparedData.exitDate) preparedData.exitDate = new Date(preparedData.exitDate);
+    if (preparedData.receivePaymentDate) preparedData.receivePaymentDate = new Date(preparedData.receivePaymentDate);
 
     // Business rule: prevent multiple active tenants for the same apartment (no overlapping occupancy)
     const targetApartmentId: string | undefined =

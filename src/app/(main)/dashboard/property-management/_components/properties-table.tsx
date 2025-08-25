@@ -17,16 +17,36 @@ import { AddPropertyDialog } from "./add-property-dialog";
 import { propertyColumns } from "./property-columns";
 import type { AddPropertyFormData } from "./schema";
 
-export function PropertiesTable() {
+interface PropertiesTableProps {
+  searchQuery?: string;
+}
+
+export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
   const {
-    properties: data,
+    properties: allProperties,
     addProperty,
     isAddPropertyDialogOpen,
     setAddPropertyDialogOpen,
   } = usePropertyManagementStore();
 
+  // Filter properties based on search query
+  const filteredProperties = React.useMemo(() => {
+    if (!searchQuery) return allProperties;
+    
+    const query = searchQuery.toLowerCase();
+    return allProperties.filter(property => 
+      property.apartmentNumber.toString().includes(query) ||
+      property.location.toLowerCase().includes(query) ||
+      property.readinessStatus.toLowerCase().includes(query) ||
+      property.propertyType.toLowerCase().includes(query) ||
+      property.occupancyStatus.toLowerCase().includes(query) ||
+      property.rooms.toString().includes(query) ||
+      (property.urgentMatter && property.urgentMatter.toLowerCase().includes(query))
+    );
+  }, [allProperties, searchQuery]);
+
   const table = useDataTableInstance({
-    data,
+    data: filteredProperties,
     columns: propertyColumns,
     getRowId: (row) => row.id,
   });
@@ -43,17 +63,22 @@ export function PropertiesTable() {
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
             Обзор Недвижимости
+            {searchQuery && (
+              <span className="text-sm font-normal text-muted-foreground">
+                (Найдено: {filteredProperties.length})
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-green-600">
-                  {data.filter((p) => p.readinessStatus === "FURNISHED").length} Меблированная
+                <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                  {filteredProperties.filter((p) => p.occupancyStatus === "NOT_OCCUPIED").length} Свободна
                 </Badge>
-                <Badge variant="outline" className="text-orange-600">
-                  {data.filter((p) => p.readinessStatus === "UNFURNISHED").length} Немеблированная
+                <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                  {filteredProperties.filter((p) => p.occupancyStatus === "OCCUPIED").length} Занята
                 </Badge>
               </div>
             </div>

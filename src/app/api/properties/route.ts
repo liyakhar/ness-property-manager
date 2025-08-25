@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { Property, ReadinessStatus } from "@prisma/client";
+import { Property, ReadinessStatus, PropertyType, OccupancyStatus } from "@prisma/client";
 import { err, ok, Result } from "neverthrow";
 import { z } from "zod";
 
@@ -26,6 +26,8 @@ const createPropertySchema = z.object({
   location: z.string().min(1),
   rooms: z.number().int().positive(),
   readinessStatus: z.nativeEnum(ReadinessStatus).default("UNFURNISHED"),
+  propertyType: z.nativeEnum(PropertyType).default("FOR_RENT"),
+  occupancyStatus: z.nativeEnum(OccupancyStatus).default("NOT_OCCUPIED"),
   urgentMatter: z.string().optional().nullable(),
 });
 
@@ -42,6 +44,8 @@ async function createProperty(data: Partial<Property>): Promise<ApiResponse<Prop
         location: parsed.data.location,
         rooms: parsed.data.rooms,
         readinessStatus: parsed.data.readinessStatus,
+        propertyType: parsed.data.propertyType,
+        occupancyStatus: parsed.data.occupancyStatus,
         urgentMatter: parsed.data.urgentMatter ?? undefined,
       },
     });

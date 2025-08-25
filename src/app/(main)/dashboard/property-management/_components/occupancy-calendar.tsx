@@ -12,7 +12,11 @@ import { usePropertyManagementStore } from "@/stores/property-management";
 
 import { AddTenantDialog } from "./add-tenant-dialog";
 
-export function OccupancyCalendar() {
+interface OccupancyCalendarProps {
+  searchQuery?: string;
+}
+
+export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
   const [selectedProperty, setSelectedProperty] = React.useState<string>("all");
   const {
@@ -26,8 +30,149 @@ export function OccupancyCalendar() {
   const monthEnd = endOfMonth(currentMonth);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
+  // Filter properties and tenants based on search query
+  const filteredProperties = React.useMemo(() => {
+    if (!searchQuery) return mockProperties;
+    
+    const query = searchQuery.toLowerCase();
+    
+    // First, check if any tenants match the search query
+    const matchingTenantPropertyIds = mockTenants
+      .filter(tenant => {
+        const basicMatch = 
+          tenant.name.toLowerCase().includes(query) ||
+          tenant.apartmentId.toLowerCase().includes(query) ||
+          (tenant.notes && tenant.notes.toLowerCase().includes(query));
+        
+        if (basicMatch) return true;
+        
+        // Search by apartment number - find the property and check its apartment number
+        const property = mockProperties.find(p => p.id === tenant.apartmentId);
+        if (property && property.apartmentNumber.toString().includes(query)) {
+          return true;
+        }
+        
+        return false;
+      })
+      .map(tenant => tenant.apartmentId);
+    
+    // Return properties that either match the search directly OR have matching tenants
+    return mockProperties.filter(property => {
+      const directMatch = 
+        property.apartmentNumber.toString().includes(query) ||
+        property.location.toLowerCase().includes(query) ||
+        property.readinessStatus.toLowerCase().includes(query);
+      
+      if (directMatch) return true;
+      
+      // Include properties that have matching tenants
+      if (matchingTenantPropertyIds.includes(property.id)) {
+        return true;
+      }
+      
+      return false;
+    });
+  }, [mockProperties, searchQuery, mockTenants]);
+
+  const filteredTenants = React.useMemo(() => {
+    if (!searchQuery) return mockTenants;
+    
+    const query = searchQuery.toLowerCase();
+    
+    // Helper function to check if query matches date formats
+    const isDateMatch = (date: Date, searchQuery: string) => {
+      const query = searchQuery.toLowerCase();
+      
+      // Check various date formats
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear().toString();
+      
+      // Format: DD/MM (e.g., "01/02")
+      if (query.includes('/') && query.length === 5) {
+        const [dayPart, monthPart] = query.split('/');
+        if (day === dayPart && month === monthPart) return true;
+      }
+      
+      // Format: DD/MM/YYYY (e.g., "01/02/2024")
+      if (query.includes('/') && query.length === 10) {
+        const [dayPart, monthPart, yearPart] = query.split('/');
+        if (day === dayPart && month === monthPart && year === yearPart) return true;
+      }
+      
+      // Format: MM/DD (e.g., "02/01")
+      if (query.includes('/') && query.length === 5) {
+        const [monthPart, dayPart] = query.split('/');
+        if (day === dayPart && month === monthPart) return true;
+      }
+      
+      // Format: MM/DD/YYYY (e.g., "02/01/2024")
+      if (query.includes('/') && query.length === 10) {
+        const [monthPart, dayPart, yearPart] = query.split('/');
+        if (day === dayPart && month === monthPart && year === yearPart) return true;
+      }
+      
+      // Check individual components
+      if (day.includes(query) || month.includes(query) || year.includes(query)) return true;
+      
+      // Check date string representation
+      if (date.toDateString().toLowerCase().includes(query)) return true;
+      
+      return false;
+    };
+    
+    return mockTenants.filter(tenant => {
+      // Basic text search
+      const basicMatch = 
+        tenant.name.toLowerCase().includes(query) ||
+        tenant.apartmentId.toLowerCase().includes(query) ||
+        (tenant.notes && tenant.notes.toLowerCase().includes(query));
+      
+      if (basicMatch) return true;
+      
+      // Date search
+      if (isDateMatch(tenant.entryDate, query)) return true;
+      if (tenant.exitDate && isDateMatch(tenant.exitDate, query)) return true;
+      
+      // Search by property details - find the property and check its details
+      const property = mockProperties.find(p => p.id === tenant.apartmentId);
+      if (property) {
+        // Check apartment number
+        if (property.apartmentNumber.toString().includes(query)) {
+          return true;
+        }
+        
+        // Check property location/address
+        if (property.location.toLowerCase().includes(query)) {
+          return true;
+        }
+        
+        // Check property readiness status
+        if (property.readinessStatus.toLowerCase().includes(query)) {
+          return true;
+        }
+        
+        // Check property rooms
+        if (property.rooms.toString().includes(query)) {
+          return true;
+        }
+        
+        // Check urgent matters
+        if (property.urgentMatter && property.urgentMatter.toLowerCase().includes(query)) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
+  }, [mockTenants, searchQuery, mockProperties]);
+
   const getTenantsForDay = (date: Date) => {
-    return mockTenants.filter((tenant) => {
+    return filteredTenants.filter((tenant) => {
+      // Only show tenants that are associated with visible properties
+      const property = filteredProperties.find(p => p.id === tenant.apartmentId);
+      if (!property) return false;
+      
       const entryDate = new Date(tenant.entryDate);
       const exitDate = tenant.exitDate ? new Date(tenant.exitDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now if no exit date
 
@@ -47,20 +192,23 @@ export function OccupancyCalendar() {
       "bg-yellow-500",
     ];
 
-    const propertyIndex = mockProperties.findIndex((p) => p.id === propertyId);
+    const propertyIndex = filteredProperties.findIndex((p) => p.id === propertyId);
     return colors[propertyIndex % colors.length] || "bg-gray-500";
   };
 
-  const filteredProperties =
-    selectedProperty === "all" ? mockProperties : mockProperties.filter((p) => p.id === selectedProperty);
+  const displayProperties =
+    selectedProperty === "all" ? filteredProperties : filteredProperties.filter((p) => p.id === selectedProperty);
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Календарь Занятости
+            {searchQuery && (
+              <span className="text-sm font-normal text-muted-foreground">
+                (Найдено: {filteredProperties.length} недвижимость, {filteredTenants.length} арендаторов)
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -72,7 +220,7 @@ export function OccupancyCalendar() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Вся Недвижимость</SelectItem>
-                  {mockProperties.map((property) => (
+                  {filteredProperties.map((property) => (
                     <SelectItem key={property.id} value={property.id}>
                       Квартира #{property.apartmentNumber}
                     </SelectItem>
@@ -82,7 +230,7 @@ export function OccupancyCalendar() {
 
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground text-sm">Легенда:</span>
-                {filteredProperties.slice(0, 6).map((property) => (
+                {displayProperties.slice(0, 6).map((property) => (
                   <div key={property.id} className="flex items-center gap-1">
                     <div className={`h-3 w-3 rounded-full ${getPropertyColor(property.id)}`} />
                     <span className="text-xs">#{property.apartmentNumber}</span>
@@ -119,14 +267,14 @@ export function OccupancyCalendar() {
 
                   <div className="space-y-1">
                     {tenants.map((tenant) => {
-                      const property = mockProperties.find((p) => p.id === tenant.apartmentId);
+                      const property = filteredProperties.find((p) => p.id === tenant.apartmentId);
                       if (!property || (selectedProperty !== "all" && property.id !== selectedProperty)) return null;
 
                       return (
                         <div
                           key={tenant.id}
                           className={`rounded p-1 text-xs text-white ${getPropertyColor(property.id)}`}
-                          title={`${tenant.name} - Apartment #${property.apartmentNumber}`}
+                          title={`${tenant.name} - Квартира №${property.apartmentNumber}`}
                         >
                           <div className="truncate">{tenant.name}</div>
                           <div className="text-xs opacity-80">#{property.apartmentNumber}</div>
@@ -160,7 +308,7 @@ export function OccupancyCalendar() {
 
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Users className="h-4 w-4" />
-              {mockTenants.length} Активных Арендаторов
+              {filteredTenants.length} Активных Арендаторов
             </div>
           </div>
         </CardContent>
@@ -173,7 +321,7 @@ export function OccupancyCalendar() {
           // Handle adding tenant
           setAddTenantDialogOpen(false);
         }}
-        properties={mockProperties}
+        properties={filteredProperties}
       />
     </div>
   );

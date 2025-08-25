@@ -25,7 +25,12 @@ const createTenantSchema = z.object({
   name: z.string().min(1),
   apartmentId: z.string().min(1),
   entryDate: z.union([z.string(), z.date()]).transform((v) => (typeof v === "string" ? new Date(v) : v)),
+  status: z.enum(["current", "past", "future", "upcoming"]).default("current"),
   notes: z.string().optional().nullable(),
+  receivePaymentDate: z.union([z.string(), z.date()]).transform((v) => (typeof v === "string" ? new Date(v) : v)).default(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }),
 });
 
 async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>> {
@@ -51,7 +56,9 @@ async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>>
         name: parsed.data.name,
         apartmentId: parsed.data.apartmentId,
         entryDate: parsed.data.entryDate,
+        status: parsed.data.status,
         notes: parsed.data.notes ?? undefined,
+        receivePaymentDate: parsed.data.receivePaymentDate,
       },
       include: {
         apartment: true,

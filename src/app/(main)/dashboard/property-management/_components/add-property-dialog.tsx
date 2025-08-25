@@ -36,6 +36,8 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
       location: "",
       rooms: 1,
       readinessStatus: "UNFURNISHED",
+      propertyType: "FOR_RENT",
+      occupancyStatus: "NOT_OCCUPIED",
       urgentMatter: "",
     },
   });
@@ -85,7 +87,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                 <FormItem>
                   <FormLabel>Расположение</FormLabel>
                   <FormControl>
-                    <Input placeholder="Downtown District, Floor 1" {...field} />
+                    <Input placeholder="Центральный район, 1 этаж" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -137,12 +139,56 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
 
             <FormField
               control={form.control}
+              name="propertyType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Тип Недвижимости</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите тип" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="FOR_RENT">Для Аренды</SelectItem>
+                      <SelectItem value="FOR_SALE">Для Продажи</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="occupancyStatus"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Статус Заселения</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите статус" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="OCCUPIED">Занята</SelectItem>
+                      <SelectItem value="NOT_OCCUPIED">Свободна</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="urgentMatter"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Срочные Вопросы (Необязательно)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Any urgent issues or maintenance needed..." {...field} />
+                    <Textarea placeholder="Любые срочные вопросы или необходимый ремонт..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

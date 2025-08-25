@@ -19,6 +19,8 @@ model Property {
   location    String
   rooms       Int
   readinessStatus ReadinessStatus @default(UNFURNISHED)
+  propertyType PropertyType @default(FOR_RENT)
+  occupancyStatus OccupancyStatus @default(NOT_OCCUPIED)
   urgentMatter String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -35,7 +37,9 @@ model Tenant {
   apartmentId String
   entryDate DateTime
   exitDate  DateTime?
+  status    TenantStatus @default(current)
   notes     String?
+  receivePaymentDate DateTime @default(dbgenerated("(strftime('%Y-%m-01', 'now'))"))
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -48,4 +52,21 @@ model Tenant {
 enum ReadinessStatus {
   FURNISHED
   UNFURNISHED
+}
+
+enum PropertyType {
+  FOR_RENT
+  FOR_SALE
+}
+
+enum OccupancyStatus {
+  OCCUPIED
+  NOT_OCCUPIED
+}
+
+enum TenantStatus {
+  current
+  past
+  future
+  upcoming
 }

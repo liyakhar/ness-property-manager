@@ -1,16 +1,32 @@
 "use client";
 
+import { useState } from "react";
+import { Search } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
 import { PropertiesTable } from "../_components/properties-table";
 
 export default function PropertiesPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Недвижимость</h1>
-        <p className="text-muted-foreground">Управляйте всей недвижимостью и их текущим статусом</p>
       </div>
 
-      <PropertiesTable />
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Поиск по номеру квартиры, местоположению, статусу..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <PropertiesTable searchQuery={searchQuery} />
     </div>
   );
 }

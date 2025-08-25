@@ -41,7 +41,9 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
       name: "",
       apartmentId: "",
       entryDate: undefined,
+      status: "current",
       notes: "",
+      receivePaymentDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     },
   });
 
@@ -88,19 +90,43 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
               name="apartmentId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Assigned Apartment</FormLabel>
+                  <FormLabel>Назначенная Квартира</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an apartment" />
+                        <SelectValue placeholder="Выберите квартиру" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {availableProperties.map((property) => (
                         <SelectItem key={property.id} value={property.id}>
-                          Apartment #{property.apartmentNumber} - {property.location}
+                          Квартира #{property.apartmentNumber} - {property.location}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Статус Арендатора</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите статус" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="current">Текущий - уже проживает</SelectItem>
+                      <SelectItem value="upcoming">Скоро - заедет в течение недели</SelectItem>
+                      <SelectItem value="future">Будущий - планирует заехать</SelectItem>
+                      <SelectItem value="past">Прошлый - уже выехал</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -114,6 +140,39 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Entry Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                        >
+                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="receivePaymentDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Receive Payment Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>

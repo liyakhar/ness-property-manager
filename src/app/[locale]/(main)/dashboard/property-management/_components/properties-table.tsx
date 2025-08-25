@@ -49,11 +49,11 @@ export function PropertiesTable() {
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-green-600">
-                  {data.filter((p) => p.readinessStatus === "FURNISHED").length} Furnished
+                <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                  {data.filter((p) => p.occupancyStatus === "NOT_OCCUPIED").length} Свободна
                 </Badge>
-                <Badge variant="outline" className="text-orange-600">
-                  {data.filter((p) => p.readinessStatus === "UNFURNISHED").length} Unfurnished
+                <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                  {data.filter((p) => p.occupancyStatus === "OCCUPIED").length} Занята
                 </Badge>
               </div>
             </div>
