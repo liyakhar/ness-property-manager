@@ -5,10 +5,11 @@ export const propertySchema = z.object({
   apartmentNumber: z.number().min(1),
   location: z.string().min(1),
   rooms: z.number().min(1).max(10),
-  readinessStatus: z.enum(["FURNISHED", "UNFURNISHED"]),
-  propertyType: z.enum(["FOR_RENT", "FOR_SALE"]),
-  occupancyStatus: z.enum(["OCCUPIED", "NOT_OCCUPIED"]),
+  readinessStatus: z.enum(["меблированная", "немеблированная"]),
+  propertyType: z.enum(["аренда", "продажа"]),
+  occupancyStatus: z.enum(["занята", "свободна"]),
   urgentMatter: z.string().optional(),
+  urgentMatterResolved: z.boolean().default(false),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -44,10 +45,11 @@ export const addPropertySchema = z.object({
   apartmentNumber: z.number().min(1, "Apartment number must be at least 1"),
   location: z.string().min(1, "Location is required"),
   rooms: z.number().min(1, "Number of rooms must be at least 1").max(10, "Number of rooms cannot exceed 10"),
-  readinessStatus: z.enum(["FURNISHED", "UNFURNISHED"]),
-  propertyType: z.enum(["FOR_RENT", "FOR_SALE"]),
-  occupancyStatus: z.enum(["OCCUPIED", "NOT_OCCUPIED"]),
+  readinessStatus: z.enum(["меблированная", "немеблированная"]),
+  propertyType: z.enum(["аренда", "продажа"]),
+  occupancyStatus: z.enum(["занята", "свободна"]),
   urgentMatter: z.string().optional(),
+  urgentMatterResolved: z.boolean().default(false),
 });
 
 export type Property = z.infer<typeof propertySchema>;

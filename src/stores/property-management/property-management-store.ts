@@ -128,12 +128,12 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
 
       getVacantProperties: () => {
         const state = get();
-        return state.properties.filter((prop) => prop.occupancyStatus === "NOT_OCCUPIED");
+        return state.properties.filter((prop) => prop.occupancyStatus === "свободна");
       },
 
       getOccupiedProperties: () => {
         const state = get();
-        return state.properties.filter((prop) => prop.occupancyStatus === "OCCUPIED");
+        return state.properties.filter((prop) => prop.occupancyStatus === "занята");
       },
 
       getActiveTenants: () => get().tenants.filter((tenant) => tenant.status === "current"),

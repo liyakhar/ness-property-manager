@@ -9,16 +9,15 @@ import { DataTablePagination } from "@/components/data-table/data-table-paginati
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePropertyManagementStore } from "@/stores/property-management";
 
 import { AddTenantDialog } from "./add-tenant-dialog";
-import type { AddTenantFormData } from "./schema";
+import type { AddTenantFormData, Tenant } from "./schema";
 import { createTenantColumns } from "./tenant-columns";
 import { EditableCell } from "./editable-cell";
 import { ColumnDef } from "@tanstack/react-table";
-import { Tenant } from "./schema";
 
 interface TenantDatabaseProps {
   searchQuery?: string;
@@ -82,26 +81,24 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     const newColumn: ColumnDef<Tenant> = {
       id: columnData.id,
       accessorKey: columnData.id,
-      header: ({ column }) => <div className="font-medium">{columnData.header}</div>,
-      cell: ({ row, column }) => {
+      header: () => <div className="font-medium">{columnData.header}</div>,
+      cell: ({ row }) => {
         // Use EditableCell for custom columns
         const value = (row.original as any)[columnData.id];
         return (
-          <EditableCell
-            value={value}
-            row={row}
-            column={column}
-            onSave={(newValue: any) => {
-              const updates = { [columnData.id]: newValue };
-              updateTenant(row.original.id, updates);
-            }}
-            type={columnData.type as any}
-            options={columnData.type === "select" ? [
-              { value: "option1", label: "Опция 1" },
-              { value: "option2", label: "Опция 2" },
-              { value: "option3", label: "Опция 3" },
-            ] : []}
-          />
+                  <EditableCell
+          value={value}
+          onSave={(newValue: unknown) => {
+            const updates = { [columnData.id]: newValue };
+            updateTenant(row.original.id, updates);
+          }}
+          type={columnData.type as any}
+          options={columnData.type === "select" ? [
+            { value: "option1", label: "Опция 1" },
+            { value: "option2", label: "Опция 2" },
+            { value: "option3", label: "Опция 3" },
+          ] : []}
+        />
         );
       },
       enableSorting: true,

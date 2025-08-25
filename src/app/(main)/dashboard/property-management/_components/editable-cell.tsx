@@ -245,6 +245,20 @@ export function EditableCell({
       );
     }
     
+    if (type === "select") {
+      if (!value) return <span className="text-muted-foreground text-sm">-</span>;
+      
+      const option = options.find(opt => opt.value === value);
+      if (option) {
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50">
+            {option.label}
+          </Badge>
+        );
+      }
+      return value ? String(value) : <span className="text-muted-foreground text-sm">-</span>;
+    }
+    
     if (type === "apartment") {
       if (!value) return <span className="text-muted-foreground text-sm">-</span>;
       

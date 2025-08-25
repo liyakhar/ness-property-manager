@@ -4,19 +4,16 @@ import React, { useState } from "react";
 
 import { Building2, Search } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { usePropertyManagementStore } from "@/stores/property-management";
+import { DailyNotifications } from "./_components/daily-notifications";
 
 export default function PropertyManagementPage() {
   const { properties, tenants } = usePropertyManagementStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   const getActiveTenants = () => tenants.filter((tenant) => !tenant.exitDate);
-  const getVacantProperties = () => {
-    return properties.filter((property) => property.occupancyStatus === "NOT_OCCUPIED");
-  };
 
   // Filter properties and tenants based on search query
   const filteredProperties = properties.filter(property => 
@@ -26,10 +23,10 @@ export default function PropertyManagementPage() {
     property.readinessStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
     property.propertyType.toLowerCase().includes(searchQuery.toLowerCase()) ||
     property.occupancyStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (searchQuery.toLowerCase().includes("аренд") && property.propertyType === "FOR_RENT") ||
-    (searchQuery.toLowerCase().includes("продаж") && property.propertyType === "FOR_SALE") ||
-    (searchQuery.toLowerCase().includes("занят") && property.occupancyStatus === "OCCUPIED") ||
-    (searchQuery.toLowerCase().includes("свобод") && property.occupancyStatus === "NOT_OCCUPIED")
+    (searchQuery.toLowerCase().includes("аренд") && property.propertyType === "аренда") ||
+    (searchQuery.toLowerCase().includes("продаж") && property.propertyType === "продажа") ||
+    (searchQuery.toLowerCase().includes("занят") && property.occupancyStatus === "занята") ||
+    (searchQuery.toLowerCase().includes("свобод") && property.occupancyStatus === "свободна")
   );
 
   const filteredTenants = tenants.filter(tenant => {
@@ -149,7 +146,7 @@ export default function PropertyManagementPage() {
           <CardContent>
             <div className="text-2xl font-bold">{filteredProperties.length}</div>
             <p className="text-muted-foreground text-xs">
-              {filteredProperties.filter((p) => p.readinessStatus === "FURNISHED").length} меблированная
+              {filteredProperties.filter((p) => p.readinessStatus === "меблированная").length} меблированная
             </p>
           </CardContent>
         </Card>
@@ -160,9 +157,9 @@ export default function PropertyManagementPage() {
             <Building2 className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredProperties.filter((p) => p.propertyType === "FOR_RENT").length}</div>
+            <div className="text-2xl font-bold">{filteredProperties.filter((p) => p.propertyType === "аренда").length}</div>
             <p className="text-muted-foreground text-xs">
-              {filteredProperties.filter((p) => p.propertyType === "FOR_RENT" && p.readinessStatus === "FURNISHED").length} меблированная
+              {filteredProperties.filter((p) => p.propertyType === "аренда" && p.readinessStatus === "меблированная").length} меблированная
             </p>
           </CardContent>
         </Card>
@@ -173,9 +170,9 @@ export default function PropertyManagementPage() {
             <Building2 className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredProperties.filter((p) => p.propertyType === "FOR_SALE").length}</div>
+            <div className="text-2xl font-bold">{filteredProperties.filter((p) => p.propertyType === "продажа").length}</div>
             <p className="text-muted-foreground text-xs">
-              {filteredProperties.filter((p) => p.propertyType === "FOR_SALE" && p.readinessStatus === "FURNISHED").length} меблированная
+              {filteredProperties.filter((p) => p.propertyType === "продажа" && p.readinessStatus === "меблированная").length} меблированная
             </p>
           </CardContent>
         </Card>
@@ -191,6 +188,9 @@ export default function PropertyManagementPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Daily Notifications */}
+      <DailyNotifications />
     </div>
   );
 }

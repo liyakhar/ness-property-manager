@@ -1,28 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EditableCell } from "./editable-cell";
 
-import { mockProperties } from "./mock-data";
 import { Tenant } from "./schema";
-
-// Helper function to get status badge variant and text
-const getStatusDisplay = (status: string) => {
-  switch (status) {
-    case "current":
-      return { variant: "default" as const, text: "Текущий", className: "bg-green-100 text-green-800 hover:bg-green-100" };
-    case "past":
-      return { variant: "secondary" as const, text: "Прошлый", className: "bg-gray-100 text-gray-800 hover:bg-green-100" };
-    case "future":
-      return { variant: "outline" as const, text: "Будущий", className: "bg-blue-100 text-blue-800 hover:bg-green-100" };
-    case "upcoming":
-      return { variant: "outline" as const, text: "Скоро", className: "bg-orange-100 text-orange-800 hover:bg-green-100" };
-    default:
-      return { variant: "secondary" as const, text: "Неизвестно", className: "bg-gray-100 text-gray-800 hover:bg-green-100" };
-  }
-};
 
 export const createTenantColumns = (
   onUpdateTenant: (id: string, updates: Partial<Tenant>) => void,
@@ -57,7 +39,7 @@ export const createTenantColumns = (
     cell: ({ row }) => (
       <EditableCell
         value={row.original.name}
-        onSave={(value) => onUpdateTenant(row.original.id, { name: value })}
+        onSave={(value: unknown) => onUpdateTenant(row.original.id, { name: value as string })}
         type="text"
       />
     ),
@@ -73,7 +55,7 @@ export const createTenantColumns = (
         <div className="flex items-center gap-2">
           <EditableCell
             value={row.original.apartmentId}
-            onSave={(value) => onUpdateTenant(row.original.id, { apartmentId: value })}
+            onSave={(value: unknown) => onUpdateTenant(row.original.id, { apartmentId: value as string })}
             type="apartment"
             properties={properties}
           />
@@ -91,7 +73,7 @@ export const createTenantColumns = (
     cell: ({ row }) => (
       <EditableCell
         value={row.original.status}
-        onSave={(value) => onUpdateTenant(row.original.id, { status: value })}
+        onSave={(value: unknown) => onUpdateTenant(row.original.id, { status: value as "current" | "past" | "future" | "upcoming" })}
         type="status"
       />
     ),
@@ -103,7 +85,7 @@ export const createTenantColumns = (
     cell: ({ row }) => (
       <EditableCell
         value={row.original.entryDate}
-        onSave={(value) => onUpdateTenant(row.original.id, { entryDate: value })}
+        onSave={(value: unknown) => onUpdateTenant(row.original.id, { entryDate: value as Date })}
         type="date"
       />
     ),
@@ -112,12 +94,10 @@ export const createTenantColumns = (
   {
     accessorKey: "exitDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Дата Выезда" />,
-    cell: ({ row, column }) => (
+    cell: ({ row }) => (
       <EditableCell
         value={row.original.exitDate}
-        row={row}
-        column={column}
-        onSave={(value) => onUpdateTenant(row.original.id, { exitDate: value })}
+        onSave={(value: unknown) => onUpdateTenant(row.original.id, { exitDate: value as Date | undefined })}
         type="date"
       />
     ),
@@ -126,12 +106,10 @@ export const createTenantColumns = (
   {
     accessorKey: "receivePaymentDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Получение Платежа" />,
-    cell: ({ row, column }) => (
+    cell: ({ row }) => (
       <EditableCell
         value={row.original.receivePaymentDate}
-        row={row}
-        column={column}
-        onSave={(value) => onUpdateTenant(row.original.id, { receivePaymentDate: value })}
+        onSave={(value: unknown) => onUpdateTenant(row.original.id, { receivePaymentDate: value as Date })}
         type="date"
       />
     ),
@@ -140,12 +118,10 @@ export const createTenantColumns = (
   {
     accessorKey: "notes",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Заметки" />,
-    cell: ({ row, column }) => (
+    cell: ({ row }) => (
       <EditableCell
         value={row.original.notes}
-        row={row}
-        column={column}
-        onSave={(value) => onUpdateTenant(row.original.id, { notes: value })}
+        onSave={(value: unknown) => onUpdateTenant(row.original.id, { notes: value as string | undefined })}
         type="textarea"
       />
     ),

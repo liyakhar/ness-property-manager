@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from "date-fns";
-import { Calendar, Plus, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,18 +182,22 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
 
   const getPropertyColor = (propertyId: string) => {
     const colors = [
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-purple-500",
-      "bg-orange-500",
-      "bg-pink-500",
-      "bg-indigo-500",
-      "bg-red-500",
-      "bg-yellow-500",
+      "bg-blue-200",
+      "bg-green-200",
+      "bg-purple-200",
+      "bg-orange-200",
+      "bg-pink-200",
+      "bg-indigo-200",
+      "bg-red-200",
+      "bg-yellow-200",
+      "bg-teal-200",
+      "bg-cyan-200",
+      "bg-lime-200",
+      "bg-amber-200",
     ];
 
     const propertyIndex = filteredProperties.findIndex((p) => p.id === propertyId);
-    return colors[propertyIndex % colors.length] || "bg-gray-500";
+    return colors[propertyIndex % colors.length] || "bg-gray-200";
   };
 
   const displayProperties =
@@ -273,11 +277,11 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
                       return (
                         <div
                           key={tenant.id}
-                          className={`rounded p-1 text-xs text-white ${getPropertyColor(property.id)}`}
+                          className={`rounded p-1 text-xs text-gray-800 ${getPropertyColor(property.id)}`}
                           title={`${tenant.name} - Квартира №${property.apartmentNumber}`}
                         >
                           <div className="truncate">{tenant.name}</div>
-                          <div className="text-xs opacity-80">#{property.apartmentNumber}</div>
+                          <div className="text-xs text-gray-600">#{property.apartmentNumber}</div>
                         </div>
                       );
                     })}

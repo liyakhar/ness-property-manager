@@ -9,7 +9,7 @@ import { DataTablePagination } from "@/components/data-table/data-table-paginati
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePropertyManagementStore } from "@/stores/property-management";
 
@@ -50,10 +50,10 @@ export function PropertiesTable() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                  {data.filter((p) => p.occupancyStatus === "NOT_OCCUPIED").length} Свободна
+                  {data.filter((p) => p.occupancyStatus === "свободна").length} Свободна
                 </Badge>
                 <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-                  {data.filter((p) => p.occupancyStatus === "OCCUPIED").length} Занята
+                  {data.filter((p) => p.occupancyStatus === "занята").length} Занята
                 </Badge>
               </div>
             </div>

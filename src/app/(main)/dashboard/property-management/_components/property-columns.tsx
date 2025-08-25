@@ -2,11 +2,15 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { EditableCell } from "./editable-cell";
 
 import { Property } from "./schema";
 
-export const propertyColumns: ColumnDef<Property>[] = [
+export const createPropertyColumns = (
+  updateProperty: (id: string, updates: Partial<Property>) => void
+): ColumnDef<Property>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -33,79 +37,145 @@ export const propertyColumns: ColumnDef<Property>[] = [
   {
     accessorKey: "apartmentNumber",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
-    cell: ({ row }) => <div className="font-mono font-medium">#{row.original.apartmentNumber}</div>,
+    cell: ({ row, column }) => (
+      <EditableCell
+        value={row.original.apartmentNumber}
+        onSave={(newValue: unknown) => {
+          updateProperty(row.original.id, { apartmentNumber: newValue as number });
+        }}
+        type="number"
+      />
+    ),
     enableSorting: true,
   },
   {
     accessorKey: "location",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Расположение" />,
-    cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.original.location}>
-        {row.original.location}
-      </div>
+    cell: ({ row, column }) => (
+      <EditableCell
+        value={row.original.location}
+        onSave={(newValue: unknown) => {
+          updateProperty(row.original.id, { location: newValue as string });
+        }}
+        type="text"
+      />
     ),
     enableSorting: true,
   },
   {
     accessorKey: "rooms",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Комнаты" />,
-    cell: ({ row }) => (
-      <Badge variant="outline" className="w-16 justify-center">
-        {row.original.rooms}
-      </Badge>
+    cell: ({ row, column }) => (
+      <EditableCell
+        value={row.original.rooms}
+        onSave={(newValue: unknown) => {
+          updateProperty(row.original.id, { rooms: newValue as number });
+        }}
+        type="number"
+      />
     ),
     enableSorting: true,
   },
   {
     accessorKey: "readinessStatus",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
-    cell: ({ row }) => (
-      <Badge variant="outline" className={row.original.readinessStatus === "UNFURNISHED" 
-        ? "text-red-600" 
-        : ""
-      }>
-        {row.original.readinessStatus === "FURNISHED" ? "Меблированная" : "Немеблированная"}
-      </Badge>
+    cell: ({ row, column }) => (
+      <EditableCell
+        value={row.original.readinessStatus}
+        onSave={(newValue: unknown) => {
+          updateProperty(row.original.id, { readinessStatus: newValue as "меблированная" | "немеблированная" });
+        }}
+        type="select"
+        options={[
+          { value: "меблированная", label: "Меблированная" },
+          { value: "немеблированная", label: "Немеблированная" },
+        ]}
+      />
     ),
     enableSorting: true,
   },
   {
     accessorKey: "propertyType",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Тип" />,
-    cell: ({ row }) => (
-      <Badge variant="outline" className={row.original.propertyType === "FOR_RENT" 
-        ? "bg-amber-50 hover:bg-amber-50" 
-        : "bg-stone-200 hover:bg-stone-200"
-      }>
-        {row.original.propertyType === "FOR_RENT" ? "Аренда" : "Продажа"}
-      </Badge>
+    cell: ({ row, column }) => (
+      <EditableCell
+        value={row.original.propertyType}
+        onSave={(newValue: unknown) => {
+          updateProperty(row.original.id, { propertyType: newValue as "аренда" | "продажа" });
+        }}
+        type="select"
+        options={[
+          { value: "аренда", label: "Аренда" },
+          { value: "продажа", label: "Продажа" },
+        ]}
+      />
     ),
     enableSorting: true,
   },
   {
     accessorKey: "occupancyStatus",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
-    cell: ({ row }) => (
-      <Badge 
-        variant="outline" 
-        className={row.original.occupancyStatus === "OCCUPIED" 
-          ? "bg-orange-100 text-orange-800 hover:bg-orange-100" 
-          : "bg-green-100 text-green-800 hover:bg-green-100"
-        }
-      >
-        {row.original.occupancyStatus === "OCCUPIED" ? "Занята" : "Свободна"}
-      </Badge>
+    cell: ({ row, column }) => (
+      <EditableCell
+        value={row.original.occupancyStatus}
+        onSave={(newValue: unknown) => {
+          updateProperty(row.original.id, { occupancyStatus: newValue as "занята" | "свободна" });
+        }}
+        type="select"
+        options={[
+          { value: "занята", label: "Занята" },
+          { value: "свободна", label: "Свободна" },
+        ]}
+      />
     ),
     enableSorting: true,
   },
   {
     accessorKey: "urgentMatter",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Срочные Вопросы" />,
-    cell: ({ row }) => (
-      <div className="max-w-[200px] truncate" title={row.original.urgentMatter}>
-        {row.original.urgentMatter || "—"}
-      </div>
+    cell: ({ row, column }) => (
+      <EditableCell
+        value={row.original.urgentMatter || ""}
+        onSave={(newValue: unknown) => {
+          updateProperty(row.original.id, { urgentMatter: newValue as string || undefined });
+        }}
+        type="textarea"
+      />
     ),
+    enableSorting: true,
+  },
+  {
+    accessorKey: "urgentMatterResolved",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Статус Решения" />,
+    cell: ({ row }) => {
+      const hasUrgentMatter = !!row.original.urgentMatter;
+      const isResolved = row.original.urgentMatterResolved;
+      
+      if (!hasUrgentMatter) {
+        return <Badge variant="outline" className="bg-gray-100 text-gray-600">Нет проблем</Badge>;
+      }
+      
+      return (
+        <div className="flex items-center gap-2">
+          <Badge 
+            variant={isResolved ? "outline" : "destructive"}
+            className={isResolved ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
+          >
+            {isResolved ? "Решено" : "Требует решения"}
+          </Badge>
+          {!isResolved && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => updateProperty(row.original.id, { urgentMatterResolved: true })}
+              className="h-6 px-2 text-xs"
+            >
+              Решено
+            </Button>
+          )}
+        </div>
+      );
+    },
     enableSorting: true,
   },
   {
@@ -117,3 +187,6 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableSorting: true,
   },
 ];
+
+// Keep the old export for backward compatibility
+export const propertyColumns = createPropertyColumns(() => {});

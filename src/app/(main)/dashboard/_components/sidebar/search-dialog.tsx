@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
-import { Building2, Calendar, Users, Search, Home, Settings } from "lucide-react";
+import { Building2, Calendar, Users, Search, Home } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CommandDialog, CommandEmpty, CommandInput, CommandItem, CommandList, CommandGroup } from "@/components/ui/command";
@@ -73,12 +73,12 @@ export function SearchDialog() {
         property.readinessStatus.toLowerCase(),
         property.propertyType.toLowerCase(),
         property.occupancyStatus.toLowerCase(),
-        property.propertyType === "FOR_RENT" ? "аренда" : "продажа",
-        property.propertyType === "FOR_RENT" ? "rent" : "sale",
-        property.occupancyStatus === "OCCUPIED" ? "занята" : "свободна",
-        property.occupancyStatus === "OCCUPIED" ? "occupied" : "vacant",
+        property.propertyType === "аренда" ? "аренда" : "продажа",
+        property.propertyType === "аренда" ? "rent" : "sale",
+        property.occupancyStatus === "занята" ? "занята" : "свободна",
+        property.occupancyStatus === "занята" ? "occupied" : "vacant",
         property.rooms.toString(),
-        property.urgentMatter?.toLowerCase() || ""
+        property.urgentMatter?.toLowerCase() ?? ""
       ].filter(Boolean)
     })),
     // Tenants
@@ -92,7 +92,7 @@ export function SearchDialog() {
         group: "Арендаторы",
         keywords: [
           tenant.name.toLowerCase(),
-          tenant.notes?.toLowerCase() || "",
+          tenant.notes?.toLowerCase() ?? "",
           tenant.apartmentId.toLowerCase(),
           property ? property.apartmentNumber.toString() : "",
           property ? `квартира ${property.apartmentNumber}` : "",
@@ -113,7 +113,7 @@ export function SearchDialog() {
 
   // Group items by category
   const groupedItems = filteredItems.reduce((acc, item) => {
-    if (!acc[item.group]) {
+    if (!(item.group in acc)) {
       acc[item.group] = [];
     }
     acc[item.group].push(item);

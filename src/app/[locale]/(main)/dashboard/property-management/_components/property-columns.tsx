@@ -60,11 +60,11 @@ export const propertyColumns: ColumnDef<Property>[] = [
     accessorKey: "readinessStatus",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
     cell: ({ row }) => (
-      <Badge variant="outline" className={row.original.readinessStatus === "UNFURNISHED" 
-        ? "text-red-600" 
+      <Badge variant="outline" className={row.original.readinessStatus === "немеблированная" 
+        ? "bg-rose-100 hover:bg-rose-100" 
         : ""
       }>
-        {row.original.readinessStatus === "FURNISHED" ? "Меблированная" : "Немеблированная"}
+        {row.original.readinessStatus === "меблированная" ? "Меблированная" : "Немеблированная"}
       </Badge>
     ),
     enableSorting: true,
@@ -73,11 +73,11 @@ export const propertyColumns: ColumnDef<Property>[] = [
     accessorKey: "propertyType",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Тип" />,
     cell: ({ row }) => (
-      <Badge variant="outline" className={row.original.propertyType === "FOR_RENT" 
+      <Badge variant="outline" className={row.original.propertyType === "аренда" 
         ? "bg-amber-50 hover:bg-amber-50" 
         : "bg-stone-200 hover:bg-stone-200"
       }>
-        {row.original.propertyType === "FOR_RENT" ? "Аренда" : "Продажа"}
+        {row.original.propertyType === "аренда" ? "Аренда" : "Продажа"}
       </Badge>
     ),
     enableSorting: true,
@@ -88,12 +88,12 @@ export const propertyColumns: ColumnDef<Property>[] = [
     cell: ({ row }) => (
       <Badge 
         variant="outline" 
-        className={row.original.occupancyStatus === "OCCUPIED" 
+        className={row.original.occupancyStatus === "занята" 
           ? "bg-orange-100 text-orange-800 hover:bg-orange-100" 
           : "bg-green-100 text-green-800 hover:bg-green-100"
         }
       >
-        {row.original.occupancyStatus === "OCCUPIED" ? "Занята" : "Свободна"}
+        {row.original.occupancyStatus === "занята" ? "Занята" : "Свободна"}
       </Badge>
     ),
     enableSorting: true,

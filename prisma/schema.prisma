@@ -18,9 +18,9 @@ model Property {
   apartmentNumber Int      @unique
   location    String
   rooms       Int
-  readinessStatus ReadinessStatus @default(UNFURNISHED)
-  propertyType PropertyType @default(FOR_RENT)
-  occupancyStatus OccupancyStatus @default(NOT_OCCUPIED)
+  readinessStatus ReadinessStatus @default(немеблированная)
+  propertyType PropertyType @default(аренда)
+  occupancyStatus OccupancyStatus @default(свободна)
   urgentMatter String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -50,18 +50,18 @@ model Tenant {
 }
 
 enum ReadinessStatus {
-  FURNISHED
-  UNFURNISHED
+  меблированная
+  немеблированная
 }
 
 enum PropertyType {
-  FOR_RENT
-  FOR_SALE
+  аренда
+  продажа
 }
 
 enum OccupancyStatus {
-  OCCUPIED
-  NOT_OCCUPIED
+  занята
+  свободна
 }
 
 enum TenantStatus {

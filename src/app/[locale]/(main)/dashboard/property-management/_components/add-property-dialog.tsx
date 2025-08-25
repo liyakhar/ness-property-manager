@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,10 +36,11 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
       apartmentNumber: undefined,
       location: "",
       rooms: 1,
-      readinessStatus: "UNFURNISHED",
-      propertyType: "FOR_RENT",
-      occupancyStatus: "NOT_OCCUPIED",
+      readinessStatus: "немеблированная",
+      propertyType: "аренда",
+      occupancyStatus: "свободна",
       urgentMatter: "",
+      urgentMatterResolved: false,
     },
   });
 
@@ -128,8 +130,8 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="FURNISHED">Меблированная</SelectItem>
-                      <SelectItem value="UNFURNISHED">Немеблированная</SelectItem>
+                      <SelectItem value="меблированная">Меблированная</SelectItem>
+                      <SelectItem value="немеблированная">Немеблированная</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -150,8 +152,8 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="FOR_RENT">Для Аренды</SelectItem>
-                      <SelectItem value="FOR_SALE">Для Продажи</SelectItem>
+                      <SelectItem value="аренда">Для Аренды</SelectItem>
+                      <SelectItem value="продажа">Для Продажи</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -172,8 +174,8 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="OCCUPIED">Занята</SelectItem>
-                      <SelectItem value="NOT_OCCUPIED">Свободна</SelectItem>
+                      <SelectItem value="занята">Занята</SelectItem>
+                      <SelectItem value="свободна">Свободна</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -191,6 +193,26 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                     <Textarea placeholder="Any urgent issues or maintenance needed..." {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="urgentMatterResolved"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Проблема уже решена
+                    </FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
