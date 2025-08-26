@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
@@ -14,7 +14,8 @@
     "check:fix": "biome check --write .",
     "prepare": "husky",
     "type": "bun tsc --noEmit",
-    "generate:presets": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' src/scripts/generate-theme-presets.ts"
+    "generate:presets": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' src/scripts/generate-theme-presets.ts",
+    "postinstall": "prisma generate"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx}": [
