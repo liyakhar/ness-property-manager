@@ -75,8 +75,8 @@ export function SearchDialog() {
         property.occupancyStatus.toLowerCase(),
         property.propertyType === "аренда" ? "аренда" : "продажа",
         property.propertyType === "аренда" ? "rent" : "sale",
-        property.occupancyStatus === "занята" ? "занята" : "свободна",
-        property.occupancyStatus === "занята" ? "occupied" : "vacant",
+        property.occupancyStatus === "занята" ? (property.propertyType === "продажа" ? "продана" : "занята") : "свободна",
+        property.occupancyStatus === "занята" ? (property.propertyType === "продажа" ? "sold" : "occupied") : "vacant",
         property.rooms.toString(),
         property.urgentMatter?.toLowerCase() ?? ""
       ].filter(Boolean)

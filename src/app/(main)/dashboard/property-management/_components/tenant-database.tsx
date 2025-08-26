@@ -9,6 +9,7 @@ import { DataTablePagination } from "@/components/data-table/data-table-paginati
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePropertyManagementStore } from "@/stores/property-management";
@@ -18,6 +19,7 @@ import type { AddTenantFormData, Tenant } from "./schema";
 import { createTenantColumns } from "./tenant-columns";
 import { EditableCell } from "./editable-cell";
 import { ColumnDef } from "@tanstack/react-table";
+// import { HiddenTenantsTable } from "./hidden-tenants-table";
 
 interface TenantDatabaseProps {
   searchQuery?: string;
@@ -29,6 +31,8 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     properties: mockProperties,
     addTenant,
     updateTenant,
+    deleteTenant,
+    setTenantsHidden,
     isAddTenantDialogOpen,
     setAddTenantDialogOpen,
   } = usePropertyManagementStore();
@@ -114,9 +118,16 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     }
   };
 
+  const [showHiddenView, setShowHiddenView] = React.useState(false);
+
   // Create tenant columns with update function
   const tenantColumns = React.useMemo(() => {
-    return createTenantColumns(updateTenant, mockProperties);
+    return createTenantColumns(updateTenant, mockProperties, (id: string) => {
+      // Optimistic local delete via store
+      usePropertyManagementStore.getState().deleteTenant(id);
+      // Fire-and-forget API delete to persist if backend used
+      fetch(`/api/tenants/${id}`, { method: "DELETE" }).catch(() => {});
+    });
   }, [mockProperties]);
 
   // Combine default columns with custom columns
@@ -124,9 +135,10 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     return [...tenantColumns, ...customColumns];
   }, [tenantColumns, customColumns]);
 
-  // Filter tenants based on search query
+  // Non-hidden, filtered by search
   const filteredTenants = React.useMemo(() => {
-    if (!searchQuery) return allTenants;
+    const base = allTenants.filter((t) => !t.hidden);
+    if (!searchQuery) return base;
     
     const query = searchQuery.toLowerCase();
     
@@ -172,7 +184,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
       return false;
     };
     
-    return allTenants.filter(tenant => {
+    return base.filter(tenant => {
       // Basic text search
       const basicMatch = 
         tenant.name.toLowerCase().includes(query) ||
@@ -219,11 +231,33 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     });
   }, [allTenants, searchQuery, mockProperties]);
 
+  const hiddenTenants = React.useMemo(() => allTenants.filter((t) => !!t.hidden), [allTenants]);
+  const tableData = showHiddenView ? hiddenTenants : filteredTenants;
+
   const table = useDataTableInstance({
-    data: filteredTenants,
+    data: tableData,
     columns: allColumns,
     getRowId: (row) => row.id,
   });
+
+  const selectedTenantIds = table.getSelectedRowModel().rows.map((r) => r.original.id);
+  const selectedTenants = table.getSelectedRowModel().rows.map((r) => r.original);
+  const hasSelection = selectedTenantIds.length > 0;
+
+  const handleToggleHideSelected = () => {
+    if (!hasSelection) return;
+    setTenantsHidden(selectedTenantIds, !showHiddenView);
+    table.resetRowSelection();
+  };
+
+  const handleDeleteSelected = () => {
+    if (!hasSelection) return;
+    selectedTenantIds.forEach((id) => {
+      deleteTenant(id);
+      fetch(`/api/tenants/${id}`, { method: "DELETE" }).catch(() => {});
+    });
+    table.resetRowSelection();
+  };
 
   const handleAddTenant = (newTenant: AddTenantFormData) => {
     addTenant(newTenant);
@@ -269,6 +303,9 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowHiddenView((v) => !v)}>
+                {showHiddenView ? "Показать основные" : "Скрытые"}
+              </Button>
               <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
               <Button onClick={() => setAddTenantDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -279,6 +316,22 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
 
           <div className="overflow-hidden rounded-md border">
             <DataTable table={table} columns={allColumns} />
+          </div>
+
+          <div className="mt-3 flex items-center justify-start">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled={!hasSelection} onClick={handleToggleHideSelected}>
+                {showHiddenView ? "Вернуть в основные" : "Скрыть выбранные"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasSelection}
+                onClick={handleDeleteSelected}
+              >
+                Удалить выбранные
+              </Button>
+            </div>
           </div>
 
           <DataTablePagination table={table} />

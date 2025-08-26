@@ -39,14 +39,14 @@ export const sidebarItems: NavGroup[] = [
         icon: Building2,
       },
       {
-        title: "Календарь",
-        url: "/dashboard/property-management/calendar",
-        icon: Calendar,
-      },
-      {
         title: "Арендаторы",
         url: "/dashboard/property-management/tenants",
         icon: Users,
+      },
+      {
+        title: "Календарь",
+        url: "/dashboard/property-management/calendar",
+        icon: Calendar,
       },
     ],
   },

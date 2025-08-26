@@ -2,18 +2,19 @@
 
 import React, { useState } from "react";
 
-import { Building2, Search } from "lucide-react";
+import { Search, AlertTriangle } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePropertyManagementStore } from "@/stores/property-management";
 import { DailyNotifications } from "./_components/daily-notifications";
 
 export default function PropertyManagementPage() {
-  const { properties, tenants } = usePropertyManagementStore();
+  const { properties, tenants, updateProperty } = usePropertyManagementStore();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const getActiveTenants = () => tenants.filter((tenant) => !tenant.exitDate);
+  const getActiveTenants = () => tenants.filter((tenant) => tenant.status === "current");
 
   // Filter properties and tenants based on search query
   const filteredProperties = properties.filter(property => 
@@ -119,6 +120,97 @@ export default function PropertyManagementPage() {
     return false;
   };
 
+  // Calculate statistics for mind map structure
+  const totalProperties = filteredProperties.length;
+  const rentProperties = filteredProperties.filter(p => p.propertyType === "аренда");
+  const saleProperties = filteredProperties.filter(p => p.propertyType === "продажа");
+  
+  // Rent properties breakdown
+  const rentOccupied = rentProperties.filter(p => p.occupancyStatus === "занята");
+  const rentVacant = rentProperties.filter(p => p.occupancyStatus === "свободна");
+  
+  const rentOccupiedFurnished = rentOccupied.filter(p => p.readinessStatus === "меблированная");
+  const rentOccupiedUnfurnished = rentOccupied.filter(p => p.readinessStatus === "немеблированная");
+  const rentVacantFurnished = rentVacant.filter(p => p.readinessStatus === "меблированная");
+  const rentVacantUnfurnished = rentVacant.filter(p => p.readinessStatus === "немеблированная");
+  
+  // Sale properties breakdown
+  const saleOccupied = saleProperties.filter(p => p.occupancyStatus === "занята");
+  const saleVacant = saleProperties.filter(p => p.occupancyStatus === "свободна");
+  
+  const saleOccupiedFurnished = saleOccupied.filter(p => p.readinessStatus === "меблированная");
+  const saleOccupiedUnfurnished = saleOccupied.filter(p => p.readinessStatus === "немеблированная");
+  const saleVacantFurnished = saleVacant.filter(p => p.readinessStatus === "меблированная");
+  const saleVacantUnfurnished = saleVacant.filter(p => p.readinessStatus === "немеблированная");
+
+  // Additional important metrics
+  const urgentMatters = filteredProperties.filter(p => 
+    p.urgentMatter &&
+    !p.urgentMatterResolved &&
+    typeof p.urgentMatter === 'string' &&
+    p.urgentMatter.trim() !== ""
+  );
+  const propertiesWithUrgentMatters = urgentMatters.length;
+  
+  // Room distribution
+  const oneRoomProperties = filteredProperties.filter(p => p.rooms === 1);
+  const twoRoomProperties = filteredProperties.filter(p => p.rooms === 2);
+  const threeRoomProperties = filteredProperties.filter(p => p.rooms === 3);
+  const fourPlusRoomProperties = filteredProperties.filter(p => p.rooms >= 4);
+  
+  // Revenue potential indicators
+  const readyForImmediateRent = rentVacantFurnished.length; // Highest revenue potential
+  const readyForImmediateSale = saleVacantFurnished.length;
+  const totalReadyForImmediateAction = readyForImmediateRent + readyForImmediateSale;
+  
+  // Tenant status breakdown
+  const currentTenants = filteredTenants.filter(t => t.status === "current");
+  const pastTenants = filteredTenants.filter(t => t.status === "past");
+  const futureTenants = filteredTenants.filter(t => t.status === "future");
+  const upcomingTenants = filteredTenants.filter(t => t.status === "upcoming");
+
+  // Address-based grouping
+  const addressGroups = filteredProperties.reduce((groups, property) => {
+    const address = property.location;
+    if (!groups[address]) {
+      groups[address] = {
+        address,
+        count: 0,
+        rent: 0,
+        sale: 0,
+        occupied: 0,
+        vacant: 0,
+        furnished: 0,
+        unfurnished: 0
+      };
+    }
+    
+    groups[address].count++;
+    
+    if (property.propertyType === "аренда") {
+      groups[address].rent++;
+    } else {
+      groups[address].sale++;
+    }
+    
+    if (property.occupancyStatus === "занята") {
+      groups[address].occupied++;
+    } else {
+      groups[address].vacant++;
+    }
+    
+    if (property.readinessStatus === "меблированная") {
+      groups[address].furnished++;
+    } else {
+      groups[address].unfurnished++;
+    }
+    
+    return groups;
+  }, {} as Record<string, any>);
+
+  // Sort addresses by property count (descending)
+  const sortedAddresses = Object.values(addressGroups).sort((a, b) => b.count - a.count);
+
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">
       <div className="flex flex-col gap-2">
@@ -136,57 +228,231 @@ export default function PropertyManagementPage() {
         />
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Всего Недвижимости</CardTitle>
-            <Building2 className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredProperties.length}</div>
-            <p className="text-muted-foreground text-xs">
-              {filteredProperties.filter((p) => p.readinessStatus === "меблированная").length} меблированная
-            </p>
-          </CardContent>
-        </Card>
+      {/* Main Statistics - Mind Map Structure */}
+      <div className="space-y-8">
+        {/* Total Properties, Rent, and Sale - All in One Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Rent Properties Branch */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-base">
+                <span>Для Аренды</span>
+                <div className="text-2xl font-bold">{rentProperties.length}</div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Occupied */}
+                <div className="p-6 bg-muted/30 rounded-xl border">
+                  <div className="text-sm font-medium mb-2">Занята</div>
+                  <div className="text-xl font-bold mb-3">{rentOccupied.length}</div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span>Готовая:</span>
+                      <span className="font-medium">{rentOccupiedFurnished.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Не готовая:</span>
+                      <span className="font-medium">{rentOccupiedUnfurnished.length}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Vacant */}
+                <div className="p-6 bg-muted/30 rounded-xl border">
+                  <div className="text-sm font-medium mb-2">Свободна</div>
+                  <div className="text-xl font-bold mb-3">{rentVacant.length}</div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span>Готовая:</span>
+                      <span className="font-medium">{rentVacantFurnished.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Не готовая:</span>
+                      <span className="font-medium">{rentVacantUnfurnished.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Для Аренды</CardTitle>
-            <Building2 className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredProperties.filter((p) => p.propertyType === "аренда").length}</div>
-            <p className="text-muted-foreground text-xs">
-              {filteredProperties.filter((p) => p.propertyType === "аренда" && p.readinessStatus === "меблированная").length} меблированная
-            </p>
-          </CardContent>
-        </Card>
+          {/* Sale Properties Branch */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-base">
+                <span>Для Продажи</span>
+                <div className="text-2xl font-bold">{saleProperties.length}</div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Occupied / Sold */}
+                <div className="p-6 bg-muted/30 rounded-xl border">
+                  <div className="text-sm font-medium mb-2">Продана</div>
+                  <div className="text-xl font-bold mb-3">{saleOccupied.length}</div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span>Готовая:</span>
+                      <span className="font-medium">{saleOccupiedFurnished.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Не готовая:</span>
+                      <span className="font-medium">{saleOccupiedUnfurnished.length}</span>
+                    </div>
+                  </div>
+                  </div>
+                
+                {/* Vacant */}
+                <div className="p-6 bg-muted/30 rounded-xl border">
+                  <div className="text-sm font-medium mb-2">Свободна</div>
+                  <div className="text-xl font-bold mb-3">{saleVacant.length}</div>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span>Готовая:</span>
+                      <span className="font-medium">{saleVacantFurnished.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Не готовая:</span>
+                      <span className="font-medium">{saleVacantUnfurnished.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Для Продажи</CardTitle>
-            <Building2 className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredProperties.filter((p) => p.propertyType === "продажа").length}</div>
-            <p className="text-muted-foreground text-xs">
-              {filteredProperties.filter((p) => p.propertyType === "продажа" && p.readinessStatus === "меблированная").length} меблированная
-            </p>
-          </CardContent>
-        </Card>
+        {/* Tenants and Room Distribution - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Tenants */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-base">
+                <span>Арендаторы</span>
+                <div className="text-2xl font-bold">{filteredTenants.length}</div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{currentTenants.length}</div>
+                  <div className="text-sm text-muted-foreground">текущие</div>
+                </div>
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{upcomingTenants.length}</div>
+                  <div className="text-sm text-muted-foreground">предстоящие</div>
+                </div>
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{pastTenants.length}</div>
+                  <div className="text-sm text-muted-foreground">прошлые</div>
+                </div>
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{futureTenants.length}</div>
+                  <div className="text-sm text-muted-foreground">будущие</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Арендаторы</CardTitle>
-            <Building2 className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredTenants.length}</div>
-            <p className="text-muted-foreground text-xs">{getActiveTenants().length} в настоящее время активны</p>
-          </CardContent>
-        </Card>
+          {/* Room Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-base">
+                <span>Распределение по комнатам</span>
+                <div className="text-2xl font-bold invisible">0</div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{oneRoomProperties.length}</div>
+                  <div className="text-sm text-muted-foreground">1 комната</div>
+                </div>
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{twoRoomProperties.length}</div>
+                  <div className="text-sm text-muted-foreground">2 комнаты</div>
+                </div>
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{threeRoomProperties.length}</div>
+                  <div className="text-sm text-muted-foreground">3 комнаты</div>
+                </div>
+                <div className="p-6 bg-muted/30 rounded-xl border text-left">
+                  <div className="text-xl font-bold mb-1">{fourPlusRoomProperties.length}</div>
+                  <div className="text-sm text-muted-foreground">4+ комнаты</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Address Distribution - On its own line below */}
+        <div className="grid grid-cols-1 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">
+                По адресам
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {sortedAddresses.map((addressGroup) => (
+                  <div key={addressGroup.address} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border">
+                    <div className="font-medium">{addressGroup.address}</div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="font-bold">{addressGroup.count}</span>
+                      <span className="text-muted-foreground">|</span>
+                      <span className="text-orange-600">{addressGroup.vacant} свободно</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional Metrics */}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Urgent Matters */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                Срочные вопросы
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {propertiesWithUrgentMatters > 0 ? (
+                <div className="space-y-3">
+                  {urgentMatters.slice(0, 3).map((property) => (
+                    <div key={property.id} className="p-4 rounded-lg border bg-white border-l-4 border-l-red-500">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="mb-2">
+                            <span className="font-medium">Кв. {property.apartmentNumber}</span>
+                          </div>
+                          <p className="text-sm text-gray-700">{property.urgentMatter}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateProperty(property.id, { urgentMatterResolved: true })}
+                          className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                          Решено
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  <p>Срочных вопросов нет</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Daily Notifications */}

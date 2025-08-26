@@ -56,7 +56,7 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
   },
   {
     accessorKey: "apartmentId",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
     cell: ({ row }) => {
       const property = mockProperties.find((p) => p.id === row.original.apartmentId);
       return (
@@ -64,10 +64,21 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
           <Badge variant="outline" className="font-mono">
             #{property?.apartmentNumber ?? "Unknown"}
           </Badge>
-          <span className="text-muted-foreground text-sm">{property?.location ?? "Неизвестно"}</span>
         </div>
       );
     },
+    enableSorting: true,
+  },
+  {
+    id: "location",
+    accessorFn: (row) => {
+      const property = mockProperties.find((p) => p.id === row.apartmentId);
+      return property?.location ?? "";
+    },
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Расположение" />,
+    cell: ({ getValue }) => (
+      <div className="text-muted-foreground text-sm">{(getValue() as string) || "-"}</div>
+    ),
     enableSorting: true,
   },
   {

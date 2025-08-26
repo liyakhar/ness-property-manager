@@ -33,7 +33,9 @@ export const propertyColumns: ColumnDef<Property>[] = [
   {
     accessorKey: "apartmentNumber",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
-    cell: ({ row }) => <div className="font-mono font-medium">#{row.original.apartmentNumber}</div>,
+    cell: ({ row }) => (
+      <Badge variant="outline" className="font-mono">#{row.original.apartmentNumber}</Badge>
+    ),
     enableSorting: true,
   },
   {
@@ -60,12 +62,9 @@ export const propertyColumns: ColumnDef<Property>[] = [
     accessorKey: "readinessStatus",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
     cell: ({ row }) => (
-      <Badge variant="outline" className={row.original.readinessStatus === "немеблированная" 
-        ? "bg-rose-100 hover:bg-rose-100" 
-        : ""
-      }>
+      <span>
         {row.original.readinessStatus === "меблированная" ? "Меблированная" : "Немеблированная"}
-      </Badge>
+      </span>
     ),
     enableSorting: true,
   },
@@ -93,7 +92,9 @@ export const propertyColumns: ColumnDef<Property>[] = [
           : "bg-green-100 text-green-800 hover:bg-green-100"
         }
       >
-        {row.original.occupancyStatus === "занята" ? "Занята" : "Свободна"}
+        {row.original.occupancyStatus === "занята" 
+          ? (row.original.propertyType === "продажа" ? "Продана" : "Занята")
+          : "Свободна"}
       </Badge>
     ),
     enableSorting: true,

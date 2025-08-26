@@ -10,6 +10,7 @@ export const propertySchema = z.object({
   occupancyStatus: z.enum(["занята", "свободна"]),
   urgentMatter: z.string().optional(),
   urgentMatterResolved: z.boolean().default(false),
+  hidden: z.boolean().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 }).passthrough(); // Allow additional properties for custom fields
@@ -23,6 +24,7 @@ export const tenantSchema = z.object({
   notes: z.string().optional(),
   status: z.enum(["current", "past", "future", "upcoming"]),
   receivePaymentDate: z.date(),
+  hidden: z.boolean().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 }).passthrough(); // Allow additional properties for custom fields

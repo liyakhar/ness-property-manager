@@ -8,6 +8,7 @@ import { Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePropertyManagementStore } from "@/stores/property-management";
 
 import { AddTenantDialog } from "./add-tenant-dialog";
@@ -19,6 +20,9 @@ interface OccupancyCalendarProps {
 export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
   const [selectedProperty, setSelectedProperty] = React.useState<string>("all");
+  const [dayDialogOpen, setDayDialogOpen] = React.useState(false);
+  const [selectedDay, setSelectedDay] = React.useState<Date | null>(null);
+  const [selectedDayTenants, setSelectedDayTenants] = React.useState<any[]>([]);
   const {
     properties: mockProperties,
     tenants: mockTenants,
@@ -259,8 +263,15 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
 
           <div className="grid grid-cols-7 gap-1">
             {daysInMonth.map((day) => {
-              const tenants = getTenantsForDay(day);
+              // Filter by selected property here for accurate counts and rendering
+              const tenantsForDay = getTenantsForDay(day).filter((tenant) => {
+                if (selectedProperty === "all") return true;
+                return tenant.apartmentId === selectedProperty;
+              });
               const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
+              const maxVisible = 3;
+              const visibleTenants = tenantsForDay.slice(0, maxVisible);
+              const hiddenCount = Math.max(tenantsForDay.length - maxVisible, 0);
 
               return (
                 <div
@@ -270,9 +281,9 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
                   <div className="mb-1 text-sm font-medium">{format(day, "d")}</div>
 
                   <div className="space-y-1">
-                    {tenants.map((tenant) => {
+                    {visibleTenants.map((tenant) => {
                       const property = filteredProperties.find((p) => p.id === tenant.apartmentId);
-                      if (!property || (selectedProperty !== "all" && property.id !== selectedProperty)) return null;
+                      if (!property) return null;
 
                       return (
                         <div
@@ -285,6 +296,18 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
                         </div>
                       );
                     })}
+                    {hiddenCount > 0 && (
+                      <button
+                        className="text-xs text-blue-700 underline"
+                        onClick={() => {
+                          setSelectedDay(day);
+                          setSelectedDayTenants(tenantsForDay);
+                          setDayDialogOpen(true);
+                        }}
+                      >
+                        +{hiddenCount} ещё
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -317,6 +340,40 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
           </div>
         </CardContent>
       </Card>
+
+      {/* Day details dialog */}
+      <Dialog open={dayDialogOpen} onOpenChange={setDayDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedDay ? `Занятость на ${format(selectedDay, "d MMMM yyyy")}` : "Занятость"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-[60vh] overflow-auto">
+            {selectedDayTenants.map((tenant) => {
+              const property = filteredProperties.find((p) => p.id === tenant.apartmentId);
+              if (!property) return null;
+              return (
+                <div
+                  key={tenant.id}
+                  className={`flex items-center justify-between rounded border p-2 text-sm ${getPropertyColor(property.id)}`}
+                >
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{tenant.name}</div>
+                    <div className="text-xs text-gray-700">Кв. #{property.apartmentNumber}</div>
+                  </div>
+                  <div className="text-xs text-gray-700">
+                    {format(new Date(tenant.entryDate), "d MMM")} – {tenant.exitDate ? format(new Date(tenant.exitDate), "d MMM") : "…"}
+                  </div>
+                </div>
+              );
+            })}
+            {selectedDayTenants.length === 0 && (
+              <div className="text-sm text-muted-foreground">Нет записей на выбранную дату</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AddTenantDialog
         open={isAddTenantDialogOpen}

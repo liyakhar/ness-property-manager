@@ -5,7 +5,6 @@ import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { OccupancyCalendar } from "../_components/occupancy-calendar";
-import { DailyNotifications } from "../_components/daily-notifications";
 
 export default function CalendarPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,9 +25,6 @@ export default function CalendarPage() {
           className="pl-10"
         />
       </div>
-
-      {/* Daily Notifications */}
-      <DailyNotifications />
 
       <OccupancyCalendar searchQuery={searchQuery} />
     </div>

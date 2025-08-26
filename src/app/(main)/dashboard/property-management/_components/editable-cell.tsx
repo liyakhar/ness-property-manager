@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 interface EditableCellProps {
   value: unknown;
   onSave: (value: unknown) => void;
-  type?: "text" | "number" | "date" | "select" | "textarea" | "status" | "apartment";
+  type?: "text" | "number" | "date" | "select" | "textarea" | "status" | "apartment" | "apartmentNumber" | "occupancy" | "propertyType" | "readiness";
   options?: { value: string; label: string }[];
   properties?: Array<{ id: string; apartmentNumber: string; location: string }>;
 }
@@ -132,6 +132,64 @@ export function EditableCell({
           </Select>
         );
       
+      case "occupancy":
+        return (
+          <Select value={typeof editValue === 'string' ? editValue : ""} onValueChange={setEditValue}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите статус" />
+            </SelectTrigger>
+            <SelectContent>
+              {/* Use provided options if any; otherwise default to occupancy statuses */}
+              {(options.length ? options : [
+                { value: "свободна", label: "Свободна" },
+                { value: "занята", label: "Занята" },
+              ]).map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case "propertyType":
+        return (
+          <Select value={typeof editValue === 'string' ? editValue : ""} onValueChange={setEditValue}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите тип" />
+            </SelectTrigger>
+            <SelectContent>
+              {(options.length ? options : [
+                { value: "аренда", label: "Аренда" },
+                { value: "продажа", label: "Продажа" },
+              ]).map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case "readiness":
+        return (
+          <Select value={typeof editValue === 'string' ? editValue : ""} onValueChange={setEditValue}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите готовность" />
+            </SelectTrigger>
+            <SelectContent>
+              {(options.length ? options : [
+                { value: "меблированная", label: "Меблированная" },
+                { value: "немеблированная", label: "Немеблированная" },
+              ]).map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      
       case "status":
         return (
           <Select value={typeof editValue === 'string' ? editValue : ""} onValueChange={setEditValue}>
@@ -173,6 +231,19 @@ export function EditableCell({
             onKeyDown={handleKeyDown}
             className="w-full"
             placeholder="Введите число..."
+          />
+        );
+      
+      case "apartmentNumber":
+        return (
+          <Input
+            ref={inputRef}
+            type="number"
+            value={typeof editValue === 'string' || typeof editValue === 'number' ? String(editValue) : ""}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full"
+            placeholder="Введите номер квартиры..."
           />
         );
       
@@ -245,6 +316,24 @@ export function EditableCell({
       );
     }
     
+    if (type === "occupancy") {
+      const occupancy = typeof value === 'string' ? value : '';
+      const isVacant = occupancy === "свободна";
+      const className = isVacant
+        ? "bg-green-50 text-green-700 hover:bg-green-50"
+        : "bg-orange-50 text-orange-700 hover:bg-orange-50";
+      // Prefer provided option label if available (allows context-aware labels like "Продана")
+      const matchedOption = options.find(opt => opt.value === occupancy);
+      const text = matchedOption
+        ? matchedOption.label
+        : occupancy === "занята" ? "Занята" : occupancy === "свободна" ? "Свободна" : "-";
+      return (
+        <Badge variant="outline" className={className}>
+          {text}
+        </Badge>
+      );
+    }
+    
     if (type === "select") {
       if (!value) return <span className="text-muted-foreground text-sm">-</span>;
       
@@ -269,13 +358,43 @@ export function EditableCell({
             <Badge variant="outline" className="font-mono">
               #{property.apartmentNumber}
             </Badge>
-            <span className="text-muted-foreground text-sm">{property.location}</span>
           </div>
         );
       }
       return value ? String(value) : <span className="text-muted-foreground text-sm">-</span>;
     }
     
+    if (type === "apartmentNumber") {
+      if (value === undefined || value === null || value === "") {
+        return <span className="text-muted-foreground text-sm">-</span>;
+      }
+      return (
+        <Badge variant="outline" className="font-mono">
+          #{String(value)}
+        </Badge>
+      );
+    }
+    
+    if (type === "propertyType") {
+      const propType = typeof value === 'string' ? value : '';
+      const isRent = propType === "аренда";
+      const className = isRent
+        ? "bg-amber-50 text-amber-700 hover:bg-amber-50"
+        : "bg-slate-50 text-slate-700 hover:bg-slate-50";
+      const text = propType === "аренда" ? "Аренда" : propType === "продажа" ? "Продажа" : "-";
+      return (
+        <Badge variant="outline" className={className}>
+          {text}
+        </Badge>
+      );
+    }
+
+    if (type === "readiness") {
+      const readiness = typeof value === 'string' ? value : '';
+      // Render readiness as plain text without badge styling
+      return <span>{readiness === "меблированная" ? "Меблированная" : readiness === "немеблированная" ? "Немеблированная" : "-"}</span>;
+    }
+
     if (type === "textarea") {
       return value ? (
         <div className="max-w-[200px]">

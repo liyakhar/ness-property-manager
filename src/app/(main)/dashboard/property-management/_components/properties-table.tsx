@@ -18,6 +18,7 @@ import { createPropertyColumns } from "./property-columns";
 import type { AddPropertyFormData, Property } from "./schema";
 import { EditableCell } from "./editable-cell";
 import { ColumnDef } from "@tanstack/react-table";
+// import { HiddenPropertiesTable } from "./hidden-properties-table";
 
 interface PropertiesTableProps {
   searchQuery?: string;
@@ -28,6 +29,8 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
     properties: allProperties,
     addProperty,
     updateProperty,
+    deleteProperty,
+    setPropertiesHidden,
     isAddPropertyDialogOpen,
     setAddPropertyDialogOpen,
   } = usePropertyManagementStore();
@@ -115,7 +118,12 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
 
   // Create property columns with update function
   const propertyColumns = React.useMemo(() => {
-    return createPropertyColumns(updateProperty);
+    return createPropertyColumns(updateProperty, (id: string) => {
+      // Optimistic local delete via store
+      usePropertyManagementStore.getState().deleteProperty(id);
+      // Fire-and-forget API delete to persist if backend used
+      fetch(`/api/properties/${id}`, { method: "DELETE" }).catch(() => {});
+    });
   }, []);
 
   // Combine default columns with custom columns
@@ -123,12 +131,14 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
     return [...propertyColumns, ...customColumns];
   }, [propertyColumns, customColumns]);
 
-  // Filter properties based on search query
+  const [showHiddenView, setShowHiddenView] = React.useState(false);
+
+  // Non-hidden, filtered by search
   const filteredProperties = React.useMemo(() => {
-    if (!searchQuery) return allProperties;
-    
+    const base = allProperties.filter((p) => !p.hidden);
+    if (!searchQuery) return base;
     const query = searchQuery.toLowerCase();
-    return allProperties.filter(property => 
+    return base.filter((property) =>
       property.apartmentNumber.toString().includes(query) ||
       property.location.toLowerCase().includes(query) ||
       property.readinessStatus.toLowerCase().includes(query) ||
@@ -139,11 +149,39 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
     );
   }, [allProperties, searchQuery]);
 
+  // Hidden (not search-filtered to keep all hidden visible)
+  const hiddenProperties = React.useMemo(() => allProperties.filter((p) => !!p.hidden), [allProperties]);
+
+  const tableData = showHiddenView ? hiddenProperties : filteredProperties;
+
   const table = useDataTableInstance({
-    data: filteredProperties,
+    data: tableData,
     columns: allColumns,
     getRowId: (row) => row.id,
   });
+
+  const selectedPropertyIds = table.getSelectedRowModel().rows.map((r) => r.original.id);
+  const hasSelection = selectedPropertyIds.length > 0;
+
+  const handleHideSelected = () => {
+    if (!hasSelection) return;
+    setPropertiesHidden(selectedPropertyIds, true);
+    table.resetRowSelection();
+  };
+  const handleUnhideSelected = () => {
+    if (!hasSelection) return;
+    setPropertiesHidden(selectedPropertyIds, false);
+    table.resetRowSelection();
+  };
+
+  const handleDeleteSelected = () => {
+    if (!hasSelection) return;
+    selectedPropertyIds.forEach((id) => {
+      deleteProperty(id);
+      fetch(`/api/properties/${id}`, { method: "DELETE" }).catch(() => {});
+    });
+    table.resetRowSelection();
+  };
 
   const handleAddProperty = (newProperty: AddPropertyFormData) => {
     addProperty(newProperty);
@@ -168,15 +206,18 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50">
                   {filteredProperties.filter((p) => p.occupancyStatus === "свободна").length} Свободна
                 </Badge>
-                <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                <Badge variant="outline" className="bg-orange-50 text-orange-700 hover:bg-orange-50">
                   {filteredProperties.filter((p) => p.occupancyStatus === "занята").length} Занята
                 </Badge>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowHiddenView((v) => !v)}>
+                {showHiddenView ? "Показать основные" : "Скрытые"}
+              </Button>
               <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
               <Button onClick={() => setAddPropertyDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -187,6 +228,28 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
 
           <div className="overflow-hidden rounded-md border">
             <DataTable table={table} columns={allColumns} />
+          </div>
+
+          <div className="mt-3 flex items-center justify-start">
+            <div className="flex items-center gap-2">
+              {showHiddenView ? (
+                <Button variant="outline" size="sm" disabled={!hasSelection} onClick={handleUnhideSelected}>
+                  Вернуть в основные
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" disabled={!hasSelection} onClick={handleHideSelected}>
+                  Скрыть выбранные
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasSelection}
+                onClick={handleDeleteSelected}
+              >
+                Удалить выбранные
+              </Button>
+            </div>
           </div>
 
           <DataTablePagination table={table} />

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertTriangle, Calendar, DollarSign, Home } from "lucide-react";
+import { Calendar, AlertTriangle, DollarSign, Home } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,10 @@ interface NotificationItem {
   description: string;
   daysRemaining?: number;
   isToday?: boolean;
-  priority: "high" | "medium" | "low";
+  priority: "high" | "medium";
   propertyId: string;
   tenantId?: string;
+  dueDate?: Date;
 }
 
 export function DailyNotifications() {
@@ -27,14 +28,18 @@ export function DailyNotifications() {
     const notifications: NotificationItem[] = [];
     const today = new Date();
     const oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    // Срочные проблемы отображаются только в отдельной карточке, не в уведомлениях
 
-    // Check for upcoming tenant entries
+    // 1. Заселение арендаторов - Уведомления о заселении в ближайшие 7 дней
     tenants.forEach((tenant) => {
       if (tenant.status === "upcoming" || tenant.status === "future") {
         const entryDate = new Date(tenant.entryDate);
         if (entryDate <= oneWeekFromNow && entryDate >= today) {
           const daysRemaining = Math.ceil((entryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           const isToday = daysRemaining === 0;
+          
+          // Приоритет: высокий (сегодня/завтра), средний (3-7 дней)
+          const priority = (daysRemaining <= 1) ? "high" : "medium";
           
           const property = properties.find(p => p.id === tenant.apartmentId);
           if (property) {
@@ -45,42 +50,29 @@ export function DailyNotifications() {
               description: `${tenant.name} заселяется в квартиру ${property.apartmentNumber}`,
               daysRemaining,
               isToday,
-              priority: isToday ? "high" : daysRemaining <= 2 ? "high" : "medium",
+              priority,
               propertyId: property.id,
               tenantId: tenant.id,
+              dueDate: entryDate,
             });
           }
         }
       }
     });
 
-    // Check for urgent matters
-    properties.forEach((property) => {
-      if (property.urgentMatter && !property.urgentMatterResolved) {
-        const propertyTenant = tenants.find(t => t.apartmentId === property.id && t.status === "current");
-        notifications.push({
-          id: `urgent-${property.id}`,
-          type: "urgent",
-          title: `Срочная проблема`,
-          description: `${property.urgentMatter} - Квартира ${property.apartmentNumber}`,
-          priority: "high",
-          propertyId: property.id,
-          tenantId: propertyTenant?.id,
-        });
-      }
-    });
+    // 2. Срочные проблемы — исключены из ежедневных уведомлений
 
-    // Check for payment days
+    // 3. Дни оплаты - Уведомления о сроках оплаты аренды
     tenants.forEach((tenant) => {
       if (tenant.status === "current") {
         const paymentDate = new Date(tenant.receivePaymentDate);
         const nextPaymentDate = new Date(paymentDate);
         nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
         
-        // Check if payment is due today or tomorrow
+        // Показывать уведомления за 3 дня до оплаты и в день оплаты
         const daysUntilPayment = Math.ceil((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         
-        if (daysUntilPayment <= 1 && daysUntilPayment >= 0) {
+        if (daysUntilPayment <= 3 && daysUntilPayment >= 0) {
           const property = properties.find(p => p.id === tenant.apartmentId);
           if (property) {
             notifications.push({
@@ -90,18 +82,19 @@ export function DailyNotifications() {
               description: `${tenant.name} - Квартира ${property.apartmentNumber}`,
               daysRemaining: daysUntilPayment,
               isToday: daysUntilPayment === 0,
-              priority: "medium",
+              priority: "medium", // Приоритет: средний
               propertyId: property.id,
               tenantId: tenant.id,
+              dueDate: nextPaymentDate,
             });
           }
         }
       }
     });
 
-    // Sort by priority and days remaining
+    // Сортировка по приоритету и времени
     return notifications.sort((a, b) => {
-      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      const priorityOrder = { high: 2, medium: 1 };
       if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
         return priorityOrder[b.priority] - priorityOrder[a.priority];
       }
@@ -113,15 +106,15 @@ export function DailyNotifications() {
 
   if (notifications.length === 0) {
     return (
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-gray-900">
             <Calendar className="h-5 w-5" />
             Ежедневные Уведомления
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-8 text-gray-500">
             <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Нет активных уведомлений</p>
             <p className="text-sm">Все в порядке!</p>
@@ -134,13 +127,11 @@ export function DailyNotifications() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "border-l-4 border-l-red-500 bg-red-50";
       case "medium":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "low":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "border-l-4 border-l-orange-500 bg-orange-50";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "border-l-4 border-l-gray-500 bg-gray-50";
     }
   };
 
@@ -154,19 +145,6 @@ export function DailyNotifications() {
         return <DollarSign className="h-4 w-4" />;
       default:
         return <Calendar className="h-4 w-4" />;
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "entry":
-        return "bg-green-100 text-green-800";
-      case "urgent":
-        return "bg-red-100 text-red-800";
-      case "payment":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -184,12 +162,12 @@ export function DailyNotifications() {
   };
 
   return (
-    <Card>
+    <Card className="bg-white">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-gray-900">
           <Calendar className="h-5 w-5" />
           Ежедневные Уведомления
-          <Badge variant="secondary" className="ml-2">
+          <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-700">
             {notifications.length}
           </Badge>
         </CardTitle>
@@ -199,44 +177,46 @@ export function DailyNotifications() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-4 rounded-lg border ${getPriorityColor(notification.priority)}`}
+              className={`p-4 rounded-lg border bg-white ${getPriorityColor(notification.priority)}`}
             >
-                             <div className="flex items-start justify-between">
-                 <div className="flex items-start gap-3 flex-1">
-                   <div className={`p-2 rounded-full ${getTypeColor(notification.type)}`}>
-                     {getTypeIcon(notification.type)}
-                   </div>
-                   <div className="flex-1">
-                     <div className="flex items-center gap-2 mb-1">
-                       <Badge variant="outline" className={getTypeColor(notification.type)}>
-                         {getTypeLabel(notification.type)}
-                       </Badge>
-                       {notification.daysRemaining !== undefined && (
-                         <Badge 
-                           variant={notification.isToday ? "destructive" : "secondary"}
-                           className={notification.isToday ? "bg-red-600 text-white" : ""}
-                         >
-                           {notification.isToday ? "Сегодня" : `${notification.daysRemaining} дн.`}
-                         </Badge>
-                       )}
-                     </div>
-                     <h4 className="font-medium text-sm mb-1">{notification.title}</h4>
-                     <p className="text-sm opacity-80">{notification.description}</p>
-                   </div>
-                 </div>
-                 
-                 {/* Action buttons */}
-                 {notification.type === "urgent" && (
-                   <Button
-                     size="sm"
-                     variant="outline"
-                     onClick={() => updateProperty(notification.propertyId, { urgentMatterResolved: true })}
-                     className="ml-2"
-                   >
-                     Решено
-                   </Button>
-                 )}
-               </div>
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="text-gray-600">
+                    {getTypeIcon(notification.type)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="bg-white text-gray-700 border-gray-300">
+                        {getTypeLabel(notification.type)}
+                      </Badge>
+                      {notification.daysRemaining !== undefined && (
+                        <Badge 
+                          variant={notification.isToday ? "destructive" : "secondary"}
+                          className={notification.isToday ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700"}
+                        >
+                          {notification.isToday ? "Сегодня" : `${notification.daysRemaining} дн.`}
+                        </Badge>
+                      )}
+                    </div>
+                    {notification.title && (
+                      <h4 className="font-medium text-sm mb-1 text-gray-900">{notification.title}</h4>
+                    )}
+                    <p className="text-sm text-gray-600">{notification.description}</p>
+                  </div>
+                </div>
+                
+                {/* Кнопка "Решено" только для срочных проблем */}
+                {notification.type === "urgent" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => updateProperty(notification.propertyId, { urgentMatterResolved: true })}
+                    className="ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    Решено
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>

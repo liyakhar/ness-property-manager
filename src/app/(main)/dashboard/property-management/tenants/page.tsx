@@ -5,7 +5,6 @@ import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { TenantDatabase } from "../_components/tenant-database";
-import { DailyNotifications } from "../_components/daily-notifications";
 
 export default function TenantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,9 +25,6 @@ export default function TenantsPage() {
           className="pl-10"
         />
       </div>
-
-      {/* Daily Notifications */}
-      <DailyNotifications />
 
       <TenantDatabase searchQuery={searchQuery} />
     </div>

@@ -1,16 +1,30 @@
 import { ColumnDef } from "@tanstack/react-table";
+import { Trash2 } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { EditableCell } from "./editable-cell";
 
 import { Property } from "./schema";
 
 export const createPropertyColumns = (
-  updateProperty: (id: string, updates: Partial<Property>) => void
-): ColumnDef<Property>[] => [
+  updateProperty: (id: string, updates: Partial<Property>) => void,
+  onDeleteProperty?: (id: string) => void,
+): ColumnDef<Property>[] => {
+  const columns: ColumnDef<Property>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -43,7 +57,7 @@ export const createPropertyColumns = (
         onSave={(newValue: unknown) => {
           updateProperty(row.original.id, { apartmentNumber: newValue as number });
         }}
-        type="number"
+        type="apartmentNumber"
       />
     ),
     enableSorting: true,
@@ -85,7 +99,7 @@ export const createPropertyColumns = (
         onSave={(newValue: unknown) => {
           updateProperty(row.original.id, { readinessStatus: newValue as "меблированная" | "немеблированная" });
         }}
-        type="select"
+        type="readiness"
         options={[
           { value: "меблированная", label: "Меблированная" },
           { value: "немеблированная", label: "Немеблированная" },
@@ -103,7 +117,7 @@ export const createPropertyColumns = (
         onSave={(newValue: unknown) => {
           updateProperty(row.original.id, { propertyType: newValue as "аренда" | "продажа" });
         }}
-        type="select"
+        type="propertyType"
         options={[
           { value: "аренда", label: "Аренда" },
           { value: "продажа", label: "Продажа" },
@@ -121,10 +135,10 @@ export const createPropertyColumns = (
         onSave={(newValue: unknown) => {
           updateProperty(row.original.id, { occupancyStatus: newValue as "занята" | "свободна" });
         }}
-        type="select"
+        type="occupancy"
         options={[
-          { value: "занята", label: "Занята" },
           { value: "свободна", label: "Свободна" },
+          { value: "занята", label: row.original.propertyType === "продажа" ? "Продана" : "Занята" },
         ]}
       />
     ),
@@ -186,7 +200,49 @@ export const createPropertyColumns = (
     ),
     enableSorting: true,
   },
-];
+  ];
+
+  if (onDeleteProperty) {
+    columns.push({
+      id: "actions",
+      header: () => <div className="text-right">Действия</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Удалить запись?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Действие необратимо. Запись будет удалена.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Отмена</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    onDeleteProperty(row.original.id);
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Удалить
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    });
+  }
+
+  return columns;
+};
 
 // Keep the old export for backward compatibility
-export const propertyColumns = createPropertyColumns(() => {});
+export const propertyColumns = createPropertyColumns(() => {}, () => {});

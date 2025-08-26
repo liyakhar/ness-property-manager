@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { users } from "@/data/users";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/server/server-actions";
 import {
@@ -18,7 +17,7 @@ import {
 } from "@/types/preferences/layout";
 import { PropertyManagementProvider } from "@/stores/property-management";
 
-import { AccountSwitcher } from "./_components/sidebar/account-switcher";
+// Removed AccountSwitcher and login-related UI since authentication is not used
 import { LayoutControls } from "./_components/sidebar/layout-controls";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
@@ -52,7 +51,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         )}
       >
         <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex w-full items-center justify-between px-4 lg:px-6">
+          <div className="flex w-full items-center justify-between px-6 lg:px-8">
             <div className="flex items-center gap-1 lg:gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
@@ -61,11 +60,11 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <div className="flex items-center gap-2">
               <LayoutControls {...layoutPreferences} />
               <ThemeSwitcher />
-              <AccountSwitcher users={users} />
+              {/* Account switcher removed */}
             </div>
           </div>
         </header>
-        <div className="h-full p-4 md:p-6">
+        <div className="h-full px-6 lg:px-8 py-4 md:py-6">
           <PropertyManagementProvider>
             {children}
           </PropertyManagementProvider>

@@ -26,9 +26,11 @@ interface PropertyManagementState {
   addProperty: (property: AddPropertyFormData) => void;
   updateProperty: (id: string, updates: Partial<Property>) => void;
   deleteProperty: (id: string) => void;
+  setPropertiesHidden: (ids: string[], hidden: boolean) => void;
   addTenant: (tenant: AddTenantFormData) => void;
   updateTenant: (id: string, updates: Partial<Tenant>) => void;
   deleteTenant: (id: string) => void;
+  setTenantsHidden: (ids: string[], hidden: boolean) => void;
 
   // UI Actions
   setSelectedProperty: (id: string | null) => void;
@@ -87,6 +89,14 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
         }));
       },
 
+      setPropertiesHidden: (ids, hidden) => {
+        set((state) => ({
+          properties: state.properties.map((prop) =>
+            ids.includes(prop.id) ? { ...prop, hidden, updatedAt: new Date() } : prop,
+          ),
+        }));
+      },
+
       addTenant: (tenantData) => {
         const newTenant: Tenant = {
           id: `tenant-${Date.now()}`,
@@ -111,6 +121,14 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       deleteTenant: (id) => {
         set((state) => ({
           tenants: state.tenants.filter((tenant) => tenant.id !== id),
+        }));
+      },
+
+      setTenantsHidden: (ids, hidden) => {
+        set((state) => ({
+          tenants: state.tenants.map((tenant) =>
+            ids.includes(tenant.id) ? { ...tenant, hidden, updatedAt: new Date() } : tenant,
+          ),
         }));
       },
 
