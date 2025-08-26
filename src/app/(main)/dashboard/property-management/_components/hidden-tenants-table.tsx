@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/data-table/data-table";
@@ -17,7 +18,7 @@ interface HiddenTenantsTableProps {
 }
 
 export function HiddenTenantsTable({ data, columns, onUnhide }: HiddenTenantsTableProps) {
-  const table = useDataTableInstance<Tenant>({
+  const table = useDataTableInstance({
     data,
     columns,
     getRowId: (row) => row.id,
@@ -48,5 +49,3 @@ export function HiddenTenantsTable({ data, columns, onUnhide }: HiddenTenantsTab
     </div>
   );
 }
-
-
