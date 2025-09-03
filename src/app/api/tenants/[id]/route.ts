@@ -57,18 +57,53 @@ async function getTargetDates(
   };
 }
 
+/* eslint-disable complexity */
 async function updateTenant(
   id: string,
-  data: Partial<Pick<Tenant, "name" | "apartmentId" | "entryDate" | "exitDate" | "status" | "notes" | "receivePaymentDate">>,
+  data: Partial<
+    Pick<
+      Tenant,
+      | "name"
+      | "apartmentId"
+      | "entryDate"
+      | "exitDate"
+      | "status"
+      | "notes"
+      | "receivePaymentDate"
+      | "utilityPaymentDate"
+      | "internetPaymentDate"
+      | "isPaid"
+      | "paymentAttachment"
+      | "hidden"
+    >
+  >,
 ): Promise<ApiResponse<Tenant>> {
   try {
     // Convert date strings to Date if provided
-    const preparedData: Partial<Pick<Tenant, "name" | "apartmentId" | "entryDate" | "exitDate" | "status" | "notes" | "receivePaymentDate">> = {
+    const preparedData: Partial<
+      Pick<
+        Tenant,
+        | "name"
+        | "apartmentId"
+        | "entryDate"
+        | "exitDate"
+        | "status"
+        | "notes"
+        | "receivePaymentDate"
+        | "utilityPaymentDate"
+        | "internetPaymentDate"
+        | "isPaid"
+        | "paymentAttachment"
+        | "hidden"
+      >
+    > = {
       ...data,
     };
     if (preparedData.entryDate) preparedData.entryDate = new Date(preparedData.entryDate);
     if (preparedData.exitDate) preparedData.exitDate = new Date(preparedData.exitDate);
     if (preparedData.receivePaymentDate) preparedData.receivePaymentDate = new Date(preparedData.receivePaymentDate);
+    if (preparedData.utilityPaymentDate) preparedData.utilityPaymentDate = new Date(preparedData.utilityPaymentDate);
+    if (preparedData.internetPaymentDate) preparedData.internetPaymentDate = new Date(preparedData.internetPaymentDate);
 
     // Business rule: prevent multiple active tenants for the same apartment (no overlapping occupancy)
     const targetApartmentId: string | undefined =

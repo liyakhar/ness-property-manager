@@ -21,6 +21,7 @@ model Property {
   readinessStatus ReadinessStatus @default(немеблированная)
   propertyType PropertyType @default(аренда)
   occupancyStatus OccupancyStatus @default(свободна)
+  apartmentContents String?
   urgentMatter String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -40,6 +41,11 @@ model Tenant {
   status    TenantStatus @default(current)
   notes     String?
   receivePaymentDate DateTime @default(dbgenerated("(strftime('%Y-%m-01', 'now'))"))
+  utilityPaymentDate DateTime?
+  internetPaymentDate DateTime?
+  isPaid    Boolean @default(false)
+  paymentAttachment String?
+  hidden    Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   

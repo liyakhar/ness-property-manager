@@ -1,33 +1,42 @@
 import { z } from "zod";
 
-export const propertySchema = z.object({
-  id: z.string(),
-  apartmentNumber: z.number().min(1),
-  location: z.string().min(1),
-  rooms: z.number().min(1).max(10),
-  readinessStatus: z.enum(["меблированная", "немеблированная"]),
-  propertyType: z.enum(["аренда", "продажа"]),
-  occupancyStatus: z.enum(["занята", "свободна"]),
-  urgentMatter: z.string().optional(),
-  urgentMatterResolved: z.boolean().default(false),
-  hidden: z.boolean().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-}).passthrough(); // Allow additional properties for custom fields
+export const propertySchema = z
+  .object({
+    id: z.string(),
+    apartmentNumber: z.number().min(1),
+    location: z.string().min(1),
+    rooms: z.number().min(1).max(10),
+    readinessStatus: z.enum(["меблированная", "немеблированная"]),
+    propertyType: z.enum(["аренда", "продажа"]),
+    occupancyStatus: z.enum(["занята", "свободна"]),
+    apartmentContents: z.string().optional(),
+    urgentMatter: z.string().optional(),
+    urgentMatterResolved: z.boolean().default(false),
+    hidden: z.boolean().optional(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+  })
+  .passthrough(); // Allow additional properties for custom fields
 
-export const tenantSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1),
-  apartmentId: z.string(),
-  entryDate: z.date(),
-  exitDate: z.date().optional(),
-  notes: z.string().optional(),
-  status: z.enum(["current", "past", "future", "upcoming"]),
-  receivePaymentDate: z.date(),
-  hidden: z.boolean().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-}).passthrough(); // Allow additional properties for custom fields
+export const tenantSchema = z
+  .object({
+    id: z.string(),
+    name: z.string().min(1),
+    apartmentId: z.string(),
+    entryDate: z.date(),
+    exitDate: z.date().optional(),
+    notes: z.string().optional(),
+    status: z.enum(["current", "past", "future", "upcoming"]),
+    receivePaymentDate: z.date(),
+    utilityPaymentDate: z.date().optional(),
+    internetPaymentDate: z.date().optional(),
+    isPaid: z.boolean().default(false),
+    paymentAttachment: z.string().optional(),
+    hidden: z.boolean().optional(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+  })
+  .passthrough(); // Allow additional properties for custom fields
 
 export const addTenantSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -41,6 +50,10 @@ export const addTenantSchema = z.object({
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   }),
+  utilityPaymentDate: z.date().optional(),
+  internetPaymentDate: z.date().optional(),
+  isPaid: z.boolean().default(false),
+  paymentAttachment: z.string().optional(),
 });
 
 export const addPropertySchema = z.object({
@@ -50,6 +63,7 @@ export const addPropertySchema = z.object({
   readinessStatus: z.enum(["меблированная", "немеблированная"]),
   propertyType: z.enum(["аренда", "продажа"]),
   occupancyStatus: z.enum(["занята", "свободна"]),
+  apartmentContents: z.string().optional(),
   urgentMatter: z.string().optional(),
   urgentMatterResolved: z.boolean().default(false),
 });

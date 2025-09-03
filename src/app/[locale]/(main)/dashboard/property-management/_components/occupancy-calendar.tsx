@@ -6,7 +6,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval }
 import { Calendar, Plus, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePropertyManagementStore } from "@/stores/property-management";
 
@@ -15,19 +15,14 @@ import { AddTenantDialog } from "./add-tenant-dialog";
 export function OccupancyCalendar() {
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
   const [selectedProperty, setSelectedProperty] = React.useState<string>("all");
-  const {
-    properties: mockProperties,
-    tenants: mockTenants,
-    isAddTenantDialogOpen,
-    setAddTenantDialogOpen,
-  } = usePropertyManagementStore();
+  const { properties, tenants, isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const getTenantsForDay = (date: Date) => {
-    return mockTenants.filter((tenant) => {
+    return tenants.filter((tenant) => {
       const entryDate = new Date(tenant.entryDate);
       const exitDate = tenant.exitDate ? new Date(tenant.exitDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now if no exit date
 
@@ -47,12 +42,12 @@ export function OccupancyCalendar() {
       "bg-yellow-500",
     ];
 
-    const propertyIndex = mockProperties.findIndex((p) => p.id === propertyId);
+    const propertyIndex = properties.findIndex((p) => p.id === propertyId);
     return colors[propertyIndex % colors.length] || "bg-gray-500";
   };
 
   const filteredProperties =
-    selectedProperty === "all" ? mockProperties : mockProperties.filter((p) => p.id === selectedProperty);
+    selectedProperty === "all" ? properties : properties.filter((p) => p.id === selectedProperty);
 
   return (
     <div className="space-y-4">
@@ -72,7 +67,7 @@ export function OccupancyCalendar() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Properties</SelectItem>
-                  {mockProperties.map((property) => (
+                  {properties.map((property) => (
                     <SelectItem key={property.id} value={property.id}>
                       Apartment #{property.apartmentNumber}
                     </SelectItem>
@@ -119,7 +114,7 @@ export function OccupancyCalendar() {
 
                   <div className="space-y-1">
                     {tenants.map((tenant) => {
-                      const property = mockProperties.find((p) => p.id === tenant.apartmentId);
+                      const property = properties.find((p) => p.id === tenant.apartmentId);
                       if (!property || (selectedProperty !== "all" && property.id !== selectedProperty)) return null;
 
                       return (
@@ -160,7 +155,7 @@ export function OccupancyCalendar() {
 
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <Users className="h-4 w-4" />
-              {mockTenants.length} Active Tenants
+              {tenants.length} Active Tenants
             </div>
           </div>
         </CardContent>
@@ -173,7 +168,7 @@ export function OccupancyCalendar() {
           // Handle adding tenant
           setAddTenantDialogOpen(false);
         }}
-        properties={mockProperties}
+        properties={properties}
       />
     </div>
   );

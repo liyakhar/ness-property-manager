@@ -21,7 +21,9 @@ async function getPropertyById(id: string): Promise<ApiResponse<Property | null>
 
 async function updateProperty(
   id: string,
-  data: Partial<Pick<Property, "apartmentNumber" | "location" | "rooms" | "readinessStatus" | "urgentMatter">>,
+  data: Partial<
+    Pick<Property, "apartmentNumber" | "location" | "rooms" | "readinessStatus" | "apartmentContents" | "urgentMatter">
+  >,
 ): Promise<ApiResponse<Property>> {
   try {
     // Basic validation

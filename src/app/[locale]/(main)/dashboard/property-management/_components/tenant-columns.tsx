@@ -3,23 +3,39 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { usePropertyManagementStore } from "@/stores/property-management";
 
-import { mockProperties } from "./mock-data";
 import { Tenant } from "./schema";
 
 // Helper function to get status badge variant and text
 const getStatusDisplay = (status: string) => {
   switch (status) {
     case "current":
-      return { variant: "default" as const, text: "Текущий", className: "bg-green-100 text-green-800 hover:bg-green-100" };
+      return {
+        variant: "default" as const,
+        text: "Текущий",
+        className: "bg-green-100 text-green-800 hover:bg-green-100",
+      };
     case "past":
-      return { variant: "secondary" as const, text: "Прошлый", className: "bg-gray-100 text-gray-800 hover:bg-gray-100" };
+      return {
+        variant: "secondary" as const,
+        text: "Прошлый",
+        className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+      };
     case "future":
       return { variant: "outline" as const, text: "Будущий", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" };
     case "upcoming":
-      return { variant: "outline" as const, text: "Скоро", className: "bg-orange-100 text-orange-800 hover:bg-orange-100" };
+      return {
+        variant: "outline" as const,
+        text: "Скоро",
+        className: "bg-orange-100 text-orange-800 hover:bg-orange-100",
+      };
     default:
-      return { variant: "secondary" as const, text: "Неизвестно", className: "bg-gray-100 text-gray-800 hover:bg-gray-100" };
+      return {
+        variant: "secondary" as const,
+        text: "Неизвестно",
+        className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+      };
   }
 };
 
@@ -58,7 +74,8 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
     accessorKey: "apartmentId",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
     cell: ({ row }) => {
-      const property = mockProperties.find((p) => p.id === row.original.apartmentId);
+      const { properties } = usePropertyManagementStore.getState();
+      const property = properties.find((p) => p.id === row.original.apartmentId);
       return (
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="font-mono">
@@ -72,13 +89,12 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
   {
     id: "location",
     accessorFn: (row) => {
-      const property = mockProperties.find((p) => p.id === row.apartmentId);
+      const { properties } = usePropertyManagementStore.getState();
+      const property = properties.find((p) => p.id === row.apartmentId);
       return property?.location ?? "";
     },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Расположение" />,
-    cell: ({ getValue }) => (
-      <div className="text-muted-foreground text-sm">{(getValue() as string) || "-"}</div>
-    ),
+    cell: ({ getValue }) => <div className="text-muted-foreground text-sm">{(getValue() as string) || "-"}</div>,
     enableSorting: true,
   },
   {
@@ -117,11 +133,7 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
   {
     accessorKey: "receivePaymentDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Получение Платежа" />,
-    cell: ({ row }) => (
-      <div className="text-sm">
-        {new Date(row.original.receivePaymentDate).toLocaleDateString()}
-      </div>
-    ),
+    cell: ({ row }) => <div className="text-sm">{new Date(row.original.receivePaymentDate).toLocaleDateString()}</div>,
     enableSorting: true,
   },
   {

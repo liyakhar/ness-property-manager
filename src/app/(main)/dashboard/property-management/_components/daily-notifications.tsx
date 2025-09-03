@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+
 import { Calendar, AlertTriangle, DollarSign, Home } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,7 @@ import { usePropertyManagementStore } from "@/stores/property-management";
 
 interface NotificationItem {
   id: string;
-  type: "entry" | "urgent" | "payment";
+  type: "entry" | "urgent" | "payment" | "utility";
   title: string;
   description: string;
   daysRemaining?: number;
@@ -37,11 +38,11 @@ export function DailyNotifications() {
         if (entryDate <= oneWeekFromNow && entryDate >= today) {
           const daysRemaining = Math.ceil((entryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           const isToday = daysRemaining === 0;
-          
+
           // Приоритет: высокий (сегодня/завтра), средний (3-7 дней)
-          const priority = (daysRemaining <= 1) ? "high" : "medium";
-          
-          const property = properties.find(p => p.id === tenant.apartmentId);
+          const priority = daysRemaining <= 1 ? "high" : "medium";
+
+          const property = properties.find((p) => p.id === tenant.apartmentId);
           if (property) {
             notifications.push({
               id: `entry-${tenant.id}`,
@@ -68,12 +69,12 @@ export function DailyNotifications() {
         const paymentDate = new Date(tenant.receivePaymentDate);
         const nextPaymentDate = new Date(paymentDate);
         nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
-        
+
         // Показывать уведомления за 3 дня до оплаты и в день оплаты
         const daysUntilPayment = Math.ceil((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
+
         if (daysUntilPayment <= 3 && daysUntilPayment >= 0) {
-          const property = properties.find(p => p.id === tenant.apartmentId);
+          const property = properties.find((p) => p.id === tenant.apartmentId);
           if (property) {
             notifications.push({
               id: `payment-${tenant.id}`,
@@ -86,6 +87,37 @@ export function DailyNotifications() {
               propertyId: property.id,
               tenantId: tenant.id,
               dueDate: nextPaymentDate,
+            });
+          }
+        }
+      }
+    });
+
+    // 4. Платеж за счета - Уведомления о сроках оплаты коммунальных услуг
+    tenants.forEach((tenant) => {
+      if (tenant.status === "current" && tenant.utilityPaymentDate) {
+        const utilityPaymentDate = new Date(tenant.utilityPaymentDate);
+        const nextUtilityPaymentDate = new Date(utilityPaymentDate);
+        nextUtilityPaymentDate.setMonth(nextUtilityPaymentDate.getMonth() + 1);
+
+        // Показывать уведомления за 3 дня до оплаты и в день оплаты
+        const daysUntilUtilityPayment = Math.ceil(
+          (nextUtilityPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        if (daysUntilUtilityPayment <= 3 && daysUntilUtilityPayment >= 0) {
+          const property = properties.find((p) => p.id === tenant.apartmentId);
+          if (property) {
+            notifications.push({
+              id: `utility-${tenant.id}`,
+              type: "utility",
+              title: `Платеж за счета`,
+              description: `${tenant.name} - Квартира ${property.apartmentNumber}`,
+              daysRemaining: daysUntilUtilityPayment,
+              isToday: daysUntilUtilityPayment === 0,
+              priority: "medium", // Приоритет: средний
+              propertyId: property.id,
+              tenantId: tenant.id,
+              dueDate: nextUtilityPaymentDate,
             });
           }
         }
@@ -114,8 +146,8 @@ export function DailyNotifications() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <div className="py-8 text-center text-gray-500">
+            <Calendar className="mx-auto mb-4 h-12 w-12 opacity-50" />
             <p>Нет активных уведомлений</p>
             <p className="text-sm">Все в порядке!</p>
           </div>
@@ -143,6 +175,8 @@ export function DailyNotifications() {
         return <AlertTriangle className="h-4 w-4" />;
       case "payment":
         return <DollarSign className="h-4 w-4" />;
+      case "utility":
+        return <DollarSign className="h-4 w-4" />;
       default:
         return <Calendar className="h-4 w-4" />;
     }
@@ -156,6 +190,8 @@ export function DailyNotifications() {
         return "Срочно";
       case "payment":
         return "Оплата";
+      case "utility":
+        return "Счета";
       default:
         return "Уведомление";
     }
@@ -177,20 +213,18 @@ export function DailyNotifications() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-4 rounded-lg border bg-white ${getPriorityColor(notification.priority)}`}
+              className={`rounded-lg border bg-white p-4 ${getPriorityColor(notification.priority)}`}
             >
               <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="text-gray-600">
-                    {getTypeIcon(notification.type)}
-                  </div>
+                <div className="flex flex-1 items-start gap-3">
+                  <div className="text-gray-600">{getTypeIcon(notification.type)}</div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="bg-white text-gray-700 border-gray-300">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge variant="outline" className="border-gray-300 bg-white text-gray-700">
                         {getTypeLabel(notification.type)}
                       </Badge>
                       {notification.daysRemaining !== undefined && (
-                        <Badge 
+                        <Badge
                           variant={notification.isToday ? "destructive" : "secondary"}
                           className={notification.isToday ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700"}
                         >
@@ -199,19 +233,19 @@ export function DailyNotifications() {
                       )}
                     </div>
                     {notification.title && (
-                      <h4 className="font-medium text-sm mb-1 text-gray-900">{notification.title}</h4>
+                      <h4 className="mb-1 text-sm font-medium text-gray-900">{notification.title}</h4>
                     )}
                     <p className="text-sm text-gray-600">{notification.description}</p>
                   </div>
                 </div>
-                
+
                 {/* Кнопка "Решено" только для срочных проблем */}
                 {notification.type === "urgent" && (
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => updateProperty(notification.propertyId, { urgentMatterResolved: true })}
-                    className="ml-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                    className="ml-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                   >
                     Решено
                   </Button>

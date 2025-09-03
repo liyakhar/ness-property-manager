@@ -8,6 +8,7 @@ export const propertySchema = z.object({
   readinessStatus: z.enum(["меблированная", "немеблированная"]),
   propertyType: z.enum(["аренда", "продажа"]),
   occupancyStatus: z.enum(["занята", "свободна"]),
+  apartmentContents: z.string().optional(),
   urgentMatter: z.string().optional(),
   urgentMatterResolved: z.boolean().default(false),
   createdAt: z.date(),
@@ -48,6 +49,7 @@ export const addPropertySchema = z.object({
   readinessStatus: z.enum(["меблированная", "немеблированная"]),
   propertyType: z.enum(["аренда", "продажа"]),
   occupancyStatus: z.enum(["занята", "свободна"]),
+  apartmentContents: z.string().optional(),
   urgentMatter: z.string().optional(),
   urgentMatterResolved: z.boolean().default(false),
 });

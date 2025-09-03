@@ -1,6 +1,8 @@
 import { ColumnDef } from "@tanstack/react-table";
+import { Image as ImageIcon } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -31,10 +33,40 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableHiding: false,
   },
   {
+    id: "images",
+    accessorKey: "images",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Изображения" />,
+    cell: ({ row }) => {
+      const images = (row.original as Record<string, unknown>).images as string[] | undefined;
+      return (
+        <div className="flex items-center gap-1">
+          {(images ?? []).slice(0, 3).map((src) => (
+            <Avatar key={`img-${src}`} className="h-8 w-8">
+              <AvatarImage src={src} alt="" />
+              <AvatarFallback>
+                <ImageIcon className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+          ))}
+          {!images || images.length === 0 ? (
+            <span className="text-muted-foreground text-xs">Нет</span>
+          ) : images.length > 3 ? (
+            <Badge variant="outline" className="text-[10px]">
+              +{images.length - 3}
+            </Badge>
+          ) : null}
+        </div>
+      );
+    },
+    enableSorting: false,
+  },
+  {
     accessorKey: "apartmentNumber",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
     cell: ({ row }) => (
-      <Badge variant="outline" className="font-mono">#{row.original.apartmentNumber}</Badge>
+      <Badge variant="outline" className="font-mono">
+        #{row.original.apartmentNumber}
+      </Badge>
     ),
     enableSorting: true,
   },
@@ -62,9 +94,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
     accessorKey: "readinessStatus",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
     cell: ({ row }) => (
-      <span>
-        {row.original.readinessStatus === "меблированная" ? "Меблированная" : "Немеблированная"}
-      </span>
+      <span>{row.original.readinessStatus === "меблированная" ? "Меблированная" : "Немеблированная"}</span>
     ),
     enableSorting: true,
   },
@@ -72,10 +102,12 @@ export const propertyColumns: ColumnDef<Property>[] = [
     accessorKey: "propertyType",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Тип" />,
     cell: ({ row }) => (
-      <Badge variant="outline" className={row.original.propertyType === "аренда" 
-        ? "bg-amber-50 hover:bg-amber-50" 
-        : "bg-stone-200 hover:bg-stone-200"
-      }>
+      <Badge
+        variant="outline"
+        className={
+          row.original.propertyType === "аренда" ? "bg-amber-50 hover:bg-amber-50" : "bg-stone-200 hover:bg-stone-200"
+        }
+      >
         {row.original.propertyType === "аренда" ? "Аренда" : "Продажа"}
       </Badge>
     ),
@@ -85,19 +117,38 @@ export const propertyColumns: ColumnDef<Property>[] = [
     accessorKey: "occupancyStatus",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
     cell: ({ row }) => (
-      <Badge 
-        variant="outline" 
-        className={row.original.occupancyStatus === "занята" 
-          ? "bg-orange-100 text-orange-800 hover:bg-orange-100" 
-          : "bg-green-100 text-green-800 hover:bg-green-100"
+      <Badge
+        variant="outline"
+        className={
+          row.original.occupancyStatus === "занята"
+            ? "bg-orange-100 text-orange-800 hover:bg-orange-100"
+            : "bg-green-100 text-green-800 hover:bg-green-100"
         }
       >
-        {row.original.occupancyStatus === "занята" 
-          ? (row.original.propertyType === "продажа" ? "Продана" : "Занята")
+        {row.original.occupancyStatus === "занята"
+          ? row.original.propertyType === "продажа"
+            ? "Продана"
+            : "Занята"
           : "Свободна"}
       </Badge>
     ),
     enableSorting: true,
+  },
+  {
+    accessorKey: "apartmentContents",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="В квартире есть" />,
+    cell: ({ row }) => (
+      <div className="max-w-[200px]">
+        {row.original.apartmentContents ? (
+          <Badge variant="outline" className="bg-gray-100 text-xs text-gray-700 hover:bg-gray-100">
+            {row.original.apartmentContents}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground text-sm">-</span>
+        )}
+      </div>
+    ),
+    enableSorting: false,
   },
   {
     accessorKey: "urgentMatter",
@@ -105,7 +156,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
     cell: ({ row }) => (
       <div className="max-w-[200px]">
         {row.original.urgentMatter ? (
-          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-100">
+          <Badge variant="outline" className="bg-blue-100 text-xs text-blue-700 hover:bg-blue-100">
             {row.original.urgentMatter}
           </Badge>
         ) : (

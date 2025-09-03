@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -39,6 +39,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
       readinessStatus: "немеблированная",
       propertyType: "аренда",
       occupancyStatus: "свободна",
+      apartmentContents: "",
       urgentMatter: "",
       urgentMatterResolved: false,
     },
@@ -185,6 +186,20 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
 
             <FormField
               control={form.control}
+              name="apartmentContents"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>В квартире есть (Необязательно)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Опишите что есть в квартире (мебель, техника, и т.д.)..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="urgentMatter"
               render={({ field }) => (
                 <FormItem>
@@ -201,17 +216,12 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
               control={form.control}
               name="urgentMatterResolved"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Проблема уже решена
-                    </FormLabel>
+                    <FormLabel>Проблема уже решена</FormLabel>
                   </div>
                 </FormItem>
               )}

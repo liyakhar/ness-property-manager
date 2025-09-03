@@ -28,6 +28,7 @@ const createPropertySchema = z.object({
   readinessStatus: z.nativeEnum(ReadinessStatus).default("немеблированная"),
   propertyType: z.nativeEnum(PropertyType).default("аренда"),
   occupancyStatus: z.nativeEnum(OccupancyStatus).default("свободна"),
+  apartmentContents: z.string().optional().nullable(),
   urgentMatter: z.string().optional().nullable(),
 });
 
@@ -46,6 +47,7 @@ async function createProperty(data: Partial<Property>): Promise<ApiResponse<Prop
         readinessStatus: parsed.data.readinessStatus,
         propertyType: parsed.data.propertyType,
         occupancyStatus: parsed.data.occupancyStatus,
+        apartmentContents: parsed.data.apartmentContents ?? undefined,
         urgentMatter: parsed.data.urgentMatter ?? undefined,
       },
     });

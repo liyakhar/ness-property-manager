@@ -27,10 +27,24 @@ const createTenantSchema = z.object({
   entryDate: z.union([z.string(), z.date()]).transform((v) => (typeof v === "string" ? new Date(v) : v)),
   status: z.enum(["current", "past", "future", "upcoming"]).default("current"),
   notes: z.string().optional().nullable(),
-  receivePaymentDate: z.union([z.string(), z.date()]).transform((v) => (typeof v === "string" ? new Date(v) : v)).default(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  }),
+  receivePaymentDate: z
+    .union([z.string(), z.date()])
+    .transform((v) => (typeof v === "string" ? new Date(v) : v))
+    .default(() => {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    }),
+  utilityPaymentDate: z
+    .union([z.string(), z.date()])
+    .transform((v) => (typeof v === "string" ? new Date(v) : v))
+    .optional(),
+  internetPaymentDate: z
+    .union([z.string(), z.date()])
+    .transform((v) => (typeof v === "string" ? new Date(v) : v))
+    .optional(),
+  isPaid: z.boolean().default(false),
+  paymentAttachment: z.string().optional(),
+  hidden: z.boolean().default(false),
 });
 
 async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>> {
@@ -59,6 +73,11 @@ async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>>
         status: parsed.data.status,
         notes: parsed.data.notes ?? undefined,
         receivePaymentDate: parsed.data.receivePaymentDate,
+        utilityPaymentDate: parsed.data.utilityPaymentDate,
+        internetPaymentDate: parsed.data.internetPaymentDate,
+        isPaid: parsed.data.isPaid,
+        paymentAttachment: parsed.data.paymentAttachment,
+        hidden: parsed.data.hidden,
       },
       include: {
         apartment: true,

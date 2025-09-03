@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { ColumnDef } from "@tanstack/react-table";
 import { Plus, Users } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
@@ -14,15 +15,13 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePropertyManagementStore } from "@/stores/property-management";
 
 import { AddTenantDialog } from "./add-tenant-dialog";
-import type { AddTenantFormData } from "./schema";
+import type { AddTenantFormData, Tenant } from "./schema";
 import { tenantColumns } from "./tenant-columns";
-import { ColumnDef } from "@tanstack/react-table";
-import { Tenant } from "./schema";
 
 export function TenantDatabase() {
   const {
     tenants: data,
-    properties: mockProperties,
+    properties,
     addTenant,
     isAddTenantDialogOpen,
     setAddTenantDialogOpen,
@@ -31,13 +30,13 @@ export function TenantDatabase() {
   // State for custom columns
   const [customColumns, setCustomColumns] = React.useState<ColumnDef<Tenant>[]>(() => {
     // Load custom columns from localStorage on component mount
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('tenant-custom-columns');
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("tenant-custom-columns");
       if (saved) {
         try {
           return JSON.parse(saved);
         } catch (e) {
-          console.error('Failed to parse saved custom columns:', e);
+          console.error("Failed to parse saved custom columns:", e);
         }
       }
     }
@@ -49,22 +48,22 @@ export function TenantDatabase() {
     const newColumn: ColumnDef<Tenant> = {
       id: columnData.id,
       accessorKey: columnData.id,
-      header: ({ column }) => <div className="font-medium">{columnData.header}</div>,
-      cell: ({ row }) => {
+      header: () => <div className="font-medium">{columnData.header}</div>,
+      cell: () => {
         // For now, show placeholder data based on type
         switch (columnData.type) {
           case "text":
-            return <div className="text-sm text-muted-foreground">-</div>;
+            return <div className="text-muted-foreground text-sm">-</div>;
           case "number":
-            return <div className="text-sm text-muted-foreground">0</div>;
+            return <div className="text-muted-foreground text-sm">0</div>;
           case "date":
-            return <div className="text-sm text-muted-foreground">-</div>;
+            return <div className="text-muted-foreground text-sm">-</div>;
           case "select":
-            return <div className="text-sm text-muted-foreground">-</div>;
+            return <div className="text-muted-foreground text-sm">-</div>;
           case "boolean":
-            return <div className="text-sm text-muted-foreground">Нет</div>;
+            return <div className="text-muted-foreground text-sm">Нет</div>;
           default:
-            return <div className="text-sm text-muted-foreground">-</div>;
+            return <div className="text-muted-foreground text-sm">-</div>;
         }
       },
       enableSorting: true,
@@ -73,10 +72,10 @@ export function TenantDatabase() {
 
     const updatedColumns = [...customColumns, newColumn];
     setCustomColumns(updatedColumns);
-    
+
     // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('tenant-custom-columns', JSON.stringify(updatedColumns));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tenant-custom-columns", JSON.stringify(updatedColumns));
     }
   };
 
@@ -151,7 +150,7 @@ export function TenantDatabase() {
         open={isAddTenantDialogOpen}
         onOpenChange={setAddTenantDialogOpen}
         onAddTenant={handleAddTenant}
-        properties={mockProperties}
+        properties={properties}
       />
     </div>
   );

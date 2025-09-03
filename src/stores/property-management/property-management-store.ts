@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { mockProperties, mockTenants } from "@/app/(main)/dashboard/property-management/_components/mock-data";
 import {
   Property,
   Tenant,
@@ -50,9 +49,9 @@ interface PropertyManagementState {
 export const usePropertyManagementStore = create<PropertyManagementState>()(
   devtools(
     (set, get) => ({
-      // Initial State
-      properties: mockProperties,
-      tenants: mockTenants,
+      // Initial State (empty for production use)
+      properties: [],
+      tenants: [],
       selectedProperty: null,
       selectedTenant: null,
       isAddPropertyDialogOpen: false,
