@@ -194,9 +194,14 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
     table.resetRowSelection();
   };
 
-  const handleAddProperty = (newProperty: AddPropertyFormData) => {
-    addProperty(newProperty);
-    setAddPropertyDialogOpen(false);
+  const handleAddProperty = async (newProperty: AddPropertyFormData) => {
+    try {
+      await addProperty(newProperty);
+      setAddPropertyDialogOpen(false);
+    } catch (error) {
+      console.error('Error adding property:', error);
+      // Error handling is done in the dialog component
+    }
   };
 
   return (

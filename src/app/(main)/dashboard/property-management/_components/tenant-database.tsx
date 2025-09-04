@@ -300,9 +300,14 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
     table.resetRowSelection();
   };
 
-  const handleAddTenant = (newTenant: AddTenantFormData) => {
-    addTenant(newTenant);
-    setAddTenantDialogOpen(false);
+  const handleAddTenant = async (newTenant: AddTenantFormData) => {
+    try {
+      await addTenant(newTenant);
+      setAddTenantDialogOpen(false);
+    } catch (error) {
+      console.error('Error adding tenant:', error);
+      // Error handling is done in the dialog component
+    }
   };
 
   const getActiveTenants = () => filteredTenants.filter((tenant) => tenant.status === 'current');

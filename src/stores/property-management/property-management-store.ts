@@ -22,11 +22,11 @@ interface PropertyManagementState {
   // Actions
   setProperties: (properties: Property[]) => void;
   setTenants: (tenants: Tenant[]) => void;
-  addProperty: (property: AddPropertyFormData) => void;
+  addProperty: (property: AddPropertyFormData) => Promise<void>;
   updateProperty: (id: string, updates: Partial<Property>) => void;
   deleteProperty: (id: string) => void;
   setPropertiesHidden: (ids: string[], hidden: boolean) => void;
-  addTenant: (tenant: AddTenantFormData) => void;
+  addTenant: (tenant: AddTenantFormData) => Promise<void>;
   updateTenant: (id: string, updates: Partial<Tenant>) => void;
   deleteTenant: (id: string) => void;
   setTenantsHidden: (ids: string[], hidden: boolean) => void;
@@ -61,16 +61,30 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       setProperties: (properties) => set({ properties }),
       setTenants: (tenants) => set({ tenants }),
 
-      addProperty: (propertyData) => {
-        const newProperty: Property = {
-          id: `prop-${Date.now()}`,
-          ...propertyData,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        set((state) => ({
-          properties: [...state.properties, newProperty],
-        }));
+      addProperty: async (propertyData) => {
+        try {
+          const response = await fetch('/api/properties', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(propertyData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create property');
+          }
+
+          const newProperty = await response.json();
+
+          set((state) => ({
+            properties: [...state.properties, newProperty],
+          }));
+        } catch (error) {
+          console.error('Error creating property:', error);
+          throw error;
+        }
       },
 
       updateProperty: (id, updates) => {
@@ -96,17 +110,30 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
         }));
       },
 
-      addTenant: (tenantData) => {
-        const newTenant: Tenant = {
-          id: `tenant-${Date.now()}`,
-          ...tenantData,
-          status: 'current', // Default status for new tenants
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        set((state) => ({
-          tenants: [...state.tenants, newTenant],
-        }));
+      addTenant: async (tenantData) => {
+        try {
+          const response = await fetch('/api/tenants', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(tenantData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create tenant');
+          }
+
+          const newTenant = await response.json();
+
+          set((state) => ({
+            tenants: [...state.tenants, newTenant],
+          }));
+        } catch (error) {
+          console.error('Error creating tenant:', error);
+          throw error;
+        }
       },
 
       updateTenant: (id, updates) => {

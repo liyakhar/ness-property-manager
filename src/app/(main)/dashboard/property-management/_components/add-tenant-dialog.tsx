@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -41,7 +42,7 @@ import { type AddTenantFormData, addTenantSchema, type Property } from './schema
 interface AddTenantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddTenant: (tenant: AddTenantFormData) => void;
+  onAddTenant: (tenant: AddTenantFormData) => Promise<void>;
   properties: Property[];
 }
 
@@ -51,6 +52,8 @@ export function AddTenantDialog({
   onAddTenant,
   properties,
 }: AddTenantDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<AddTenantFormData>({
     resolver: zodResolver(addTenantSchema),
     defaultValues: {
@@ -68,12 +71,16 @@ export function AddTenantDialog({
   });
 
   const onSubmit = async (data: AddTenantFormData) => {
+    setIsLoading(true);
     try {
-      onAddTenant(data);
+      await onAddTenant(data);
       toast.success('Арендатор успешно добавлен');
       form.reset();
-    } catch {
+    } catch (error) {
+      console.error('Error adding tenant:', error);
       toast.error('Не удалось добавить арендатора');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -308,10 +315,24 @@ export function AddTenantDialog({
               />
 
               <DialogFooter className="flex-shrink-0">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isLoading}
+                >
                   Отмена
                 </Button>
-                <Button type="submit">Добавить Арендатора</Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Добавление...
+                    </>
+                  ) : (
+                    'Добавить Арендатора'
+                  )}
+                </Button>
               </DialogFooter>
             </form>
           </Form>

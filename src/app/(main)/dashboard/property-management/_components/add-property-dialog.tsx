@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -37,10 +38,12 @@ import { type AddPropertyFormData, addPropertySchema } from './schema';
 interface AddPropertyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddProperty: (property: AddPropertyFormData) => void;
+  onAddProperty: (property: AddPropertyFormData) => Promise<void>;
 }
 
 export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddPropertyDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<AddPropertyFormData>({
     resolver: zodResolver(addPropertySchema),
     defaultValues: {
@@ -57,12 +60,16 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
   });
 
   const onSubmit = async (data: AddPropertyFormData) => {
+    setIsLoading(true);
     try {
-      onAddProperty(data);
+      await onAddProperty(data);
       toast.success('Недвижимость успешно добавлена');
       form.reset();
-    } catch {
+    } catch (error) {
+      console.error('Error adding property:', error);
       toast.error('Не удалось добавить недвижимость');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -248,10 +255,24 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
               />
 
               <DialogFooter className="flex-shrink-0">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isLoading}
+                >
                   Отмена
                 </Button>
-                <Button type="submit">Добавить Недвижимость</Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Добавление...
+                    </>
+                  ) : (
+                    'Добавить Недвижимость'
+                  )}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
