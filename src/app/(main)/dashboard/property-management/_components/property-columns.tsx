@@ -58,6 +58,7 @@ export const createPropertyColumns = (
         <PropertyImagesCell
           value={(row.original as Record<string, unknown>).images as string[] | undefined}
           onSave={(value) => updateProperty(row.original.id, { images: value as any })}
+          propertyId={row.original.id}
         />
       ),
       enableSorting: false,
