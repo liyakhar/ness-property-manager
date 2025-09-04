@@ -12,8 +12,6 @@ export default function PropertyManagementPage() {
   const { properties, tenants, updateProperty } = usePropertyManagementStore();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const _getActiveTenants = () => tenants.filter((tenant) => tenant.status === 'current');
-
   // Filter properties and tenants based on search query
   const filteredProperties = properties.filter(
     (property) =>

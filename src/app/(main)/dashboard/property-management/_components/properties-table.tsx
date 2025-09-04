@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
+import { useProperties } from '@/hooks/use-properties';
 import { usePropertyManagementStore } from '@/stores/property-management';
 import { AddPropertyDialog } from './add-property-dialog';
 import { EditableCell } from './editable-cell';
@@ -30,9 +31,9 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
     updateProperty,
     deleteProperty,
     setPropertiesHidden,
-    isAddPropertyDialogOpen,
-    setAddPropertyDialogOpen,
-  } = usePropertyManagementStore();
+  } = useProperties();
+
+  const { isAddPropertyDialogOpen, setAddPropertyDialogOpen } = usePropertyManagementStore();
 
   // State for custom columns
   const [customColumns, setCustomColumns] = React.useState<ColumnDef<Property>[]>(() => {

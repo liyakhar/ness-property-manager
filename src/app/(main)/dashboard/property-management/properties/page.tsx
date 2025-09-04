@@ -4,10 +4,28 @@ import { Search } from 'lucide-react';
 import { useState } from 'react';
 
 import { Input } from '@/components/ui/input';
+import { useProperties } from '@/hooks/use-properties';
 import { PropertiesTable } from '../_components/properties-table';
 
 export default function PropertiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const { isLoading } = useProperties();
+
+  if (isLoading) {
+    return (
+      <div className="@container/main flex flex-col gap-4 md:gap-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold tracking-tight">Недвижимость</h1>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent" />
+            <p className="text-muted-foreground">Загрузка недвижимости...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">

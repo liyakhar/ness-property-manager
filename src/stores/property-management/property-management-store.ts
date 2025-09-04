@@ -18,10 +18,13 @@ interface PropertyManagementState {
   selectedTenant: string | null;
   isAddPropertyDialogOpen: boolean;
   isAddTenantDialogOpen: boolean;
+  isLoading: boolean;
 
   // Actions
   setProperties: (properties: Property[]) => void;
   setTenants: (tenants: Tenant[]) => void;
+  fetchProperties: () => Promise<void>;
+  fetchTenants: () => Promise<void>;
   addProperty: (property: AddPropertyFormData) => Promise<void>;
   updateProperty: (id: string, updates: Partial<Property>) => void;
   deleteProperty: (id: string) => void;
@@ -56,10 +59,43 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       selectedTenant: null,
       isAddPropertyDialogOpen: false,
       isAddTenantDialogOpen: false,
+      isLoading: false,
 
       // Actions
       setProperties: (properties) => set({ properties }),
       setTenants: (tenants) => set({ tenants }),
+
+      fetchProperties: async () => {
+        set({ isLoading: true });
+        try {
+          const response = await fetch('/api/properties');
+          if (!response.ok) {
+            throw new Error('Failed to fetch properties');
+          }
+          const properties = await response.json();
+          set({ properties, isLoading: false });
+        } catch (error) {
+          console.error('Error fetching properties:', error);
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+
+      fetchTenants: async () => {
+        set({ isLoading: true });
+        try {
+          const response = await fetch('/api/tenants');
+          if (!response.ok) {
+            throw new Error('Failed to fetch tenants');
+          }
+          const tenants = await response.json();
+          set({ tenants, isLoading: false });
+        } catch (error) {
+          console.error('Error fetching tenants:', error);
+          set({ isLoading: false });
+          throw error;
+        }
+      },
 
       addProperty: async (propertyData) => {
         try {

@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
+import { useTenants } from '@/hooks/use-tenants';
 import { usePropertyManagementStore } from '@/stores/property-management';
 
 import { AddTenantDialog } from './add-tenant-dialog';
@@ -32,9 +33,9 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
     updateTenant,
     deleteTenant,
     setTenantsHidden,
-    isAddTenantDialogOpen,
-    setAddTenantDialogOpen,
-  } = usePropertyManagementStore();
+  } = useTenants();
+
+  const { isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
 
   // State for custom columns
   const [customColumns, setCustomColumns] = React.useState<ColumnDef<Tenant>[]>(() => {
