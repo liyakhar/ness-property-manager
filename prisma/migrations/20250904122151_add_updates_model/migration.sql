@@ -49,6 +49,18 @@ CREATE TABLE "public"."tenants" (
     CONSTRAINT "tenants_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."updates" (
+    "id" TEXT NOT NULL,
+    "author" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "updates_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "properties_apartmentNumber_key" ON "public"."properties"("apartmentNumber");
 

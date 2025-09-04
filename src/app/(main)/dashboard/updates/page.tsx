@@ -17,7 +17,7 @@ import {
 import { AddUpdateDialog } from './_components/add-update-dialog';
 
 interface UpdateItem {
-  id: number;
+  id: string;
   name: string;
   update: string;
   date: Date;
@@ -28,9 +28,49 @@ const initialData: UpdateItem[] = [];
 export default function UpdatesPage() {
   const [data, setData] = React.useState<UpdateItem[]>(initialData);
 
-  const handleAddUpdate = (newUpdate: Omit<UpdateItem, 'id'>) => {
-    const id = Math.max(0, ...data.map((item) => item.id)) + 1;
-    setData((prev) => [...prev, { ...newUpdate, id }]);
+  React.useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch('/api/updates');
+        if (!res.ok) return;
+        const items: Array<{ id: string; author: string; content: string; date: string }> =
+          await res.json();
+        setData(
+          items.map((u) => ({
+            id: u.id,
+            name: u.author,
+            update: u.content,
+            date: new Date(u.date),
+          }))
+        );
+      } catch {}
+    })();
+  }, []);
+
+  const handleAddUpdate = async (newUpdate: Omit<UpdateItem, 'id'>) => {
+    try {
+      const res = await fetch('/api/updates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          author: newUpdate.name,
+          content: newUpdate.update,
+          date: newUpdate.date,
+        }),
+      });
+      if (!res.ok) return;
+      const created: { id: string; author: string; content: string; date: string } =
+        await res.json();
+      setData((prev) => [
+        ...prev,
+        {
+          id: created.id,
+          name: created.author,
+          update: created.content,
+          date: new Date(created.date),
+        },
+      ]);
+    } catch {}
   };
 
   const columns: ColumnDef<UpdateItem>[] = React.useMemo(
@@ -43,11 +83,15 @@ export default function UpdatesPage() {
             value={row.original.name}
             type="text"
             onSave={(newValue: unknown) => {
+              const value = String(newValue ?? '');
               setData((prev) =>
-                prev.map((item) =>
-                  item.id === row.original.id ? { ...item, name: String(newValue ?? '') } : item
-                )
+                prev.map((item) => (item.id === row.original.id ? { ...item, name: value } : item))
               );
+              fetch(`/api/updates/${row.original.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author: value }),
+              }).catch(() => {});
             }}
           />
         ),
@@ -60,11 +104,17 @@ export default function UpdatesPage() {
             value={row.original.update}
             type="textarea"
             onSave={(newValue: unknown) => {
+              const value = String(newValue ?? '');
               setData((prev) =>
                 prev.map((item) =>
-                  item.id === row.original.id ? { ...item, update: String(newValue ?? '') } : item
+                  item.id === row.original.id ? { ...item, update: value } : item
                 )
               );
+              fetch(`/api/updates/${row.original.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: value }),
+              }).catch(() => {});
             }}
           />
         ),
@@ -77,13 +127,17 @@ export default function UpdatesPage() {
             value={row.original.date}
             type="date"
             onSave={(newValue: unknown) => {
+              if (!(newValue instanceof Date)) return;
               setData((prev) =>
                 prev.map((item) =>
-                  item.id === row.original.id && newValue instanceof Date
-                    ? { ...item, date: newValue }
-                    : item
+                  item.id === row.original.id ? { ...item, date: newValue } : item
                 )
               );
+              fetch(`/api/updates/${row.original.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: newValue }),
+              }).catch(() => {});
             }}
           />
         ),

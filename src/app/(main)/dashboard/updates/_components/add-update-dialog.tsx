@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 interface UpdateItem {
-  id: number;
+  id: string;
   name: string;
   update: string;
   date: Date;
