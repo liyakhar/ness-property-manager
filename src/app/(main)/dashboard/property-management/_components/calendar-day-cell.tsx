@@ -7,7 +7,13 @@ import { format } from "date-fns";
 interface CalendarDayCellProps {
   day: Date;
   currentMonth: Date;
-  tenantsForDay: Array<{ id: string; name: string; apartmentId: string }>;
+  tenantsForDay: Array<{
+    id: string;
+    name: string;
+    apartmentId: string;
+    entryDate: Date;
+    exitDate?: Date;
+  }>;
   filteredProperties: Array<{ id: string; apartmentNumber: number }>;
   getPropertyColor: (propertyId: string) => string;
   onShowMore: (

@@ -40,6 +40,10 @@ export const addTenantSchema = z.object({
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   }),
+  utilityPaymentDate: z.date().optional(),
+  internetPaymentDate: z.date().optional(),
+  isPaid: z.boolean().default(false),
+  paymentAttachment: z.string().optional(),
 });
 
 export const addPropertySchema = z.object({
