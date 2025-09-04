@@ -1,212 +1,230 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-
-import { Search, AlertTriangle } from "lucide-react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { usePropertyManagementStore } from "@/stores/property-management";
-import { DailyNotifications } from "./_components/daily-notifications";
+import { AlertTriangle, Search } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { usePropertyManagementStore } from '@/stores/property-management';
+import { DailyNotifications } from './_components/daily-notifications';
 
 export default function PropertyManagementPage() {
   const { properties, tenants, updateProperty } = usePropertyManagementStore();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const getActiveTenants = () => tenants.filter((tenant) => tenant.status === "current");
+  const _getActiveTenants = () => tenants.filter((tenant) => tenant.status === 'current');
 
   // Filter properties and tenants based on search query
-  const filteredProperties = properties.filter(property => 
-    !searchQuery || 
-    property.apartmentNumber.toString().includes(searchQuery) ||
-    property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.readinessStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.propertyType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.occupancyStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (searchQuery.toLowerCase().includes("аренд") && property.propertyType === "аренда") ||
-    (searchQuery.toLowerCase().includes("продаж") && property.propertyType === "продажа") ||
-    (searchQuery.toLowerCase().includes("занят") && property.occupancyStatus === "занята") ||
-    (searchQuery.toLowerCase().includes("свобод") && property.occupancyStatus === "свободна")
+  const filteredProperties = properties.filter(
+    (property) =>
+      !searchQuery ||
+      property.apartmentNumber.toString().includes(searchQuery) ||
+      property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      property.readinessStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      property.propertyType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      property.occupancyStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (searchQuery.toLowerCase().includes('аренд') && property.propertyType === 'аренда') ||
+      (searchQuery.toLowerCase().includes('продаж') && property.propertyType === 'продажа') ||
+      (searchQuery.toLowerCase().includes('занят') && property.occupancyStatus === 'занята') ||
+      (searchQuery.toLowerCase().includes('свобод') && property.occupancyStatus === 'свободна')
   );
 
-  const filteredTenants = tenants.filter(tenant => {
+  const filteredTenants = tenants.filter((tenant) => {
     if (!searchQuery) return true;
-    
+
     const query = searchQuery.toLowerCase();
-    
+
     // Basic text search
-    const basicMatch = 
-      tenant.name.toLowerCase().includes(query) ||
-      tenant.apartmentId.toLowerCase().includes(query);
-    
+    const basicMatch =
+      tenant.name.toLowerCase().includes(query) || tenant.apartmentId.toLowerCase().includes(query);
+
     if (basicMatch) return true;
-    
+
     // Date search
     if (isDateMatch(tenant.entryDate, query)) return true;
     if (tenant.exitDate && isDateMatch(tenant.exitDate, query)) return true;
-    
+
     // Search by property details - find the property and check its details
-    const property = properties.find(p => p.id === tenant.apartmentId);
+    const property = properties.find((p) => p.id === tenant.apartmentId);
     if (property) {
       // Check apartment number
       if (property.apartmentNumber.toString().includes(query)) {
         return true;
       }
-      
+
       // Check property location/address
       if (property.location.toLowerCase().includes(query)) {
         return true;
       }
-      
+
       // Check property readiness status
       if (property.readinessStatus.toLowerCase().includes(query)) {
         return true;
       }
-      
+
       // Check property rooms
       if (property.rooms.toString().includes(query)) {
         return true;
       }
-      
+
       // Check urgent matters
-      if (property.urgentMatter && property.urgentMatter.toLowerCase().includes(query)) {
+      if (property.urgentMatter?.toLowerCase().includes(query)) {
         return true;
       }
     }
-    
+
     return false;
   });
 
   // Helper function to check if query matches date formats
   const isDateMatch = (date: Date, searchQuery: string) => {
     const query = searchQuery.toLowerCase();
-    
+
     // Check various date formats
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear().toString();
-    
+
     // Format: DD/MM (e.g., "01/02")
     if (query.includes('/') && query.length === 5) {
       const [dayPart, monthPart] = query.split('/');
       if (day === dayPart && month === monthPart) return true;
     }
-    
+
     // Format: DD/MM/YYYY (e.g., "01/02/2024")
     if (query.includes('/') && query.length === 10) {
       const [dayPart, monthPart, yearPart] = query.split('/');
       if (day === dayPart && month === monthPart && year === yearPart) return true;
     }
-    
+
     // Format: MM/DD (e.g., "02/01")
     if (query.includes('/') && query.length === 5) {
       const [monthPart, dayPart] = query.split('/');
       if (day === dayPart && month === monthPart) return true;
     }
-    
+
     // Format: MM/DD/YYYY (e.g., "02/01/2024")
     if (query.includes('/') && query.length === 10) {
       const [monthPart, dayPart, yearPart] = query.split('/');
       if (day === dayPart && month === monthPart && year === yearPart) return true;
     }
-    
+
     // Check individual components
     if (day.includes(query) || month.includes(query) || year.includes(query)) return true;
-    
+
     // Check date string representation
     if (date.toDateString().toLowerCase().includes(query)) return true;
-    
+
     return false;
   };
 
   // Calculate statistics for mind map structure
-  const totalProperties = filteredProperties.length;
-  const rentProperties = filteredProperties.filter(p => p.propertyType === "аренда");
-  const saleProperties = filteredProperties.filter(p => p.propertyType === "продажа");
-  
+  const _totalProperties = filteredProperties.length;
+  const rentProperties = filteredProperties.filter((p) => p.propertyType === 'аренда');
+  const saleProperties = filteredProperties.filter((p) => p.propertyType === 'продажа');
+
   // Rent properties breakdown
-  const rentOccupied = rentProperties.filter(p => p.occupancyStatus === "занята");
-  const rentVacant = rentProperties.filter(p => p.occupancyStatus === "свободна");
-  
-  const rentOccupiedFurnished = rentOccupied.filter(p => p.readinessStatus === "меблированная");
-  const rentOccupiedUnfurnished = rentOccupied.filter(p => p.readinessStatus === "немеблированная");
-  const rentVacantFurnished = rentVacant.filter(p => p.readinessStatus === "меблированная");
-  const rentVacantUnfurnished = rentVacant.filter(p => p.readinessStatus === "немеблированная");
-  
+  const rentOccupied = rentProperties.filter((p) => p.occupancyStatus === 'занята');
+  const rentVacant = rentProperties.filter((p) => p.occupancyStatus === 'свободна');
+
+  const rentOccupiedFurnished = rentOccupied.filter((p) => p.readinessStatus === 'меблированная');
+  const rentOccupiedUnfurnished = rentOccupied.filter(
+    (p) => p.readinessStatus === 'немеблированная'
+  );
+  const rentVacantFurnished = rentVacant.filter((p) => p.readinessStatus === 'меблированная');
+  const rentVacantUnfurnished = rentVacant.filter((p) => p.readinessStatus === 'немеблированная');
+
   // Sale properties breakdown
-  const saleOccupied = saleProperties.filter(p => p.occupancyStatus === "занята");
-  const saleVacant = saleProperties.filter(p => p.occupancyStatus === "свободна");
-  
-  const saleOccupiedFurnished = saleOccupied.filter(p => p.readinessStatus === "меблированная");
-  const saleOccupiedUnfurnished = saleOccupied.filter(p => p.readinessStatus === "немеблированная");
-  const saleVacantFurnished = saleVacant.filter(p => p.readinessStatus === "меблированная");
-  const saleVacantUnfurnished = saleVacant.filter(p => p.readinessStatus === "немеблированная");
+  const saleOccupied = saleProperties.filter((p) => p.occupancyStatus === 'занята');
+  const saleVacant = saleProperties.filter((p) => p.occupancyStatus === 'свободна');
+
+  const saleOccupiedFurnished = saleOccupied.filter((p) => p.readinessStatus === 'меблированная');
+  const saleOccupiedUnfurnished = saleOccupied.filter(
+    (p) => p.readinessStatus === 'немеблированная'
+  );
+  const saleVacantFurnished = saleVacant.filter((p) => p.readinessStatus === 'меблированная');
+  const saleVacantUnfurnished = saleVacant.filter((p) => p.readinessStatus === 'немеблированная');
 
   // Additional important metrics
-  const urgentMatters = filteredProperties.filter(p => 
-    p.urgentMatter &&
-    !p.urgentMatterResolved &&
-    typeof p.urgentMatter === 'string' &&
-    p.urgentMatter.trim() !== ""
+  const urgentMatters = filteredProperties.filter(
+    (p) =>
+      p.urgentMatter &&
+      !p.urgentMatterResolved &&
+      typeof p.urgentMatter === 'string' &&
+      p.urgentMatter.trim() !== ''
   );
   const propertiesWithUrgentMatters = urgentMatters.length;
-  
+
   // Room distribution
-  const oneRoomProperties = filteredProperties.filter(p => p.rooms === 1);
-  const twoRoomProperties = filteredProperties.filter(p => p.rooms === 2);
-  const threeRoomProperties = filteredProperties.filter(p => p.rooms === 3);
-  const fourPlusRoomProperties = filteredProperties.filter(p => p.rooms >= 4);
-  
+  const oneRoomProperties = filteredProperties.filter((p) => p.rooms === 1);
+  const twoRoomProperties = filteredProperties.filter((p) => p.rooms === 2);
+  const threeRoomProperties = filteredProperties.filter((p) => p.rooms === 3);
+  const fourPlusRoomProperties = filteredProperties.filter((p) => p.rooms >= 4);
+
   // Revenue potential indicators
   const readyForImmediateRent = rentVacantFurnished.length; // Highest revenue potential
   const readyForImmediateSale = saleVacantFurnished.length;
-  const totalReadyForImmediateAction = readyForImmediateRent + readyForImmediateSale;
-  
+  const _totalReadyForImmediateAction = readyForImmediateRent + readyForImmediateSale;
+
   // Tenant status breakdown
-  const currentTenants = filteredTenants.filter(t => t.status === "current");
-  const pastTenants = filteredTenants.filter(t => t.status === "past");
-  const futureTenants = filteredTenants.filter(t => t.status === "future");
-  const upcomingTenants = filteredTenants.filter(t => t.status === "upcoming");
+  const currentTenants = filteredTenants.filter((t) => t.status === 'current');
+  const pastTenants = filteredTenants.filter((t) => t.status === 'past');
+  const futureTenants = filteredTenants.filter((t) => t.status === 'future');
+  const upcomingTenants = filteredTenants.filter((t) => t.status === 'upcoming');
 
   // Address-based grouping
-  const addressGroups = filteredProperties.reduce((groups, property) => {
-    const address = property.location;
-    if (!groups[address]) {
-      groups[address] = {
-        address,
-        count: 0,
-        rent: 0,
-        sale: 0,
-        occupied: 0,
-        vacant: 0,
-        furnished: 0,
-        unfurnished: 0
-      };
-    }
-    
-    groups[address].count++;
-    
-    if (property.propertyType === "аренда") {
-      groups[address].rent++;
-    } else {
-      groups[address].sale++;
-    }
-    
-    if (property.occupancyStatus === "занята") {
-      groups[address].occupied++;
-    } else {
-      groups[address].vacant++;
-    }
-    
-    if (property.readinessStatus === "меблированная") {
-      groups[address].furnished++;
-    } else {
-      groups[address].unfurnished++;
-    }
-    
-    return groups;
-  }, {} as Record<string, any>);
+  const addressGroups = filteredProperties.reduce(
+    (groups, property) => {
+      const address = property.location;
+      if (!groups[address]) {
+        groups[address] = {
+          address,
+          count: 0,
+          rent: 0,
+          sale: 0,
+          occupied: 0,
+          vacant: 0,
+          furnished: 0,
+          unfurnished: 0,
+        };
+      }
+
+      groups[address].count++;
+
+      if (property.propertyType === 'аренда') {
+        groups[address].rent++;
+      } else {
+        groups[address].sale++;
+      }
+
+      if (property.occupancyStatus === 'занята') {
+        groups[address].occupied++;
+      } else {
+        groups[address].vacant++;
+      }
+
+      if (property.readinessStatus === 'меблированная') {
+        groups[address].furnished++;
+      } else {
+        groups[address].unfurnished++;
+      }
+
+      return groups;
+    },
+    {} as Record<
+      string,
+      {
+        address: string;
+        count: number;
+        rent: number;
+        sale: number;
+        occupied: number;
+        vacant: number;
+        furnished: number;
+        unfurnished: number;
+      }
+    >
+  );
 
   // Sort addresses by property count (descending)
   const sortedAddresses = Object.values(addressGroups).sort((a, b) => b.count - a.count);
@@ -257,7 +275,7 @@ export default function PropertyManagementPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Vacant */}
                 <div className="p-6 bg-muted/30 rounded-xl border">
                   <div className="text-sm font-medium mb-2">Свободна</div>
@@ -301,8 +319,8 @@ export default function PropertyManagementPage() {
                       <span className="font-medium">{saleOccupiedUnfurnished.length}</span>
                     </div>
                   </div>
-                  </div>
-                
+                </div>
+
                 {/* Vacant */}
                 <div className="p-6 bg-muted/30 rounded-xl border">
                   <div className="text-sm font-medium mb-2">Свободна</div>
@@ -390,14 +408,15 @@ export default function PropertyManagementPage() {
         <div className="grid grid-cols-1 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">
-                По адресам
-              </CardTitle>
+              <CardTitle className="text-base">По адресам</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {sortedAddresses.map((addressGroup) => (
-                  <div key={addressGroup.address} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border">
+                  <div
+                    key={addressGroup.address}
+                    className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border"
+                  >
                     <div className="font-medium">{addressGroup.address}</div>
                     <div className="flex items-center gap-4 text-sm">
                       <span className="font-bold">{addressGroup.count}</span>
@@ -425,7 +444,10 @@ export default function PropertyManagementPage() {
               {propertiesWithUrgentMatters > 0 ? (
                 <div className="space-y-3">
                   {urgentMatters.slice(0, 3).map((property) => (
-                    <div key={property.id} className="p-4 rounded-lg border bg-white border-l-4 border-l-red-500">
+                    <div
+                      key={property.id}
+                      className="p-4 rounded-lg border bg-white border-l-4 border-l-red-500"
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="mb-2">
@@ -436,7 +458,9 @@ export default function PropertyManagementPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateProperty(property.id, { urgentMatterResolved: true })}
+                          onClick={() =>
+                            updateProperty(property.id, { urgentMatterResolved: true })
+                          }
                           className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                         >
                           Решено

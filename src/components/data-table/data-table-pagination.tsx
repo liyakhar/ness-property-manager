@@ -1,19 +1,28 @@
-import { Table } from "@tanstack/react-table";
-import { ChevronRight, ChevronsRight, ChevronLeft, ChevronsLeft } from "lucide-react";
+import type { Table } from '@tanstack/react-table';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { useId } from 'react';
 
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
 }
 
 export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
+  const rowsPerPageId = useId();
   return (
     <div className="mt-4 flex items-center justify-between px-4">
       <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-        {table.getFilteredSelectedRowModel().rows.length} из {table.getFilteredRowModel().rows.length} строк выбрано.
+        {table.getFilteredSelectedRowModel().rows.length} из{' '}
+        {table.getFilteredRowModel().rows.length} строк выбрано.
       </div>
       <div className="flex w-full items-center gap-8 lg:w-fit">
         <div className="hidden items-center gap-2 lg:flex">
@@ -26,7 +35,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
               table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+            <SelectTrigger size="sm" className="w-20" id={rowsPerPageId}>
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">

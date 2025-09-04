@@ -1,16 +1,14 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -18,15 +16,27 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
-import { addTenantSchema, type AddTenantFormData, type Property } from "./schema";
+import { type AddTenantFormData, addTenantSchema, type Property } from './schema';
 
 interface AddTenantDialogProps {
   open: boolean;
@@ -35,15 +45,20 @@ interface AddTenantDialogProps {
   properties: Property[];
 }
 
-export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }: AddTenantDialogProps) {
+export function AddTenantDialog({
+  open,
+  onOpenChange,
+  onAddTenant,
+  properties,
+}: AddTenantDialogProps) {
   const form = useForm<AddTenantFormData>({
     resolver: zodResolver(addTenantSchema),
     defaultValues: {
-      name: "",
-      apartmentId: "",
+      name: '',
+      apartmentId: '',
       entryDate: undefined,
-      status: "current",
-      notes: "",
+      status: 'current',
+      notes: '',
       receivePaymentDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       utilityPaymentDate: undefined,
       internetPaymentDate: undefined,
@@ -55,10 +70,10 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
   const onSubmit = async (data: AddTenantFormData) => {
     try {
       onAddTenant(data);
-      toast.success("Арендатор успешно добавлен");
+      toast.success('Арендатор успешно добавлен');
       form.reset();
     } catch {
-      toast.error("Не удалось добавить арендатора");
+      toast.error('Не удалось добавить арендатора');
     }
   };
 
@@ -150,7 +165,7 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button variant="outline" className="w-full pl-3 text-left font-normal">
-                            {field.value ? format(field.value, "PPP") : <span>Выберите дату</span>}
+                            {field.value ? format(field.value, 'PPP') : <span>Выберите дату</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -180,13 +195,18 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button variant="outline" className="w-full pl-3 text-left font-normal">
-                            {field.value ? format(field.value, "PPP") : <span>Выберите дату</span>}
+                            {field.value ? format(field.value, 'PPP') : <span>Выберите дату</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -204,13 +224,18 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button variant="outline" className="w-full pl-3 text-left font-normal">
-                            {field.value ? format(field.value, "PPP") : <span>Выберите дату</span>}
+                            {field.value ? format(field.value, 'PPP') : <span>Выберите дату</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -228,13 +253,18 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button variant="outline" className="w-full pl-3 text-left font-normal">
-                            {field.value ? format(field.value, "PPP") : <span>Выберите дату</span>}
+                            {field.value ? format(field.value, 'PPP') : <span>Выберите дату</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -252,7 +282,9 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Оплачено</FormLabel>
-                      <p className="text-muted-foreground text-sm">Отметьте, если платеж уже получен</p>
+                      <p className="text-muted-foreground text-sm">
+                        Отметьте, если платеж уже получен
+                      </p>
                     </div>
                   </FormItem>
                 )}
@@ -265,7 +297,10 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                   <FormItem>
                     <FormLabel>Заметки (Необязательно)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Любые особые требования или заметки об арендаторе..." {...field} />
+                      <Textarea
+                        placeholder="Любые особые требования или заметки об арендаторе..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

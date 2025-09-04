@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { Plus } from 'lucide-react';
+import React, { useId } from 'react';
 
-import { Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -13,10 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface UpdateItem {
   id: number;
@@ -26,15 +25,18 @@ interface UpdateItem {
 }
 
 interface AddUpdateDialogProps {
-  onAddUpdate: (update: Omit<UpdateItem, "id">) => void;
+  onAddUpdate: (update: Omit<UpdateItem, 'id'>) => void;
 }
 
 export const AddUpdateDialog: React.FC<AddUpdateDialogProps> = ({ onAddUpdate }) => {
+  const nameId = useId();
+  const updateId = useId();
+  const dateId = useId();
   const [open, setOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    name: "",
-    update: "",
-    date: new Date().toISOString().split("T")[0],
+    name: '',
+    update: '',
+    date: new Date().toISOString().split('T')[0],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -50,9 +52,9 @@ export const AddUpdateDialog: React.FC<AddUpdateDialogProps> = ({ onAddUpdate })
     });
 
     setFormData({
-      name: "",
-      update: "",
-      date: new Date().toISOString().split("T")[0],
+      name: '',
+      update: '',
+      date: new Date().toISOString().split('T')[0],
     });
     setOpen(false);
   };
@@ -72,32 +74,34 @@ export const AddUpdateDialog: React.FC<AddUpdateDialogProps> = ({ onAddUpdate })
       <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[425px]">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Добавить обновление</DialogTitle>
-          <DialogDescription>Добавьте новое обновление в систему. Заполните все поля.</DialogDescription>
+          <DialogDescription>
+            Добавьте новое обновление в систему. Заполните все поля.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
+                <Label htmlFor={nameId} className="text-right">
                   Имя
                 </Label>
                 <Input
-                  id="name"
+                  id={nameId}
                   value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   className="col-span-3"
                   placeholder="Введите имя"
                   required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="update" className="text-right">
+                <Label htmlFor={updateId} className="text-right">
                   Обновление
                 </Label>
                 <Textarea
-                  id="update"
+                  id={updateId}
                   value={formData.update}
-                  onChange={(e) => handleInputChange("update", e.target.value)}
+                  onChange={(e) => handleInputChange('update', e.target.value)}
                   className="col-span-3"
                   placeholder="Опишите обновление"
                   rows={3}
@@ -105,14 +109,14 @@ export const AddUpdateDialog: React.FC<AddUpdateDialogProps> = ({ onAddUpdate })
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="date" className="text-right">
+                <Label htmlFor={dateId} className="text-right">
                   Дата
                 </Label>
                 <Input
-                  id="date"
+                  id={dateId}
                   type="date"
                   value={formData.date}
-                  onChange={(e) => handleInputChange("date", e.target.value)}
+                  onChange={(e) => handleInputChange('date', e.target.value)}
                   className="col-span-3"
                   required
                 />

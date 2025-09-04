@@ -1,11 +1,9 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { format } from 'date-fns';
+import { Users } from 'lucide-react';
 
-import { format } from "date-fns";
-import { Users } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface CalendarMonthNavigationProps {
   currentMonth: Date;
@@ -26,7 +24,7 @@ export function CalendarMonthNavigation({
         <Button variant="outline" size="sm" onClick={onPreviousMonth}>
           Предыдущий Месяц
         </Button>
-        <span className="text-sm font-medium">{format(currentMonth, "MMMM yyyy")}</span>
+        <span className="text-sm font-medium">{format(currentMonth, 'MMMM yyyy')}</span>
         <Button variant="outline" size="sm" onClick={onNextMonth}>
           Следующий Месяц
         </Button>

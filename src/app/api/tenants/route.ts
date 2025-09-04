@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { Tenant } from '@prisma/client';
+import { err, ok, type Result } from 'neverthrow';
+import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { Tenant } from "@prisma/client";
-import { err, ok, Result } from "neverthrow";
-import { z } from "zod";
-
-import { prisma } from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 
 type ApiResponse<T> = Result<T, { message: string; status: number }>;
 
@@ -17,30 +16,32 @@ async function getTenants(): Promise<ApiResponse<Tenant[]>> {
     });
     return ok(tenants);
   } catch {
-    return err({ message: "Failed to fetch tenants", status: 500 });
+    return err({ message: 'Failed to fetch tenants', status: 500 });
   }
 }
 
 const createTenantSchema = z.object({
   name: z.string().min(1),
   apartmentId: z.string().min(1),
-  entryDate: z.union([z.string(), z.date()]).transform((v) => (typeof v === "string" ? new Date(v) : v)),
-  status: z.enum(["current", "past", "future", "upcoming"]).default("current"),
+  entryDate: z
+    .union([z.string(), z.date()])
+    .transform((v) => (typeof v === 'string' ? new Date(v) : v)),
+  status: z.enum(['current', 'past', 'future', 'upcoming']).default('current'),
   notes: z.string().optional().nullable(),
   receivePaymentDate: z
     .union([z.string(), z.date()])
-    .transform((v) => (typeof v === "string" ? new Date(v) : v))
+    .transform((v) => (typeof v === 'string' ? new Date(v) : v))
     .default(() => {
       const now = new Date();
       return new Date(now.getFullYear(), now.getMonth(), 1);
     }),
   utilityPaymentDate: z
     .union([z.string(), z.date()])
-    .transform((v) => (typeof v === "string" ? new Date(v) : v))
+    .transform((v) => (typeof v === 'string' ? new Date(v) : v))
     .optional(),
   internetPaymentDate: z
     .union([z.string(), z.date()])
-    .transform((v) => (typeof v === "string" ? new Date(v) : v))
+    .transform((v) => (typeof v === 'string' ? new Date(v) : v))
     .optional(),
   isPaid: z.boolean().default(false),
   paymentAttachment: z.string().optional(),
@@ -51,7 +52,7 @@ async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>>
   try {
     const parsed = createTenantSchema.safeParse(data);
     if (!parsed.success) {
-      return err({ message: "Invalid request body", status: 400 });
+      return err({ message: 'Invalid request body', status: 400 });
     }
 
     // Prevent overlapping active tenants on create
@@ -62,7 +63,7 @@ async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>>
       },
     });
     if (overlapping) {
-      return err({ message: "Another active tenant overlaps for this apartment", status: 409 });
+      return err({ message: 'Another active tenant overlaps for this apartment', status: 409 });
     }
 
     const tenant = await prisma.tenant.create({
@@ -85,7 +86,7 @@ async function createTenant(data: Partial<Tenant>): Promise<ApiResponse<Tenant>>
     });
     return ok(tenant);
   } catch {
-    return err({ message: "Failed to create tenant", status: 500 });
+    return err({ message: 'Failed to create tenant', status: 500 });
   }
 }
 
@@ -94,7 +95,7 @@ export async function GET() {
 
   return result.match(
     (tenants) => NextResponse.json(tenants),
-    (error) => NextResponse.json({ error: error.message }, { status: error.status }),
+    (error) => NextResponse.json({ error: error.message }, { status: error.status })
   );
 }
 
@@ -105,9 +106,9 @@ export async function POST(request: NextRequest) {
 
     return result.match(
       (tenant) => NextResponse.json(tenant, { status: 201 }),
-      (error) => NextResponse.json({ error: error.message }, { status: error.status }),
+      (error) => NextResponse.json({ error: error.message }, { status: error.status })
     );
   } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 }

@@ -1,12 +1,12 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
-import {
-  Property,
-  Tenant,
+import type {
   AddPropertyFormData,
   AddTenantFormData,
-} from "@/app/(main)/dashboard/property-management/_components/schema";
+  Property,
+  Tenant,
+} from '@/app/(main)/dashboard/property-management/_components/schema';
 
 interface PropertyManagementState {
   // Data
@@ -76,7 +76,7 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       updateProperty: (id, updates) => {
         set((state) => ({
           properties: state.properties.map((prop) =>
-            prop.id === id ? { ...prop, ...updates, updatedAt: new Date() } : prop,
+            prop.id === id ? { ...prop, ...updates, updatedAt: new Date() } : prop
           ),
         }));
       },
@@ -91,7 +91,7 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       setPropertiesHidden: (ids, hidden) => {
         set((state) => ({
           properties: state.properties.map((prop) =>
-            ids.includes(prop.id) ? { ...prop, hidden, updatedAt: new Date() } : prop,
+            ids.includes(prop.id) ? { ...prop, hidden, updatedAt: new Date() } : prop
           ),
         }));
       },
@@ -100,7 +100,7 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
         const newTenant: Tenant = {
           id: `tenant-${Date.now()}`,
           ...tenantData,
-          status: "current", // Default status for new tenants
+          status: 'current', // Default status for new tenants
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -112,7 +112,7 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       updateTenant: (id, updates) => {
         set((state) => ({
           tenants: state.tenants.map((tenant) =>
-            tenant.id === id ? { ...tenant, ...updates, updatedAt: new Date() } : tenant,
+            tenant.id === id ? { ...tenant, ...updates, updatedAt: new Date() } : tenant
           ),
         }));
       },
@@ -126,7 +126,7 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       setTenantsHidden: (ids, hidden) => {
         set((state) => ({
           tenants: state.tenants.map((tenant) =>
-            ids.includes(tenant.id) ? { ...tenant, hidden, updatedAt: new Date() } : tenant,
+            ids.includes(tenant.id) ? { ...tenant, hidden, updatedAt: new Date() } : tenant
           ),
         }));
       },
@@ -141,22 +141,23 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
       getPropertyById: (id) => get().properties.find((prop) => prop.id === id),
       getTenantById: (id) => get().tenants.find((tenant) => tenant.id === id),
 
-      getTenantsByProperty: (propertyId) => get().tenants.filter((tenant) => tenant.apartmentId === propertyId),
+      getTenantsByProperty: (propertyId) =>
+        get().tenants.filter((tenant) => tenant.apartmentId === propertyId),
 
       getVacantProperties: () => {
         const state = get();
-        return state.properties.filter((prop) => prop.occupancyStatus === "свободна");
+        return state.properties.filter((prop) => prop.occupancyStatus === 'свободна');
       },
 
       getOccupiedProperties: () => {
         const state = get();
-        return state.properties.filter((prop) => prop.occupancyStatus === "занята");
+        return state.properties.filter((prop) => prop.occupancyStatus === 'занята');
       },
 
-      getActiveTenants: () => get().tenants.filter((tenant) => tenant.status === "current"),
+      getActiveTenants: () => get().tenants.filter((tenant) => tenant.status === 'current'),
     }),
     {
-      name: "property-management-store",
-    },
-  ),
+      name: 'property-management-store',
+    }
+  )
 );

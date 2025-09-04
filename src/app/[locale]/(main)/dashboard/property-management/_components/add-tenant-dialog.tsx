@@ -1,15 +1,13 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Dialog,
   DialogContent,
@@ -17,15 +15,28 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
-import { addTenantSchema, type AddTenantFormData, type Property } from "./schema";
+import { type AddTenantFormData, addTenantSchema, type Property } from './schema';
 
 interface AddTenantDialogProps {
   open: boolean;
@@ -34,15 +45,20 @@ interface AddTenantDialogProps {
   properties: Property[];
 }
 
-export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }: AddTenantDialogProps) {
+export function AddTenantDialog({
+  open,
+  onOpenChange,
+  onAddTenant,
+  properties,
+}: AddTenantDialogProps) {
   const form = useForm<AddTenantFormData>({
     resolver: zodResolver(addTenantSchema),
     defaultValues: {
-      name: "",
-      apartmentId: "",
+      name: '',
+      apartmentId: '',
       entryDate: undefined,
-      status: "current",
-      notes: "",
+      status: 'current',
+      notes: '',
       receivePaymentDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     },
   });
@@ -50,10 +66,10 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
   const onSubmit = async (data: AddTenantFormData) => {
     try {
       onAddTenant(data);
-      toast.success("Tenant added successfully");
+      toast.success('Tenant added successfully');
       form.reset();
     } catch {
-      toast.error("Failed to add tenant");
+      toast.error('Failed to add tenant');
     }
   };
 
@@ -146,9 +162,12 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                         <FormControl>
                           <Button
                             variant="outline"
-                            className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                            className={cn(
+                              'w-full pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
+                            )}
                           >
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -179,9 +198,12 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                         <FormControl>
                           <Button
                             variant="outline"
-                            className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                            className={cn(
+                              'w-full pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
+                            )}
                           >
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -208,7 +230,10 @@ export function AddTenantDialog({ open, onOpenChange, onAddTenant, properties }:
                   <FormItem>
                     <FormLabel>Notes (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Any special requirements or notes about the tenant..." {...field} />
+                      <Textarea
+                        placeholder="Any special requirements or notes about the tenant..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
+import { useState } from 'react';
 
-import { Input } from "@/components/ui/input";
-import { OccupancyCalendar } from "../_components/occupancy-calendar";
+import { Input } from '@/components/ui/input';
+import { OccupancyCalendar } from '../_components/occupancy-calendar';
 
 export default function CalendarPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">

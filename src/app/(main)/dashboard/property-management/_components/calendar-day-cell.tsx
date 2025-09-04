@@ -1,8 +1,6 @@
-"use client";
+'use client';
 
-import * as React from "react";
-
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
 interface CalendarDayCellProps {
   day: Date;
@@ -18,7 +16,13 @@ interface CalendarDayCellProps {
   getPropertyColor: (propertyId: string) => string;
   onShowMore: (
     day: Date,
-    tenants: Array<{ id: string; name: string; apartmentId: string; entryDate: Date; exitDate?: Date }>,
+    tenants: Array<{
+      id: string;
+      name: string;
+      apartmentId: string;
+      entryDate: Date;
+      exitDate?: Date;
+    }>
   ) => void;
 }
 
@@ -38,9 +42,9 @@ export function CalendarDayCell({
   return (
     <div
       key={day.toISOString()}
-      className={`min-h-[80px] rounded-md border p-2 ${isCurrentMonth ? "bg-background" : "bg-muted/30"}`}
+      className={`min-h-[80px] rounded-md border p-2 ${isCurrentMonth ? 'bg-background' : 'bg-muted/30'}`}
     >
-      <div className="mb-1 text-sm font-medium">{format(day, "d")}</div>
+      <div className="mb-1 text-sm font-medium">{format(day, 'd')}</div>
       <div className="space-y-1">
         {visibleTenants.map((tenant) => {
           const property = filteredProperties.find((p) => p.id === tenant.apartmentId);
@@ -57,7 +61,11 @@ export function CalendarDayCell({
           );
         })}
         {hiddenCount > 0 && (
-          <button className="text-xs text-blue-700 underline" onClick={() => onShowMore(day, tenantsForDay)}>
+          <button
+            type="button"
+            className="text-xs text-blue-700 underline"
+            onClick={() => onShowMore(day, tenantsForDay)}
+          >
             +{hiddenCount} ещё
           </button>
         )}

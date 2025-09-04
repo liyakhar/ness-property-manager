@@ -1,4 +1,4 @@
-import { Building2, Calendar, Users, Home, Bell, type LucideIcon } from "lucide-react";
+import { Bell, Building2, Calendar, Home, type LucideIcon, Users } from 'lucide-react';
 
 export interface NavSubItem {
   title: string;
@@ -29,28 +29,28 @@ export const sidebarItems: NavGroup[] = [
     id: 1,
     items: [
       {
-        title: "Общие Показатели",
-        url: "/dashboard/property-management",
+        title: 'Общие Показатели',
+        url: '/dashboard/property-management',
         icon: Home,
       },
       {
-        title: "Недвижимость",
-        url: "/dashboard/property-management/properties",
+        title: 'Недвижимость',
+        url: '/dashboard/property-management/properties',
         icon: Building2,
       },
       {
-        title: "Арендаторы",
-        url: "/dashboard/property-management/tenants",
+        title: 'Арендаторы',
+        url: '/dashboard/property-management/tenants',
         icon: Users,
       },
       {
-        title: "Календарь",
-        url: "/dashboard/property-management/calendar",
+        title: 'Календарь',
+        url: '/dashboard/property-management/calendar',
         icon: Calendar,
       },
       {
-        title: "Обновления",
-        url: "/dashboard/updates",
+        title: 'Обновления',
+        url: '/dashboard/updates',
         icon: Bell,
       },
     ],

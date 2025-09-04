@@ -1,12 +1,19 @@
-"use client";
-import * as React from "react";
-import { useRouter } from "next/navigation";
+'use client';
 
-import { Building2, Calendar, Users, Search, Home } from "lucide-react";
+import { Building2, Calendar, Home, Search, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import * as React from 'react';
 
-import { Button } from "@/components/ui/button";
-import { CommandDialog, CommandEmpty, CommandInput, CommandItem, CommandList, CommandGroup } from "@/components/ui/command";
-import { usePropertyManagementStore } from "@/stores/property-management";
+import { Button } from '@/components/ui/button';
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { usePropertyManagementStore } from '@/stores/property-management';
 
 interface SearchItem {
   id: string;
@@ -19,7 +26,7 @@ interface SearchItem {
 
 export function SearchDialog() {
   const [open, setOpen] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState('');
   const router = useRouter();
   const { properties, tenants } = usePropertyManagementStore();
 
@@ -27,44 +34,44 @@ export function SearchDialog() {
   const searchItems: SearchItem[] = [
     // Navigation items
     {
-      id: "dashboard",
-      title: "Общие Показатели",
-      url: "/dashboard/property-management",
+      id: 'dashboard',
+      title: 'Общие Показатели',
+      url: '/dashboard/property-management',
       icon: Home,
-      group: "Навигация",
-      keywords: ["dashboard", "общие", "показатели", "home", "main", "главная", "панель"]
+      group: 'Навигация',
+      keywords: ['dashboard', 'общие', 'показатели', 'home', 'main', 'главная', 'панель'],
     },
     {
-      id: "properties",
-      title: "Недвижимость",
-      url: "/dashboard/property-management/properties",
+      id: 'properties',
+      title: 'Недвижимость',
+      url: '/dashboard/property-management/properties',
       icon: Building2,
-      group: "Навигация",
-      keywords: ["properties", "недвижимость", "buildings", "apartments", "units", "квартиры"]
+      group: 'Навигация',
+      keywords: ['properties', 'недвижимость', 'buildings', 'apartments', 'units', 'квартиры'],
     },
     {
-      id: "calendar",
-      title: "Календарь",
-      url: "/dashboard/property-management/calendar",
+      id: 'calendar',
+      title: 'Календарь',
+      url: '/dashboard/property-management/calendar',
       icon: Calendar,
-      group: "Навигация",
-      keywords: ["calendar", "календарь", "занятость", "occupancy", "schedule", "временная шкала"]
+      group: 'Навигация',
+      keywords: ['calendar', 'календарь', 'занятость', 'occupancy', 'schedule', 'временная шкала'],
     },
     {
-      id: "tenants",
-      title: "Арендаторы",
-      url: "/dashboard/property-management/tenants",
+      id: 'tenants',
+      title: 'Арендаторы',
+      url: '/dashboard/property-management/tenants',
       icon: Users,
-      group: "Навигация",
-      keywords: ["tenants", "арендаторы", "renters", "residents", "жильцы"]
+      group: 'Навигация',
+      keywords: ['tenants', 'арендаторы', 'renters', 'residents', 'жильцы'],
     },
     // Properties
-    ...properties.map(property => ({
+    ...properties.map((property) => ({
       id: `prop-${property.id}`,
       title: `Квартира #${property.apartmentNumber}`,
       url: `/dashboard/property-management/properties`,
       icon: Building2,
-      group: "Недвижимость",
+      group: 'Недвижимость',
       keywords: [
         `apartment ${property.apartmentNumber}`,
         `квартира ${property.apartmentNumber}`,
@@ -73,69 +80,82 @@ export function SearchDialog() {
         property.readinessStatus.toLowerCase(),
         property.propertyType.toLowerCase(),
         property.occupancyStatus.toLowerCase(),
-        property.propertyType === "аренда" ? "аренда" : "продажа",
-        property.propertyType === "аренда" ? "rent" : "sale",
-        property.occupancyStatus === "занята" ? (property.propertyType === "продажа" ? "продана" : "занята") : "свободна",
-        property.occupancyStatus === "занята" ? (property.propertyType === "продажа" ? "sold" : "occupied") : "vacant",
+        property.propertyType === 'аренда' ? 'аренда' : 'продажа',
+        property.propertyType === 'аренда' ? 'rent' : 'sale',
+        property.occupancyStatus === 'занята'
+          ? property.propertyType === 'продажа'
+            ? 'продана'
+            : 'занята'
+          : 'свободна',
+        property.occupancyStatus === 'занята'
+          ? property.propertyType === 'продажа'
+            ? 'sold'
+            : 'occupied'
+          : 'vacant',
         property.rooms.toString(),
-        property.urgentMatter?.toLowerCase() ?? ""
-      ].filter(Boolean)
+        property.urgentMatter?.toLowerCase() ?? '',
+      ].filter(Boolean),
     })),
     // Tenants
-    ...tenants.map(tenant => {
-      const property = properties.find(p => p.id === tenant.apartmentId);
+    ...tenants.map((tenant) => {
+      const property = properties.find((p) => p.id === tenant.apartmentId);
       return {
         id: `tenant-${tenant.id}`,
         title: tenant.name,
         url: `/dashboard/property-management/tenants`,
         icon: Users,
-        group: "Арендаторы",
+        group: 'Арендаторы',
         keywords: [
           tenant.name.toLowerCase(),
-          tenant.notes?.toLowerCase() ?? "",
+          tenant.notes?.toLowerCase() ?? '',
           tenant.apartmentId.toLowerCase(),
-          property ? property.apartmentNumber.toString() : "",
-          property ? `квартира ${property.apartmentNumber}` : "",
-          property ? `apartment ${property.apartmentNumber}` : ""
-        ].filter(Boolean)
+          property ? property.apartmentNumber.toString() : '',
+          property ? `квартира ${property.apartmentNumber}` : '',
+          property ? `apartment ${property.apartmentNumber}` : '',
+        ].filter(Boolean),
       };
-    })
+    }),
   ];
 
   // Filter search items based on query
-  const filteredItems = searchItems.filter(item => {
+  const filteredItems = searchItems.filter((item) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    return item.keywords.some(keyword => keyword.includes(query)) || 
-           item.title.toLowerCase().includes(query) ||
-           item.group.toLowerCase().includes(query);
+    return (
+      item.keywords.some((keyword) => keyword.includes(query)) ||
+      item.title.toLowerCase().includes(query) ||
+      item.group.toLowerCase().includes(query)
+    );
   });
 
   // Group items by category
-  const groupedItems = filteredItems.reduce((acc, item) => {
-    if (!(item.group in acc)) {
-      acc[item.group] = [];
-    }
-    acc[item.group].push(item);
-    return acc;
-  }, {} as Record<string, SearchItem[]>);
+  const groupedItems = filteredItems.reduce(
+    (acc, item) => {
+      if (!(item.group in acc)) {
+        acc[item.group] = [];
+      }
+      acc[item.group].push(item);
+      return acc;
+    },
+    {} as Record<string, SearchItem[]>
+  );
 
   const handleSelect = (item: SearchItem) => {
     router.push(item.url);
     setOpen(false);
-    setSearchQuery("");
+    setSearchQuery('');
   };
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((open) => !open);
       }
     };
 
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
   }, []);
 
   return (
@@ -152,8 +172,8 @@ export function SearchDialog() {
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-          placeholder="Поиск по недвижимости, арендаторам, страницам..." 
+        <CommandInput
+          placeholder="Поиск по недвижимости, арендаторам, страницам..."
           value={searchQuery}
           onValueChange={setSearchQuery}
         />
@@ -162,8 +182,8 @@ export function SearchDialog() {
           {Object.entries(groupedItems).map(([group, items]) => (
             <CommandGroup key={group} heading={group}>
               {items.map((item) => (
-                <CommandItem 
-                  key={item.id} 
+                <CommandItem
+                  key={item.id}
                   onSelect={() => handleSelect(item)}
                   className="cursor-pointer"
                 >

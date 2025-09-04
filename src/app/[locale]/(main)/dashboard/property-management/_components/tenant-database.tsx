@@ -1,22 +1,21 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import type { ColumnDef } from '@tanstack/react-table';
+import { Plus, Users } from 'lucide-react';
+import * as React from 'react';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Plus, Users } from "lucide-react";
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableViewOptions } from '@/components/data-table/data-table-view-options';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDataTableInstance } from '@/hooks/use-data-table-instance';
+import { usePropertyManagementStore } from '@/stores/property-management';
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { usePropertyManagementStore } from "@/stores/property-management";
-
-import { AddTenantDialog } from "./add-tenant-dialog";
-import type { AddTenantFormData, Tenant } from "./schema";
-import { tenantColumns } from "./tenant-columns";
+import { AddTenantDialog } from './add-tenant-dialog';
+import type { AddTenantFormData, Tenant } from './schema';
+import { tenantColumns } from './tenant-columns';
 
 export function TenantDatabase() {
   const {
@@ -30,13 +29,13 @@ export function TenantDatabase() {
   // State for custom columns
   const [customColumns, setCustomColumns] = React.useState<ColumnDef<Tenant>[]>(() => {
     // Load custom columns from localStorage on component mount
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("tenant-custom-columns");
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tenant-custom-columns');
       if (saved) {
         try {
           return JSON.parse(saved);
         } catch (e) {
-          console.error("Failed to parse saved custom columns:", e);
+          console.error('Failed to parse saved custom columns:', e);
         }
       }
     }
@@ -52,15 +51,15 @@ export function TenantDatabase() {
       cell: () => {
         // For now, show placeholder data based on type
         switch (columnData.type) {
-          case "text":
+          case 'text':
             return <div className="text-muted-foreground text-sm">-</div>;
-          case "number":
+          case 'number':
             return <div className="text-muted-foreground text-sm">0</div>;
-          case "date":
+          case 'date':
             return <div className="text-muted-foreground text-sm">-</div>;
-          case "select":
+          case 'select':
             return <div className="text-muted-foreground text-sm">-</div>;
-          case "boolean":
+          case 'boolean':
             return <div className="text-muted-foreground text-sm">Нет</div>;
           default:
             return <div className="text-muted-foreground text-sm">-</div>;
@@ -74,8 +73,8 @@ export function TenantDatabase() {
     setCustomColumns(updatedColumns);
 
     // Save to localStorage
-    if (typeof window !== "undefined") {
-      localStorage.setItem("tenant-custom-columns", JSON.stringify(updatedColumns));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tenant-custom-columns', JSON.stringify(updatedColumns));
     }
   };
 
@@ -95,10 +94,10 @@ export function TenantDatabase() {
     setAddTenantDialogOpen(false);
   };
 
-  const getActiveTenants = () => data.filter((tenant) => tenant.status === "current");
-  const getPastTenants = () => data.filter((tenant) => tenant.status === "past");
-  const getFutureTenants = () => data.filter((tenant) => tenant.status === "future");
-  const getUpcomingTenants = () => data.filter((tenant) => tenant.status === "upcoming");
+  const getActiveTenants = () => data.filter((tenant) => tenant.status === 'current');
+  const getPastTenants = () => data.filter((tenant) => tenant.status === 'past');
+  const getFutureTenants = () => data.filter((tenant) => tenant.status === 'future');
+  const getUpcomingTenants = () => data.filter((tenant) => tenant.status === 'upcoming');
 
   return (
     <div className="space-y-4">
@@ -109,7 +108,9 @@ export function TenantDatabase() {
             <Users className="h-5 w-5" />
             База Данных Арендаторов
           </CardTitle>
-          <CardDescription>Управление всеми записями арендаторов и их назначениями в недвижимость</CardDescription>
+          <CardDescription>
+            Управление всеми записями арендаторов и их назначениями в недвижимость
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
@@ -118,7 +119,10 @@ export function TenantDatabase() {
                 <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
                   {getActiveTenants().length} Текущие
                 </Badge>
-                <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                <Badge
+                  variant="outline"
+                  className="bg-orange-100 text-orange-800 hover:bg-orange-100"
+                >
                   {getUpcomingTenants().length} Скоро
                 </Badge>
                 <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">

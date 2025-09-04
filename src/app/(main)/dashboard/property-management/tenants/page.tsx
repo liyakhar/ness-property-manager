@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
+import { useState } from 'react';
 
-import { Input } from "@/components/ui/input";
-import { TenantDatabase } from "../_components/tenant-database";
+import { Input } from '@/components/ui/input';
+import { TenantDatabase } from '../_components/tenant-database';
 
 export default function TenantsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">

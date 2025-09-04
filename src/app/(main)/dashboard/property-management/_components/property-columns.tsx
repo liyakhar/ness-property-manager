@@ -1,7 +1,7 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { Image as ImageIcon, Trash2 } from "lucide-react";
+import type { ColumnDef } from '@tanstack/react-table';
+import { Trash2 } from 'lucide-react';
 
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,23 +12,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
-import { EditableCell } from "./editable-cell";
-import { PropertyImagesCell } from "./property-images-cell";
-import { Property } from "./schema";
+import { EditableCell } from './editable-cell';
+import { PropertyImagesCell } from './property-images-cell';
+import type { Property } from './schema';
 
 export const createPropertyColumns = (
   updateProperty: (id: string, updates: Partial<Property>) => void,
-  onDeleteProperty?: (id: string) => void,
+  onDeleteProperty?: (id: string) => void
 ): ColumnDef<Property>[] => {
   const columns: ColumnDef<Property>[] = [
     {
-      id: "select",
+      id: 'select',
       header: ({ table }) => (
         <div className="flex items-center justify-center">
           <Checkbox
@@ -51,20 +50,20 @@ export const createPropertyColumns = (
       enableHiding: false,
     },
     {
-      id: "images",
-      accessorKey: "images",
+      id: 'images',
+      accessorKey: 'images',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Изображения" />,
       cell: ({ row }) => (
         <PropertyImagesCell
           value={(row.original as Record<string, unknown>).images as string[] | undefined}
-          onSave={(value) => updateProperty(row.original.id, { images: value as any })}
+          onSave={(value) => updateProperty(row.original.id, { images: value })}
           propertyId={row.original.id}
         />
       ),
       enableSorting: false,
     },
     {
-      accessorKey: "apartmentNumber",
+      accessorKey: 'apartmentNumber',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
       cell: ({ row }) => (
         <EditableCell
@@ -78,7 +77,7 @@ export const createPropertyColumns = (
       enableSorting: true,
     },
     {
-      accessorKey: "location",
+      accessorKey: 'location',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Расположение" />,
       cell: ({ row }) => (
         <EditableCell
@@ -92,7 +91,7 @@ export const createPropertyColumns = (
       enableSorting: true,
     },
     {
-      accessorKey: "rooms",
+      accessorKey: 'rooms',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Комнаты" />,
       cell: ({ row }) => (
         <EditableCell
@@ -106,67 +105,74 @@ export const createPropertyColumns = (
       enableSorting: true,
     },
     {
-      accessorKey: "readinessStatus",
+      accessorKey: 'readinessStatus',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
       cell: ({ row }) => (
         <EditableCell
           value={row.original.readinessStatus}
           onSave={(newValue: unknown) => {
-            updateProperty(row.original.id, { readinessStatus: newValue as "меблированная" | "немеблированная" });
+            updateProperty(row.original.id, {
+              readinessStatus: newValue as 'меблированная' | 'немеблированная',
+            });
           }}
           type="readiness"
           options={[
-            { value: "меблированная", label: "Меблированная" },
-            { value: "немеблированная", label: "Немеблированная" },
+            { value: 'меблированная', label: 'Меблированная' },
+            { value: 'немеблированная', label: 'Немеблированная' },
           ]}
         />
       ),
       enableSorting: true,
     },
     {
-      accessorKey: "propertyType",
+      accessorKey: 'propertyType',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Тип" />,
       cell: ({ row }) => (
         <EditableCell
           value={row.original.propertyType}
           onSave={(newValue: unknown) => {
-            updateProperty(row.original.id, { propertyType: newValue as "аренда" | "продажа" });
+            updateProperty(row.original.id, { propertyType: newValue as 'аренда' | 'продажа' });
           }}
           type="propertyType"
           options={[
-            { value: "аренда", label: "Аренда" },
-            { value: "продажа", label: "Продажа" },
+            { value: 'аренда', label: 'Аренда' },
+            { value: 'продажа', label: 'Продажа' },
           ]}
         />
       ),
       enableSorting: true,
     },
     {
-      accessorKey: "occupancyStatus",
+      accessorKey: 'occupancyStatus',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
       cell: ({ row }) => (
         <EditableCell
           value={row.original.occupancyStatus}
           onSave={(newValue: unknown) => {
-            updateProperty(row.original.id, { occupancyStatus: newValue as "занята" | "свободна" });
+            updateProperty(row.original.id, { occupancyStatus: newValue as 'занята' | 'свободна' });
           }}
           type="occupancy"
           options={[
-            { value: "свободна", label: "Свободна" },
-            { value: "занята", label: row.original.propertyType === "продажа" ? "Продана" : "Занята" },
+            { value: 'свободна', label: 'Свободна' },
+            {
+              value: 'занята',
+              label: row.original.propertyType === 'продажа' ? 'Продана' : 'Занята',
+            },
           ]}
         />
       ),
       enableSorting: true,
     },
     {
-      accessorKey: "apartmentContents",
+      accessorKey: 'apartmentContents',
       header: ({ column }) => <DataTableColumnHeader column={column} title="В квартире есть" />,
       cell: ({ row }) => (
         <EditableCell
-          value={row.original.apartmentContents ?? ""}
+          value={row.original.apartmentContents ?? ''}
           onSave={(newValue: unknown) => {
-            updateProperty(row.original.id, { apartmentContents: (newValue as string) || undefined });
+            updateProperty(row.original.id, {
+              apartmentContents: (newValue as string) || undefined,
+            });
           }}
           type="textarea"
         />
@@ -174,11 +180,11 @@ export const createPropertyColumns = (
       enableSorting: true,
     },
     {
-      accessorKey: "urgentMatter",
+      accessorKey: 'urgentMatter',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Срочные Вопросы" />,
       cell: ({ row }) => (
         <EditableCell
-          value={row.original.urgentMatter ?? ""}
+          value={row.original.urgentMatter ?? ''}
           onSave={(newValue: unknown) => {
             updateProperty(row.original.id, { urgentMatter: (newValue as string) || undefined });
           }}
@@ -188,7 +194,7 @@ export const createPropertyColumns = (
       enableSorting: true,
     },
     {
-      accessorKey: "urgentMatterResolved",
+      accessorKey: 'urgentMatterResolved',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Статус Решения" />,
       cell: ({ row }) => {
         const hasUrgentMatter = !!row.original.urgentMatter;
@@ -205,10 +211,10 @@ export const createPropertyColumns = (
         return (
           <div className="flex items-center gap-2">
             <Badge
-              variant={isResolved ? "outline" : "destructive"}
-              className={isResolved ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
+              variant={isResolved ? 'outline' : 'destructive'}
+              className={isResolved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
             >
-              {isResolved ? "Решено" : "Требует решения"}
+              {isResolved ? 'Решено' : 'Требует решения'}
             </Badge>
             {!isResolved && (
               <Button
@@ -226,10 +232,12 @@ export const createPropertyColumns = (
       enableSorting: true,
     },
     {
-      accessorKey: "createdAt",
+      accessorKey: 'createdAt',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Создано" />,
       cell: ({ row }) => (
-        <div className="text-muted-foreground text-sm">{new Date(row.original.createdAt).toLocaleDateString()}</div>
+        <div className="text-muted-foreground text-sm">
+          {new Date(row.original.createdAt).toLocaleDateString()}
+        </div>
       ),
       enableSorting: true,
     },
@@ -237,7 +245,7 @@ export const createPropertyColumns = (
 
   if (onDeleteProperty) {
     columns.push({
-      id: "actions",
+      id: 'actions',
       header: () => <div className="text-right">Действия</div>,
       cell: ({ row }) => (
         <div className="flex justify-end">
@@ -250,7 +258,9 @@ export const createPropertyColumns = (
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Удалить запись?</AlertDialogTitle>
-                <AlertDialogDescription>Действие необратимо. Запись будет удалена.</AlertDialogDescription>
+                <AlertDialogDescription>
+                  Действие необратимо. Запись будет удалена.
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Отмена</AlertDialogCancel>
@@ -278,5 +288,5 @@ export const createPropertyColumns = (
 // Keep the old export for backward compatibility
 export const propertyColumns = createPropertyColumns(
   () => {},
-  () => {},
+  () => {}
 );

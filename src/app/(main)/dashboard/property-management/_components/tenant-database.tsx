@@ -1,30 +1,30 @@
-"use client";
+'use client';
+
 /* eslint-disable max-lines */
 
-import * as React from "react";
+import type { ColumnDef } from '@tanstack/react-table';
+import { Plus, Users } from 'lucide-react';
+import * as React from 'react';
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Plus, Users } from "lucide-react";
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableViewOptions } from '@/components/data-table/data-table-view-options';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDataTableInstance } from '@/hooks/use-data-table-instance';
+import { usePropertyManagementStore } from '@/stores/property-management';
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { usePropertyManagementStore } from "@/stores/property-management";
-
-import { AddTenantDialog } from "./add-tenant-dialog";
-import { EditableCell } from "./editable-cell";
-import type { AddTenantFormData, Tenant } from "./schema";
-import { createTenantColumns } from "./tenant-columns";
+import { AddTenantDialog } from './add-tenant-dialog';
+import { EditableCell } from './editable-cell';
+import type { AddTenantFormData, Tenant } from './schema';
+import { createTenantColumns } from './tenant-columns';
 
 interface TenantDatabaseProps {
   searchQuery?: string;
 }
 
-export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
+export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
   const {
     tenants: allTenants,
     properties,
@@ -39,13 +39,13 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
   // State for custom columns
   const [customColumns, setCustomColumns] = React.useState<ColumnDef<Tenant>[]>(() => {
     // Load custom columns from localStorage on component mount
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("tenant-custom-columns");
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('tenant-custom-columns');
       if (saved) {
         try {
           return JSON.parse(saved);
         } catch (e) {
-          console.error("Не удалось разобрать сохраненные пользовательские колонки:", e);
+          console.error('Не удалось разобрать сохраненные пользовательские колонки:', e);
         }
       }
     }
@@ -59,23 +59,23 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
       if (!(tenant as Record<string, unknown>)[columnData.id]) {
         let defaultValue: unknown;
         switch (columnData.type) {
-          case "text":
-            defaultValue = "";
+          case 'text':
+            defaultValue = '';
             break;
-          case "number":
+          case 'number':
             defaultValue = 0;
             break;
-          case "date":
+          case 'date':
             defaultValue = new Date();
             break;
-          case "select":
-            defaultValue = "option1";
+          case 'select':
+            defaultValue = 'option1';
             break;
-          case "boolean":
+          case 'boolean':
             defaultValue = false;
             break;
           default:
-            defaultValue = "";
+            defaultValue = '';
         }
         updateTenant(tenant.id, { [columnData.id]: defaultValue });
       }
@@ -95,13 +95,13 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
               const updates = { [columnData.id]: newValue };
               updateTenant(row.original.id, updates);
             }}
-            type={columnData.type as "text" | "number" | "date" | "select"}
+            type={columnData.type as 'text' | 'number' | 'date' | 'select'}
             options={
-              columnData.type === "select"
+              columnData.type === 'select'
                 ? [
-                    { value: "option1", label: "Опция 1" },
-                    { value: "option2", label: "Опция 2" },
-                    { value: "option3", label: "Опция 3" },
+                    { value: 'option1', label: 'Опция 1' },
+                    { value: 'option2', label: 'Опция 2' },
+                    { value: 'option3', label: 'Опция 3' },
                   ]
                 : []
             }
@@ -116,8 +116,8 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     setCustomColumns(updatedColumns);
 
     // Save to localStorage
-    if (typeof window !== "undefined") {
-      localStorage.setItem("tenant-custom-columns", JSON.stringify(updatedColumns));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tenant-custom-columns', JSON.stringify(updatedColumns));
     }
   };
 
@@ -129,7 +129,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
       // Optimistic local delete via store
       usePropertyManagementStore.getState().deleteTenant(id);
       // Fire-and-forget API delete to persist if backend used
-      fetch(`/api/tenants/${id}`, { method: "DELETE" }).catch(() => {});
+      fetch(`/api/tenants/${id}`, { method: 'DELETE' }).catch(() => {});
     });
   }, [properties, updateTenant]);
 
@@ -140,39 +140,45 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
 
   // Helper function to check DD/MM format
   const isDDMMFormat = React.useCallback((day: string, month: string, query: string) => {
-    if (query.includes("/") && query.length === 5) {
-      const [dayPart, monthPart] = query.split("/");
+    if (query.includes('/') && query.length === 5) {
+      const [dayPart, monthPart] = query.split('/');
       return day === dayPart && month === monthPart;
     }
     return false;
   }, []);
 
   // Helper function to check DD/MM/YYYY format
-  const isDDMMYYYYFormat = React.useCallback((day: string, month: string, year: string, query: string) => {
-    if (query.includes("/") && query.length === 10) {
-      const [dayPart, monthPart, yearPart] = query.split("/");
-      return day === dayPart && month === monthPart && year === yearPart;
-    }
-    return false;
-  }, []);
+  const isDDMMYYYYFormat = React.useCallback(
+    (day: string, month: string, year: string, query: string) => {
+      if (query.includes('/') && query.length === 10) {
+        const [dayPart, monthPart, yearPart] = query.split('/');
+        return day === dayPart && month === monthPart && year === yearPart;
+      }
+      return false;
+    },
+    []
+  );
 
   // Helper function to check MM/DD format
   const isMMDDFormat = React.useCallback((day: string, month: string, query: string) => {
-    if (query.includes("/") && query.length === 5) {
-      const [monthPart, dayPart] = query.split("/");
+    if (query.includes('/') && query.length === 5) {
+      const [monthPart, dayPart] = query.split('/');
       return day === dayPart && month === monthPart;
     }
     return false;
   }, []);
 
   // Helper function to check MM/DD/YYYY format
-  const isMMDDYYYYFormat = React.useCallback((day: string, month: string, year: string, query: string) => {
-    if (query.includes("/") && query.length === 10) {
-      const [monthPart, dayPart, yearPart] = query.split("/");
-      return day === dayPart && month === monthPart && year === yearPart;
-    }
-    return false;
-  }, []);
+  const isMMDDYYYYFormat = React.useCallback(
+    (day: string, month: string, year: string, query: string) => {
+      if (query.includes('/') && query.length === 10) {
+        const [monthPart, dayPart, yearPart] = query.split('/');
+        return day === dayPart && month === monthPart && year === yearPart;
+      }
+      return false;
+    },
+    []
+  );
 
   // Helper function to check if query matches date formats
   const isDateMatch = React.useCallback(
@@ -180,8 +186,8 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
       const query = searchQuery.toLowerCase();
 
       // Check various date formats
-      const day = date.getDate().toString().padStart(2, "0");
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear().toString();
 
       // Check different date formats
@@ -198,7 +204,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
 
       return false;
     },
-    [isDDMMFormat, isDDMMYYYYFormat, isMMDDFormat, isMMDDYYYYFormat],
+    [isDDMMFormat, isDDMMYYYYFormat, isMMDDFormat, isMMDDYYYYFormat]
   );
 
   // Helper function to check if tenant matches property search
@@ -215,7 +221,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
         (property.urgentMatter?.toLowerCase().includes(query) ?? false)
       );
     },
-    [properties],
+    [properties]
   );
 
   // Helper function to check if tenant matches basic search
@@ -227,7 +233,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
         (tenant.notes?.toLowerCase().includes(query) ?? false)
       );
     },
-    [],
+    []
   );
 
   // Helper function to check if tenant matches date search
@@ -239,7 +245,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
         isDateMatch(tenant.receivePaymentDate, query)
       );
     },
-    [isDateMatch],
+    [isDateMatch]
   );
 
   // Non-hidden, filtered by search
@@ -262,7 +268,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
         if (isDateSearchMatch(tenant, query)) return true;
         if (isTenantPropertyMatch(tenant, query)) return true;
         return false;
-      },
+      }
     );
   }, [allTenants, searchQuery, isBasicMatch, isDateSearchMatch, isTenantPropertyMatch]);
 
@@ -289,7 +295,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     if (!hasSelection) return;
     selectedTenantIds.forEach((id) => {
       deleteTenant(id);
-      fetch(`/api/tenants/${id}`, { method: "DELETE" }).catch(() => {});
+      fetch(`/api/tenants/${id}`, { method: 'DELETE' }).catch(() => {});
     });
     table.resetRowSelection();
   };
@@ -299,10 +305,10 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
     setAddTenantDialogOpen(false);
   };
 
-  const getActiveTenants = () => filteredTenants.filter((tenant) => tenant.status === "current");
-  const getPastTenants = () => filteredTenants.filter((tenant) => tenant.status === "past");
-  const getFutureTenants = () => filteredTenants.filter((tenant) => tenant.status === "future");
-  const getUpcomingTenants = () => filteredTenants.filter((tenant) => tenant.status === "upcoming");
+  const getActiveTenants = () => filteredTenants.filter((tenant) => tenant.status === 'current');
+  const getPastTenants = () => filteredTenants.filter((tenant) => tenant.status === 'past');
+  const getFutureTenants = () => filteredTenants.filter((tenant) => tenant.status === 'future');
+  const getUpcomingTenants = () => filteredTenants.filter((tenant) => tenant.status === 'upcoming');
 
   return (
     <div className="space-y-4">
@@ -313,7 +319,9 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
             <Users className="h-5 w-5" />
             База Данных Арендаторов
             {searchQuery && (
-              <span className="text-muted-foreground text-sm font-normal">(Найдено: {filteredTenants.length})</span>
+              <span className="text-muted-foreground text-sm font-normal">
+                (Найдено: {filteredTenants.length})
+              </span>
             )}
           </CardTitle>
         </CardHeader>
@@ -324,7 +332,10 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
                 <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
                   {getActiveTenants().length} Текущие
                 </Badge>
-                <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                <Badge
+                  variant="outline"
+                  className="bg-orange-100 text-orange-800 hover:bg-orange-100"
+                >
                   {getUpcomingTenants().length} Скоро
                 </Badge>
                 <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
@@ -337,7 +348,7 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setShowHiddenView((v) => !v)}>
-                {showHiddenView ? "Показать основные" : "Скрытые"}
+                {showHiddenView ? 'Показать основные' : 'Скрытые'}
               </Button>
               <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
               <Button onClick={() => setAddTenantDialogOpen(true)}>
@@ -353,10 +364,20 @@ export function TenantDatabase({ searchQuery = "" }: TenantDatabaseProps) {
 
           <div className="mt-3 flex items-center justify-start">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled={!hasSelection} onClick={handleToggleHideSelected}>
-                {showHiddenView ? "Вернуть в основные" : "Скрыть выбранные"}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasSelection}
+                onClick={handleToggleHideSelected}
+              >
+                {showHiddenView ? 'Вернуть в основные' : 'Скрыть выбранные'}
               </Button>
-              <Button variant="outline" size="sm" disabled={!hasSelection} onClick={handleDeleteSelected}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasSelection}
+                onClick={handleDeleteSelected}
+              >
                 Удалить выбранные
               </Button>
             </div>

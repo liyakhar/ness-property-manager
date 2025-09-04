@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
+import { useState } from 'react';
 
-import { Input } from "@/components/ui/input";
-import { PropertiesTable } from "../_components/properties-table";
+import { Input } from '@/components/ui/input';
+import { PropertiesTable } from '../_components/properties-table';
 
 export default function PropertiesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">

@@ -1,30 +1,29 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import type { ColumnDef } from '@tanstack/react-table';
 
-import { Plus, Building2 } from "lucide-react";
+import { Building2, Plus } from 'lucide-react';
+import * as React from 'react';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableViewOptions } from '@/components/data-table/data-table-view-options';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDataTableInstance } from '@/hooks/use-data-table-instance';
+import { usePropertyManagementStore } from '@/stores/property-management';
+import { AddPropertyDialog } from './add-property-dialog';
+import { EditableCell } from './editable-cell';
+import { createPropertyColumns } from './property-columns';
+import type { AddPropertyFormData, Property } from './schema';
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { usePropertyManagementStore } from "@/stores/property-management";
-
-import { AddPropertyDialog } from "./add-property-dialog";
-import { createPropertyColumns } from "./property-columns";
-import type { AddPropertyFormData, Property } from "./schema";
-import { EditableCell } from "./editable-cell";
-import { ColumnDef } from "@tanstack/react-table";
 // import { HiddenPropertiesTable } from "./hidden-properties-table";
 
 interface PropertiesTableProps {
   searchQuery?: string;
 }
 
-export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
+export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const {
     properties: allProperties,
     addProperty,
@@ -54,27 +53,27 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
   // Function to handle adding new columns
   const handleAddColumn = (columnData: { id: string; header: string; type: string }) => {
     // Add the new field to all existing properties with a default value
-    allProperties.forEach(property => {
-      if (!(property as any)[columnData.id]) {
-        let defaultValue: any;
+    allProperties.forEach((property) => {
+      if (!(property as Record<string, unknown>)[columnData.id]) {
+        let defaultValue: unknown;
         switch (columnData.type) {
-          case "text":
-            defaultValue = "";
+          case 'text':
+            defaultValue = '';
             break;
-          case "number":
+          case 'number':
             defaultValue = 0;
             break;
-          case "date":
+          case 'date':
             defaultValue = new Date();
             break;
-          case "select":
-            defaultValue = "option1";
+          case 'select':
+            defaultValue = 'option1';
             break;
-          case "boolean":
+          case 'boolean':
             defaultValue = false;
             break;
           default:
-            defaultValue = "";
+            defaultValue = '';
         }
         updateProperty(property.id, { [columnData.id]: defaultValue });
       }
@@ -86,20 +85,28 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
       header: () => <div className="font-medium">{columnData.header}</div>,
       cell: ({ row }) => {
         // Use EditableCell for custom columns
-        const value = (row.original as any)[columnData.id];
+        const value = (row.original as Record<string, unknown>)[columnData.id];
         return (
           <EditableCell
             value={value}
-            onSave={(newValue: any) => {
+            onSave={(newValue: unknown) => {
               const updates = { [columnData.id]: newValue };
               updateProperty(row.original.id, updates);
             }}
-            type={columnData.type as any}
-            options={columnData.type === "select" ? [
-              { value: "option1", label: "Опция 1" },
-              { value: "option2", label: "Опция 2" },
-              { value: "option3", label: "Опция 3" },
-            ] : []}
+            type={
+              columnData.type === 'boolean'
+                ? 'text'
+                : (columnData.type as 'text' | 'number' | 'date' | 'select')
+            }
+            options={
+              columnData.type === 'select'
+                ? [
+                    { value: 'option1', label: 'Опция 1' },
+                    { value: 'option2', label: 'Опция 2' },
+                    { value: 'option3', label: 'Опция 3' },
+                  ]
+                : []
+            }
           />
         );
       },
@@ -109,7 +116,7 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
 
     const updatedColumns = [...customColumns, newColumn];
     setCustomColumns(updatedColumns);
-    
+
     // Save to localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('property-custom-columns', JSON.stringify(updatedColumns));
@@ -122,9 +129,9 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
       // Optimistic local delete via store
       usePropertyManagementStore.getState().deleteProperty(id);
       // Fire-and-forget API delete to persist if backend used
-      fetch(`/api/properties/${id}`, { method: "DELETE" }).catch(() => {});
+      fetch(`/api/properties/${id}`, { method: 'DELETE' }).catch(() => {});
     });
-  }, []);
+  }, [updateProperty]);
 
   // Combine default columns with custom columns
   const allColumns = React.useMemo(() => {
@@ -138,19 +145,23 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
     const base = allProperties.filter((p) => !p.hidden);
     if (!searchQuery) return base;
     const query = searchQuery.toLowerCase();
-    return base.filter((property) =>
-      property.apartmentNumber.toString().includes(query) ||
-      property.location.toLowerCase().includes(query) ||
-      property.readinessStatus.toLowerCase().includes(query) ||
-      property.propertyType.toLowerCase().includes(query) ||
-      property.occupancyStatus.toLowerCase().includes(query) ||
-      property.rooms.toString().includes(query) ||
-      (property.urgentMatter && property.urgentMatter.toLowerCase().includes(query))
+    return base.filter(
+      (property) =>
+        property.apartmentNumber.toString().includes(query) ||
+        property.location.toLowerCase().includes(query) ||
+        property.readinessStatus.toLowerCase().includes(query) ||
+        property.propertyType.toLowerCase().includes(query) ||
+        property.occupancyStatus.toLowerCase().includes(query) ||
+        property.rooms.toString().includes(query) ||
+        property.urgentMatter?.toLowerCase().includes(query)
     );
   }, [allProperties, searchQuery]);
 
   // Hidden (not search-filtered to keep all hidden visible)
-  const hiddenProperties = React.useMemo(() => allProperties.filter((p) => !!p.hidden), [allProperties]);
+  const hiddenProperties = React.useMemo(
+    () => allProperties.filter((p) => !!p.hidden),
+    [allProperties]
+  );
 
   const tableData = showHiddenView ? hiddenProperties : filteredProperties;
 
@@ -178,7 +189,7 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
     if (!hasSelection) return;
     selectedPropertyIds.forEach((id) => {
       deleteProperty(id);
-      fetch(`/api/properties/${id}`, { method: "DELETE" }).catch(() => {});
+      fetch(`/api/properties/${id}`, { method: 'DELETE' }).catch(() => {});
     });
     table.resetRowSelection();
   };
@@ -207,16 +218,20 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50">
-                  {filteredProperties.filter((p) => p.occupancyStatus === "свободна").length} Свободна
+                  {filteredProperties.filter((p) => p.occupancyStatus === 'свободна').length}{' '}
+                  Свободна
                 </Badge>
-                <Badge variant="outline" className="bg-orange-50 text-orange-700 hover:bg-orange-50">
-                  {filteredProperties.filter((p) => p.occupancyStatus === "занята").length} Занята
+                <Badge
+                  variant="outline"
+                  className="bg-orange-50 text-orange-700 hover:bg-orange-50"
+                >
+                  {filteredProperties.filter((p) => p.occupancyStatus === 'занята').length} Занята
                 </Badge>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setShowHiddenView((v) => !v)}>
-                {showHiddenView ? "Показать основные" : "Скрытые"}
+                {showHiddenView ? 'Показать основные' : 'Скрытые'}
               </Button>
               <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
               <Button onClick={() => setAddPropertyDialogOpen(true)}>
@@ -233,11 +248,21 @@ export function PropertiesTable({ searchQuery = "" }: PropertiesTableProps) {
           <div className="mt-3 flex items-center justify-start">
             <div className="flex items-center gap-2">
               {showHiddenView ? (
-                <Button variant="outline" size="sm" disabled={!hasSelection} onClick={handleUnhideSelected}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasSelection}
+                  onClick={handleUnhideSelected}
+                >
                   Вернуть в основные
                 </Button>
               ) : (
-                <Button variant="outline" size="sm" disabled={!hasSelection} onClick={handleHideSelected}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasSelection}
+                  onClick={handleHideSelected}
+                >
                   Скрыть выбранные
                 </Button>
               )}

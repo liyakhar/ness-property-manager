@@ -1,47 +1,51 @@
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from '@tanstack/react-table';
 
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { usePropertyManagementStore } from "@/stores/property-management";
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { usePropertyManagementStore } from '@/stores/property-management';
 
-import { Tenant } from "./schema";
+import type { Tenant } from './schema';
 
 // Helper function to get status badge variant and text
 const getStatusDisplay = (status: string) => {
   switch (status) {
-    case "current":
+    case 'current':
       return {
-        variant: "default" as const,
-        text: "Текущий",
-        className: "bg-green-100 text-green-800 hover:bg-green-100",
+        variant: 'default' as const,
+        text: 'Текущий',
+        className: 'bg-green-100 text-green-800 hover:bg-green-100',
       };
-    case "past":
+    case 'past':
       return {
-        variant: "secondary" as const,
-        text: "Прошлый",
-        className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+        variant: 'secondary' as const,
+        text: 'Прошлый',
+        className: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
       };
-    case "future":
-      return { variant: "outline" as const, text: "Будущий", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" };
-    case "upcoming":
+    case 'future':
       return {
-        variant: "outline" as const,
-        text: "Скоро",
-        className: "bg-orange-100 text-orange-800 hover:bg-orange-100",
+        variant: 'outline' as const,
+        text: 'Будущий',
+        className: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
+      };
+    case 'upcoming':
+      return {
+        variant: 'outline' as const,
+        text: 'Скоро',
+        className: 'bg-orange-100 text-orange-800 hover:bg-orange-100',
       };
     default:
       return {
-        variant: "secondary" as const,
-        text: "Неизвестно",
-        className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+        variant: 'secondary' as const,
+        text: 'Неизвестно',
+        className: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
       };
   }
 };
 
 export const tenantColumns: ColumnDef<Tenant>[] = [
   {
-    id: "select",
+    id: 'select',
     header: ({ table }) => (
       <div className="flex items-center justify-center">
         <Checkbox
@@ -64,14 +68,14 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: 'name',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Имя Арендатора" />,
     cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
     enableSorting: true,
     enableHiding: false,
   },
   {
-    accessorKey: "apartmentId",
+    accessorKey: 'apartmentId',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
     cell: ({ row }) => {
       const { properties } = usePropertyManagementStore.getState();
@@ -79,7 +83,7 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
       return (
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="font-mono">
-            #{property?.apartmentNumber ?? "Unknown"}
+            #{property?.apartmentNumber ?? 'Unknown'}
           </Badge>
         </div>
       );
@@ -87,18 +91,20 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
     enableSorting: true,
   },
   {
-    id: "location",
+    id: 'location',
     accessorFn: (row) => {
       const { properties } = usePropertyManagementStore.getState();
       const property = properties.find((p) => p.id === row.apartmentId);
-      return property?.location ?? "";
+      return property?.location ?? '';
     },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Расположение" />,
-    cell: ({ getValue }) => <div className="text-muted-foreground text-sm">{(getValue() as string) || "-"}</div>,
+    cell: ({ getValue }) => (
+      <div className="text-muted-foreground text-sm">{(getValue() as string) || '-'}</div>
+    ),
     enableSorting: true,
   },
   {
-    accessorKey: "status",
+    accessorKey: 'status',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
     cell: ({ row }) => {
       const statusDisplay = getStatusDisplay(row.original.status);
@@ -111,13 +117,15 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "entryDate",
+    accessorKey: 'entryDate',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Дата Заезда" />,
-    cell: ({ row }) => <div className="text-sm">{new Date(row.original.entryDate).toLocaleDateString()}</div>,
+    cell: ({ row }) => (
+      <div className="text-sm">{new Date(row.original.entryDate).toLocaleDateString()}</div>
+    ),
     enableSorting: true,
   },
   {
-    accessorKey: "exitDate",
+    accessorKey: 'exitDate',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Дата Выезда" />,
     cell: ({ row }) => (
       <div className="text-sm">
@@ -131,13 +139,17 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "receivePaymentDate",
+    accessorKey: 'receivePaymentDate',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Получение Платежа" />,
-    cell: ({ row }) => <div className="text-sm">{new Date(row.original.receivePaymentDate).toLocaleDateString()}</div>,
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {new Date(row.original.receivePaymentDate).toLocaleDateString()}
+      </div>
+    ),
     enableSorting: true,
   },
   {
-    accessorKey: "notes",
+    accessorKey: 'notes',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Заметки" />,
     cell: ({ row }) => (
       <div className="max-w-[200px]">
@@ -153,10 +165,12 @@ export const tenantColumns: ColumnDef<Tenant>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: 'createdAt',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Создано" />,
     cell: ({ row }) => (
-      <div className="text-muted-foreground text-sm">{new Date(row.original.createdAt).toLocaleDateString()}</div>
+      <div className="text-muted-foreground text-sm">
+        {new Date(row.original.createdAt).toLocaleDateString()}
+      </div>
     ),
     enableSorting: true,
   },

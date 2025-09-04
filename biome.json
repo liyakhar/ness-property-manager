@@ -7,12 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": [
-      "**/*.ts",
-      "**/*.tsx",
-      "**/*.js",
-      "**/*.jsx"
-    ]
+    "includes": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
   },
   "formatter": {
     "enabled": true,
@@ -28,7 +23,8 @@
         "noUnusedVariables": "error"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noDocumentCookie": "warn"
       },
       "style": {
         "useConst": "error",

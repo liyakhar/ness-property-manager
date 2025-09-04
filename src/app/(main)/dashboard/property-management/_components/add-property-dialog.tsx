@@ -1,13 +1,11 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -15,13 +13,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
-import { addPropertySchema, type AddPropertyFormData } from "./schema";
+import { type AddPropertyFormData, addPropertySchema } from './schema';
 
 interface AddPropertyDialogProps {
   open: boolean;
@@ -34,13 +45,13 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
     resolver: zodResolver(addPropertySchema),
     defaultValues: {
       apartmentNumber: undefined,
-      location: "",
+      location: '',
       rooms: 1,
-      readinessStatus: "немеблированная",
-      propertyType: "аренда",
-      occupancyStatus: "свободна",
-      apartmentContents: "",
-      urgentMatter: "",
+      readinessStatus: 'немеблированная',
+      propertyType: 'аренда',
+      occupancyStatus: 'свободна',
+      apartmentContents: '',
+      urgentMatter: '',
       urgentMatterResolved: false,
     },
   });
@@ -48,10 +59,10 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
   const onSubmit = async (data: AddPropertyFormData) => {
     try {
       onAddProperty(data);
-      toast.success("Недвижимость успешно добавлена");
+      toast.success('Недвижимость успешно добавлена');
       form.reset();
     } catch {
-      toast.error("Не удалось добавить недвижимость");
+      toast.error('Не удалось добавить недвижимость');
     }
   };
 
@@ -60,7 +71,9 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
       <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[425px]">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Добавить Новую Недвижимость</DialogTitle>
-          <DialogDescription>Добавьте новую недвижимость в ваш портфель. Заполните детали ниже.</DialogDescription>
+          <DialogDescription>
+            Добавьте новую недвижимость в ваш портфель. Заполните детали ниже.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
           <Form {...form}>
@@ -76,7 +89,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                         type="number"
                         placeholder="101"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                        onChange={(e) => field.onChange(parseInt(e.target.value, 10) || undefined)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -111,7 +124,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                         max="10"
                         placeholder="2"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -192,7 +205,10 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                   <FormItem>
                     <FormLabel>В квартире есть (Необязательно)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Опишите что есть в квартире (мебель, техника, и т.д.)..." {...field} />
+                      <Textarea
+                        placeholder="Опишите что есть в квартире (мебель, техника, и т.д.)..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -206,7 +222,10 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                   <FormItem>
                     <FormLabel>Срочные Вопросы (Необязательно)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Любые срочные вопросы или необходимый ремонт..." {...field} />
+                      <Textarea
+                        placeholder="Любые срочные вопросы или необходимый ремонт..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

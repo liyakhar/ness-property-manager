@@ -1,10 +1,10 @@
-import { useSortable } from "@dnd-kit/sortable";
-import { ColumnDef } from "@tanstack/react-table";
-import { GripVertical } from "lucide-react";
+import { useSortable } from '@dnd-kit/sortable';
+import type { ColumnDef } from '@tanstack/react-table';
+import { GripVertical } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
-function DragHandle({ id }: { id: number }) {
+function DragHandle({ id }: { id: string | number }) {
   const { attributes, listeners } = useSortable({
     id,
   });
@@ -23,8 +23,8 @@ function DragHandle({ id }: { id: number }) {
   );
 }
 
-export const dragColumn: ColumnDef<any> = {
-  id: "drag",
+export const dragColumn: ColumnDef<{ id: string | number }> = {
+  id: 'drag',
   header: () => null,
   cell: ({ row }) => <DragHandle id={row.original.id} />,
   enableSorting: false,

@@ -1,19 +1,17 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import type { ColumnDef } from '@tanstack/react-table';
 
-import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { Button } from '@/components/ui/button';
+import { useDataTableInstance } from '@/hooks/use-data-table-instance';
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { Button } from "@/components/ui/button";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-
-import type { Tenant } from "./schema";
+import type { Tenant } from './schema';
 
 interface HiddenTenantsTableProps {
   data: Tenant[];
-  columns: ColumnDef<Tenant, any>[];
+  columns: ColumnDef<Tenant, unknown>[];
   onUnhide: (ids: string[]) => void;
 }
 

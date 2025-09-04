@@ -1,13 +1,13 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const propertySchema = z.object({
   id: z.string(),
   apartmentNumber: z.number().min(1),
   location: z.string().min(1),
   rooms: z.number().min(1).max(10),
-  readinessStatus: z.enum(["меблированная", "немеблированная"]),
-  propertyType: z.enum(["аренда", "продажа"]),
-  occupancyStatus: z.enum(["занята", "свободна"]),
+  readinessStatus: z.enum(['меблированная', 'немеблированная']),
+  propertyType: z.enum(['аренда', 'продажа']),
+  occupancyStatus: z.enum(['занята', 'свободна']),
   apartmentContents: z.string().optional(),
   urgentMatter: z.string().optional(),
   urgentMatterResolved: z.boolean().default(false),
@@ -22,19 +22,19 @@ export const tenantSchema = z.object({
   entryDate: z.date(),
   exitDate: z.date().optional(),
   notes: z.string().optional(),
-  status: z.enum(["current", "past", "future", "upcoming"]),
+  status: z.enum(['current', 'past', 'future', 'upcoming']),
   receivePaymentDate: z.date(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
 export const addTenantSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  apartmentId: z.string().min(1, "Apartment is required"),
+  name: z.string().min(1, 'Name is required'),
+  apartmentId: z.string().min(1, 'Apartment is required'),
   entryDate: z.date({
-    required_error: "Entry date is required",
+    required_error: 'Entry date is required',
   }),
-  status: z.enum(["current", "past", "future", "upcoming"]).default("current"),
+  status: z.enum(['current', 'past', 'future', 'upcoming']).default('current'),
   notes: z.string().optional(),
   receivePaymentDate: z.date().default(() => {
     const now = new Date();
@@ -47,12 +47,15 @@ export const addTenantSchema = z.object({
 });
 
 export const addPropertySchema = z.object({
-  apartmentNumber: z.number().min(1, "Apartment number must be at least 1"),
-  location: z.string().min(1, "Location is required"),
-  rooms: z.number().min(1, "Number of rooms must be at least 1").max(10, "Number of rooms cannot exceed 10"),
-  readinessStatus: z.enum(["меблированная", "немеблированная"]),
-  propertyType: z.enum(["аренда", "продажа"]),
-  occupancyStatus: z.enum(["занята", "свободна"]),
+  apartmentNumber: z.number().min(1, 'Apartment number must be at least 1'),
+  location: z.string().min(1, 'Location is required'),
+  rooms: z
+    .number()
+    .min(1, 'Number of rooms must be at least 1')
+    .max(10, 'Number of rooms cannot exceed 10'),
+  readinessStatus: z.enum(['меблированная', 'немеблированная']),
+  propertyType: z.enum(['аренда', 'продажа']),
+  occupancyStatus: z.enum(['занята', 'свободна']),
   apartmentContents: z.string().optional(),
   urgentMatter: z.string().optional(),
   urgentMatterResolved: z.boolean().default(false),

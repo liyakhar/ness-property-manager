@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { ChevronLeft, ChevronRight, Image as ImageIcon, Loader2, Paperclip, X } from 'lucide-react';
+import Image from 'next/image';
+import * as React from 'react';
 
-import { Paperclip, X, Image as ImageIcon, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { useImageUpload } from "@/hooks/use-image-upload";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { cn } from '@/lib/utils';
 
 interface PropertyImagesCellProps {
   value?: string[];
@@ -18,7 +18,12 @@ interface PropertyImagesCellProps {
   propertyId: string; // Add propertyId prop for uploads
 }
 
-export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, onSave, className, propertyId }) => {
+export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
+  value,
+  onSave,
+  className,
+  propertyId,
+}) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [images, setImages] = React.useState<string[]>(value ?? []);
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
@@ -62,9 +67,9 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
         setIsEditing(false);
       }
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error('Upload error:', err);
     } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -76,14 +81,14 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
     // Extract path from URL for deletion
     try {
       const url = new URL(imageUrl);
-      const pathParts = url.pathname.split("/");
-      const bucketIndex = pathParts.findIndex((part) => part === "property-images");
+      const pathParts = url.pathname.split('/');
+      const bucketIndex = pathParts.indexOf('property-images');
       if (bucketIndex !== -1 && bucketIndex + 1 < pathParts.length) {
-        const imagePath = pathParts.slice(bucketIndex + 1).join("/");
+        const imagePath = pathParts.slice(bucketIndex + 1).join('/');
         await deleteImage(imagePath);
       }
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error('Delete error:', err);
       // Continue with removal even if delete fails
     }
 
@@ -106,8 +111,13 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
 
   if (isEditing) {
     return (
-      <div className={cn("flex items-center gap-2", className)}>
-        <Input placeholder="Вставьте URL изображения" value="" onChange={() => {}} className="hidden" />
+      <div className={cn('flex items-center gap-2', className)}>
+        <Input
+          placeholder="Вставьте URL изображения"
+          value=""
+          onChange={() => {}}
+          className="hidden"
+        />
         <input
           ref={fileInputRef}
           type="file"
@@ -123,7 +133,11 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
           className="h-8 px-2"
           disabled={isUploading}
         >
-          {isUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Paperclip className="h-3 w-3" />}
+          {isUploading ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Paperclip className="h-3 w-3" />
+          )}
         </Button>
         <Button variant="outline" size="sm" onClick={handleSave} className="h-8 px-2">
           ✓
@@ -137,12 +151,17 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
   }
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={cn('flex items-center gap-1', className)}>
       {images.length === 0 ? (
         <div className="text-muted-foreground flex items-center gap-2">
           <ImageIcon className="h-4 w-4" />
           <span className="text-xs">Нет изображений</span>
-          <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-6 w-6 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+            className="h-6 w-6 p-0"
+          >
             <Paperclip className="h-3 w-3" />
           </Button>
         </div>
@@ -150,7 +169,7 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
         <>
           <div className="flex -space-x-2">
             {images.slice(0, 3).map((image, idx) => (
-              <div key={idx} className="group relative">
+              <div key={image} className="group relative">
                 <Avatar className="border-background h-8 w-8 border-2">
                   <AvatarImage src={image} alt={`Property image ${idx + 1}`} />
                   <AvatarFallback>
@@ -174,10 +193,20 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
             )}
           </div>
           <div className="flex gap-1">
-            <Button variant="ghost" size="sm" onClick={() => handleOpenPreview(0)} className="h-6 w-6 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleOpenPreview(0)}
+              className="h-6 w-6 p-0"
+            >
               <ImageIcon className="h-3 w-3" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-6 w-6 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              className="h-6 w-6 p-0"
+            >
               <Paperclip className="h-3 w-3" />
             </Button>
           </div>
@@ -191,9 +220,11 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
           </DialogHeader>
           <div className="relative">
             {images[previewIndex] && (
-              <img
+              <Image
                 src={images[previewIndex]}
-                alt={`Property image ${previewIndex + 1}`}
+                alt={`Property ${previewIndex + 1}`}
+                width={800}
+                height={600}
                 className="h-auto max-h-[70vh] w-full object-contain"
               />
             )}
@@ -219,10 +250,10 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({ value, o
             )}
           </div>
           <div className="flex justify-center gap-2">
-            {images.map((_, idx) => (
+            {images.map((image, idx) => (
               <Button
-                key={idx}
-                variant={idx === previewIndex ? "default" : "outline"}
+                key={image}
+                variant={idx === previewIndex ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setPreviewIndex(idx)}
                 className="h-8 w-8 p-0"

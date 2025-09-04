@@ -1,21 +1,19 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { Building2, Plus } from 'lucide-react';
 
-import { Plus, Building2 } from "lucide-react";
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableViewOptions } from '@/components/data-table/data-table-view-options';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDataTableInstance } from '@/hooks/use-data-table-instance';
+import { usePropertyManagementStore } from '@/stores/property-management';
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
-import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { usePropertyManagementStore } from "@/stores/property-management";
-
-import { AddPropertyDialog } from "./add-property-dialog";
-import { propertyColumns } from "./property-columns";
-import type { AddPropertyFormData } from "./schema";
+import { AddPropertyDialog } from './add-property-dialog';
+import { propertyColumns } from './property-columns';
+import type { AddPropertyFormData } from './schema';
 
 export function PropertiesTable() {
   const {
@@ -50,10 +48,13 @@ export function PropertiesTable() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                  {data.filter((p) => p.occupancyStatus === "свободна").length} Свободна
+                  {data.filter((p) => p.occupancyStatus === 'свободна').length} Свободна
                 </Badge>
-                <Badge variant="outline" className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-                  {data.filter((p) => p.occupancyStatus === "занята").length} Занята
+                <Badge
+                  variant="outline"
+                  className="bg-orange-100 text-orange-800 hover:bg-orange-100"
+                >
+                  {data.filter((p) => p.occupancyStatus === 'занята').length} Занята
                 </Badge>
               </div>
             </div>

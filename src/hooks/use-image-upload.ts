@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 interface UploadResult {
   success: boolean;
@@ -17,23 +17,23 @@ export const useImageUpload = () => {
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("propertyId", propertyId);
+      formData.append('file', file);
+      formData.append('propertyId', propertyId);
 
-      const response = await fetch("/api/upload-image", {
-        method: "POST",
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
         body: formData,
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error ?? "Upload failed");
+        throw new Error(result.error ?? 'Upload failed');
       }
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Upload failed";
+      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -44,13 +44,13 @@ export const useImageUpload = () => {
   const deleteImage = async (imagePath: string): Promise<boolean> => {
     try {
       const response = await fetch(`/api/upload-image?path=${encodeURIComponent(imagePath)}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       const result = await response.json();
       return result.success;
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error('Delete error:', err);
       return false;
     }
   };

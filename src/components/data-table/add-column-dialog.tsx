@@ -1,11 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -13,15 +12,28 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const addColumnSchema = z.object({
-  id: z.string().min(1, "ID колонки обязателен"),
-  header: z.string().min(1, "Заголовок колонки обязателен"),
-  type: z.enum(["text", "number", "date", "select", "boolean"]),
+  id: z.string().min(1, 'ID колонки обязателен'),
+  header: z.string().min(1, 'Заголовок колонки обязателен'),
+  type: z.enum(['text', 'number', 'date', 'select', 'boolean']),
 });
 
 type AddColumnFormData = z.infer<typeof addColumnSchema>;
@@ -36,9 +48,9 @@ export function AddColumnDialog({ open, onOpenChange, onAddColumn }: AddColumnDi
   const form = useForm<AddColumnFormData>({
     resolver: zodResolver(addColumnSchema),
     defaultValues: {
-      id: "",
-      header: "",
-      type: "text",
+      id: '',
+      header: '',
+      type: 'text',
     },
   });
 
@@ -48,7 +60,7 @@ export function AddColumnDialog({ open, onOpenChange, onAddColumn }: AddColumnDi
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error("Не удалось добавить колонку:", error);
+      console.error('Не удалось добавить колонку:', error);
     }
   };
 
@@ -70,11 +82,7 @@ export function AddColumnDialog({ open, onOpenChange, onAddColumn }: AddColumnDi
                 <FormItem>
                   <FormLabel>ID колонки</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="полеКолонки" 
-                      {...field} 
-                      className="font-mono"
-                    />
+                    <Input placeholder="полеКолонки" {...field} className="font-mono" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -88,10 +96,7 @@ export function AddColumnDialog({ open, onOpenChange, onAddColumn }: AddColumnDi
                 <FormItem>
                   <FormLabel>Заголовок колонки</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Название колонки" 
-                      {...field} 
-                    />
+                    <Input placeholder="Название колонки" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

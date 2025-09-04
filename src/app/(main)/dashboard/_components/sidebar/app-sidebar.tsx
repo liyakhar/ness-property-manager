@@ -1,18 +1,17 @@
-"use client";
+'use client';
 
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { APP_CONFIG } from "@/config/app-config";
-import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
+} from '@/components/ui/sidebar';
+import { APP_CONFIG } from '@/config/app-config';
+import { sidebarItems } from '@/navigation/sidebar/sidebar-items';
 
-import { NavMain } from "./nav-main";
+import { NavMain } from './nav-main';
 // Removed NavUser and account UI since there is no login functionality
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -22,7 +21,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
+              <a href="/dashboard">
                 <span className="text-base font-semibold">{APP_CONFIG.name}</span>
               </a>
             </SidebarMenuButton>

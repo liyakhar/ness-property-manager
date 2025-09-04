@@ -1,33 +1,39 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { eachDayOfInterval, endOfMonth, isWithinInterval, startOfMonth } from 'date-fns';
+import { Plus } from 'lucide-react';
+import * as React from 'react';
 
-import { startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from "date-fns";
-import { Plus } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { usePropertyManagementStore } from '@/stores/property-management';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { usePropertyManagementStore } from "@/stores/property-management";
-
-import { AddTenantDialog } from "./add-tenant-dialog";
-import { CalendarDayCell } from "./calendar-day-cell";
-import { CalendarDayDialog } from "./calendar-day-dialog";
-import { CalendarMonthNavigation } from "./calendar-month-navigation";
+import { AddTenantDialog } from './add-tenant-dialog';
+import { CalendarDayCell } from './calendar-day-cell';
+import { CalendarDayDialog } from './calendar-day-dialog';
+import { CalendarMonthNavigation } from './calendar-month-navigation';
 
 interface OccupancyCalendarProps {
   searchQuery?: string;
 }
 
-export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) {
+export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
-  const [selectedProperty, setSelectedProperty] = React.useState<string>("all");
+  const [selectedProperty, setSelectedProperty] = React.useState<string>('all');
   const [dayDialogOpen, setDayDialogOpen] = React.useState(false);
   const [selectedDay, setSelectedDay] = React.useState<Date | null>(null);
   const [selectedDayTenants, setSelectedDayTenants] = React.useState<
     Array<{ id: string; name: string; apartmentId: string; entryDate: Date; exitDate?: Date }>
   >([]);
-  const { properties, tenants, isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
+  const { properties, tenants, isAddTenantDialogOpen, setAddTenantDialogOpen } =
+    usePropertyManagementStore();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -45,25 +51,28 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
 
       // Search by apartment number - find the property and check its apartment number
       const property = properties.find((p) => p.id === tenant.apartmentId);
-      if (property && property.apartmentNumber.toString().includes(query)) {
+      if (property?.apartmentNumber.toString().includes(query)) {
         return true;
       }
 
       return false;
     },
-    [properties],
+    [properties]
   );
 
   // Helper function to check if property matches search query
   const isPropertyMatch = React.useCallback(
-    (property: { apartmentNumber: number; location: string; readinessStatus: string }, query: string) => {
+    (
+      property: { apartmentNumber: number; location: string; readinessStatus: string },
+      query: string
+    ) => {
       return (
         property.apartmentNumber.toString().includes(query) ||
         property.location.toLowerCase().includes(query) ||
         property.readinessStatus.toLowerCase().includes(query)
       );
     },
-    [],
+    []
   );
 
   // Filter properties and tenants based on search query
@@ -92,39 +101,45 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
 
   // Helper function to check DD/MM format
   const isDDMMFormat = React.useCallback((day: string, month: string, query: string) => {
-    if (query.includes("/") && query.length === 5) {
-      const [dayPart, monthPart] = query.split("/");
+    if (query.includes('/') && query.length === 5) {
+      const [dayPart, monthPart] = query.split('/');
       return day === dayPart && month === monthPart;
     }
     return false;
   }, []);
 
   // Helper function to check DD/MM/YYYY format
-  const isDDMMYYYYFormat = React.useCallback((day: string, month: string, year: string, query: string) => {
-    if (query.includes("/") && query.length === 10) {
-      const [dayPart, monthPart, yearPart] = query.split("/");
-      return day === dayPart && month === monthPart && year === yearPart;
-    }
-    return false;
-  }, []);
+  const isDDMMYYYYFormat = React.useCallback(
+    (day: string, month: string, year: string, query: string) => {
+      if (query.includes('/') && query.length === 10) {
+        const [dayPart, monthPart, yearPart] = query.split('/');
+        return day === dayPart && month === monthPart && year === yearPart;
+      }
+      return false;
+    },
+    []
+  );
 
   // Helper function to check MM/DD format
   const isMMDDFormat = React.useCallback((day: string, month: string, query: string) => {
-    if (query.includes("/") && query.length === 5) {
-      const [monthPart, dayPart] = query.split("/");
+    if (query.includes('/') && query.length === 5) {
+      const [monthPart, dayPart] = query.split('/');
       return day === dayPart && month === monthPart;
     }
     return false;
   }, []);
 
   // Helper function to check MM/DD/YYYY format
-  const isMMDDYYYYFormat = React.useCallback((day: string, month: string, year: string, query: string) => {
-    if (query.includes("/") && query.length === 10) {
-      const [monthPart, dayPart, yearPart] = query.split("/");
-      return day === dayPart && month === monthPart && year === yearPart;
-    }
-    return false;
-  }, []);
+  const isMMDDYYYYFormat = React.useCallback(
+    (day: string, month: string, year: string, query: string) => {
+      if (query.includes('/') && query.length === 10) {
+        const [monthPart, dayPart, yearPart] = query.split('/');
+        return day === dayPart && month === monthPart && year === yearPart;
+      }
+      return false;
+    },
+    []
+  );
 
   // Helper function to check if query matches date formats
   const isDateMatch = React.useCallback(
@@ -132,8 +147,8 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
       const query = searchQuery.toLowerCase();
 
       // Check various date formats
-      const day = date.getDate().toString().padStart(2, "0");
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear().toString();
 
       // Check different date formats
@@ -150,7 +165,7 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
 
       return false;
     },
-    [isDDMMFormat, isDDMMYYYYFormat, isMMDDFormat, isMMDDYYYYFormat],
+    [isDDMMFormat, isDDMMYYYYFormat, isMMDDFormat, isMMDDYYYYFormat]
   );
 
   // Helper function to check if tenant matches property search
@@ -167,7 +182,7 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
         (property.urgentMatter?.toLowerCase().includes(query) ?? false)
       );
     },
-    [properties],
+    [properties]
   );
 
   const filteredTenants = React.useMemo(() => {
@@ -202,7 +217,9 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
       if (!property) return false;
 
       const entryDate = new Date(tenant.entryDate);
-      const exitDate = tenant.exitDate ? new Date(tenant.exitDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now if no exit date
+      const exitDate = tenant.exitDate
+        ? new Date(tenant.exitDate)
+        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now if no exit date
 
       return isWithinInterval(date, { start: entryDate, end: exitDate });
     });
@@ -210,22 +227,22 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
 
   const getPropertyColor = (propertyId: string) => {
     const colors = [
-      "bg-blue-200",
-      "bg-green-200",
-      "bg-purple-200",
-      "bg-orange-200",
-      "bg-pink-200",
-      "bg-indigo-200",
-      "bg-red-200",
-      "bg-yellow-200",
-      "bg-teal-200",
-      "bg-cyan-200",
-      "bg-lime-200",
-      "bg-amber-200",
+      'bg-blue-200',
+      'bg-green-200',
+      'bg-purple-200',
+      'bg-orange-200',
+      'bg-pink-200',
+      'bg-indigo-200',
+      'bg-red-200',
+      'bg-yellow-200',
+      'bg-teal-200',
+      'bg-cyan-200',
+      'bg-lime-200',
+      'bg-amber-200',
     ];
 
     const propertyIndex = filteredProperties.findIndex((p) => p.id === propertyId);
-    return colors[propertyIndex % colors.length] || "bg-gray-200";
+    return colors[propertyIndex % colors.length] || 'bg-gray-200';
   };
 
   return (
@@ -235,7 +252,8 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
           <CardTitle className="flex items-center gap-2">
             {searchQuery && (
               <span className="text-muted-foreground text-sm font-normal">
-                (Найдено: {filteredProperties.length} недвижимость, {filteredTenants.length} арендаторов)
+                (Найдено: {filteredProperties.length} недвижимость, {filteredTenants.length}{' '}
+                арендаторов)
               </span>
             )}
           </CardTitle>
@@ -262,7 +280,7 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
           </div>
 
           <div className="mb-4 grid grid-cols-7 gap-1">
-            {["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"].map((day) => (
+            {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day) => (
               <div key={day} className="text-muted-foreground p-2 text-center text-sm font-medium">
                 {day}
               </div>
@@ -272,7 +290,7 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
           <div className="grid grid-cols-7 gap-1">
             {daysInMonth.map((day) => {
               const tenantsForDay = getTenantsForDay(day).filter((tenant) => {
-                if (selectedProperty === "all") return true;
+                if (selectedProperty === 'all') return true;
                 return tenant.apartmentId === selectedProperty;
               });
 
@@ -296,8 +314,12 @@ export function OccupancyCalendar({ searchQuery = "" }: OccupancyCalendarProps) 
 
           <CalendarMonthNavigation
             currentMonth={currentMonth}
-            onPreviousMonth={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-            onNextMonth={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+            onPreviousMonth={() =>
+              setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
+            }
+            onNextMonth={() =>
+              setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
+            }
             activeTenantsCount={filteredTenants.length}
           />
         </CardContent>

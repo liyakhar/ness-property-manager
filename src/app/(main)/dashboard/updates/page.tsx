@@ -1,14 +1,20 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import * as React from 'react';
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { EditableCell } from '@/app/(main)/dashboard/property-management/_components/editable-cell';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-import { EditableCell } from "@/app/(main)/dashboard/property-management/_components/editable-cell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-import { AddUpdateDialog } from "./_components/add-update-dialog";
+import { AddUpdateDialog } from './_components/add-update-dialog';
 
 interface UpdateItem {
   id: number;
@@ -22,7 +28,7 @@ const initialData: UpdateItem[] = [];
 export default function UpdatesPage() {
   const [data, setData] = React.useState<UpdateItem[]>(initialData);
 
-  const handleAddUpdate = (newUpdate: Omit<UpdateItem, "id">) => {
+  const handleAddUpdate = (newUpdate: Omit<UpdateItem, 'id'>) => {
     const id = Math.max(0, ...data.map((item) => item.id)) + 1;
     setData((prev) => [...prev, { ...newUpdate, id }]);
   };
@@ -30,38 +36,42 @@ export default function UpdatesPage() {
   const columns: ColumnDef<UpdateItem>[] = React.useMemo(
     () => [
       {
-        accessorKey: "name",
-        header: "Имя",
+        accessorKey: 'name',
+        header: 'Имя',
         cell: ({ row }) => (
           <EditableCell
             value={row.original.name}
             type="text"
             onSave={(newValue: unknown) => {
               setData((prev) =>
-                prev.map((item) => (item.id === row.original.id ? { ...item, name: String(newValue ?? "") } : item)),
+                prev.map((item) =>
+                  item.id === row.original.id ? { ...item, name: String(newValue ?? '') } : item
+                )
               );
             }}
           />
         ),
       },
       {
-        accessorKey: "update",
-        header: "Обновление",
+        accessorKey: 'update',
+        header: 'Обновление',
         cell: ({ row }) => (
           <EditableCell
             value={row.original.update}
             type="textarea"
             onSave={(newValue: unknown) => {
               setData((prev) =>
-                prev.map((item) => (item.id === row.original.id ? { ...item, update: String(newValue ?? "") } : item)),
+                prev.map((item) =>
+                  item.id === row.original.id ? { ...item, update: String(newValue ?? '') } : item
+                )
               );
             }}
           />
         ),
       },
       {
-        accessorKey: "date",
-        header: "Дата",
+        accessorKey: 'date',
+        header: 'Дата',
         cell: ({ row }) => (
           <EditableCell
             value={row.original.date}
@@ -69,15 +79,17 @@ export default function UpdatesPage() {
             onSave={(newValue: unknown) => {
               setData((prev) =>
                 prev.map((item) =>
-                  item.id === row.original.id && newValue instanceof Date ? { ...item, date: newValue } : item,
-                ),
+                  item.id === row.original.id && newValue instanceof Date
+                    ? { ...item, date: newValue }
+                    : item
+                )
               );
             }}
           />
         ),
       },
     ],
-    [],
+    []
   );
 
   const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
@@ -96,7 +108,9 @@ export default function UpdatesPage() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -113,7 +127,9 @@ export default function UpdatesPage() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))

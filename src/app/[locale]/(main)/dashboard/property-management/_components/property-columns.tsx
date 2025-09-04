@@ -1,16 +1,16 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { Image as ImageIcon } from "lucide-react";
+import type { ColumnDef } from '@tanstack/react-table';
+import { Image as ImageIcon } from 'lucide-react';
 
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 
-import { Property } from "./schema";
+import type { Property } from './schema';
 
 export const propertyColumns: ColumnDef<Property>[] = [
   {
-    id: "select",
+    id: 'select',
     header: ({ table }) => (
       <div className="flex items-center justify-center">
         <Checkbox
@@ -33,8 +33,8 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableHiding: false,
   },
   {
-    id: "images",
-    accessorKey: "images",
+    id: 'images',
+    accessorKey: 'images',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Изображения" />,
     cell: ({ row }) => {
       const images = (row.original as Record<string, unknown>).images as string[] | undefined;
@@ -61,7 +61,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "apartmentNumber",
+    accessorKey: 'apartmentNumber',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Квартира №" />,
     cell: ({ row }) => (
       <Badge variant="outline" className="font-mono">
@@ -71,7 +71,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "location",
+    accessorKey: 'location',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Расположение" />,
     cell: ({ row }) => (
       <div className="max-w-[200px] truncate" title={row.original.location}>
@@ -81,7 +81,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "rooms",
+    accessorKey: 'rooms',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Комнаты" />,
     cell: ({ row }) => (
       <Badge variant="outline" className="w-16 justify-center">
@@ -91,51 +91,55 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "readinessStatus",
+    accessorKey: 'readinessStatus',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Готовность" />,
     cell: ({ row }) => (
-      <span>{row.original.readinessStatus === "меблированная" ? "Меблированная" : "Немеблированная"}</span>
+      <span>
+        {row.original.readinessStatus === 'меблированная' ? 'Меблированная' : 'Немеблированная'}
+      </span>
     ),
     enableSorting: true,
   },
   {
-    accessorKey: "propertyType",
+    accessorKey: 'propertyType',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Тип" />,
     cell: ({ row }) => (
       <Badge
         variant="outline"
         className={
-          row.original.propertyType === "аренда" ? "bg-amber-50 hover:bg-amber-50" : "bg-stone-200 hover:bg-stone-200"
+          row.original.propertyType === 'аренда'
+            ? 'bg-amber-50 hover:bg-amber-50'
+            : 'bg-stone-200 hover:bg-stone-200'
         }
       >
-        {row.original.propertyType === "аренда" ? "Аренда" : "Продажа"}
+        {row.original.propertyType === 'аренда' ? 'Аренда' : 'Продажа'}
       </Badge>
     ),
     enableSorting: true,
   },
   {
-    accessorKey: "occupancyStatus",
+    accessorKey: 'occupancyStatus',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
     cell: ({ row }) => (
       <Badge
         variant="outline"
         className={
-          row.original.occupancyStatus === "занята"
-            ? "bg-orange-100 text-orange-800 hover:bg-orange-100"
-            : "bg-green-100 text-green-800 hover:bg-green-100"
+          row.original.occupancyStatus === 'занята'
+            ? 'bg-orange-100 text-orange-800 hover:bg-orange-100'
+            : 'bg-green-100 text-green-800 hover:bg-green-100'
         }
       >
-        {row.original.occupancyStatus === "занята"
-          ? row.original.propertyType === "продажа"
-            ? "Продана"
-            : "Занята"
-          : "Свободна"}
+        {row.original.occupancyStatus === 'занята'
+          ? row.original.propertyType === 'продажа'
+            ? 'Продана'
+            : 'Занята'
+          : 'Свободна'}
       </Badge>
     ),
     enableSorting: true,
   },
   {
-    accessorKey: "apartmentContents",
+    accessorKey: 'apartmentContents',
     header: ({ column }) => <DataTableColumnHeader column={column} title="В квартире есть" />,
     cell: ({ row }) => (
       <div className="max-w-[200px]">
@@ -151,7 +155,7 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "urgentMatter",
+    accessorKey: 'urgentMatter',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Срочные Вопросы" />,
     cell: ({ row }) => (
       <div className="max-w-[200px]">
@@ -167,10 +171,12 @@ export const propertyColumns: ColumnDef<Property>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: 'createdAt',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Создано" />,
     cell: ({ row }) => (
-      <div className="text-muted-foreground text-sm">{new Date(row.original.createdAt).toLocaleDateString()}</div>
+      <div className="text-muted-foreground text-sm">
+        {new Date(row.original.createdAt).toLocaleDateString()}
+      </div>
     ),
     enableSorting: true,
   },

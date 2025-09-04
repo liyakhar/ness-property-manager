@@ -1,16 +1,15 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { Download, FileText, Image as ImageIcon, Paperclip, X } from 'lucide-react';
 
-import Image from "next/image";
+import Image from 'next/image';
+import * as React from 'react';
 
-import { Paperclip, X, FileText, Download, Image as ImageIcon } from "lucide-react";
-
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface PaymentAttachmentCellProps {
   value: string | undefined;
@@ -18,9 +17,13 @@ interface PaymentAttachmentCellProps {
   className?: string;
 }
 
-export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ value, onSave, className }) => {
+export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({
+  value,
+  onSave,
+  className,
+}) => {
   const [isEditing, setIsEditing] = React.useState(false);
-  const [attachmentUrl, setAttachmentUrl] = React.useState(value ?? "");
+  const [attachmentUrl, setAttachmentUrl] = React.useState(value ?? '');
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -30,7 +33,7 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
   };
 
   const handleCancel = () => {
-    setAttachmentUrl(value ?? "");
+    setAttachmentUrl(value ?? '');
     setIsEditing(false);
   };
 
@@ -53,60 +56,60 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
   };
 
   const handleRemoveAttachment = () => {
-    setAttachmentUrl("");
+    setAttachmentUrl('');
     onSave(undefined);
   };
 
   const getFileName = (url: string) => {
     // Handle base64 data URLs
-    if (url.startsWith("data:")) {
-      const mimeType = url.split(",")[0].split(":")[1].split(";")[0];
-      const extension = mimeType.split("/")[1];
+    if (url.startsWith('data:')) {
+      const mimeType = url.split(',')[0].split(':')[1].split(';')[0];
+      const extension = mimeType.split('/')[1];
       return `attachment.${extension}`;
     }
 
     try {
       const urlObj = new URL(url);
-      return urlObj.pathname.split("/").pop() ?? "attachment";
+      return urlObj.pathname.split('/').pop() ?? 'attachment';
     } catch {
-      return url.split("/").pop() ?? "attachment";
+      return url.split('/').pop() ?? 'attachment';
     }
   };
 
   // eslint-disable-next-line complexity
   const getFileType = (url: string) => {
     // Handle base64 data URLs
-    if (url.startsWith("data:")) {
-      const mimeType = url.split(",")[0].split(":")[1].split(";")[0];
-      if (mimeType.startsWith("image/")) {
-        return "image";
-      } else if (mimeType === "application/pdf") {
-        return "pdf";
+    if (url.startsWith('data:')) {
+      const mimeType = url.split(',')[0].split(':')[1].split(';')[0];
+      if (mimeType.startsWith('image/')) {
+        return 'image';
+      } else if (mimeType === 'application/pdf') {
+        return 'pdf';
       } else if (
-        mimeType.includes("text/") ||
-        mimeType.includes("application/msword") ||
-        mimeType.includes("application/vnd.openxmlformats")
+        mimeType.includes('text/') ||
+        mimeType.includes('application/msword') ||
+        mimeType.includes('application/vnd.openxmlformats')
       ) {
-        return "document";
+        return 'document';
       }
-      return "unknown";
+      return 'unknown';
     }
 
     const fileName = getFileName(url);
-    const extension = fileName.split(".").pop()?.toLowerCase();
+    const extension = fileName.split('.').pop()?.toLowerCase();
 
-    if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension ?? "")) {
-      return "image";
-    } else if (extension === "pdf") {
-      return "pdf";
-    } else if (["doc", "docx", "txt", "rtf"].includes(extension ?? "")) {
-      return "document";
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension ?? '')) {
+      return 'image';
+    } else if (extension === 'pdf') {
+      return 'pdf';
+    } else if (['doc', 'docx', 'txt', 'rtf'].includes(extension ?? '')) {
+      return 'document';
     }
-    return "unknown";
+    return 'unknown';
   };
 
-  const isImage = (url: string) => getFileType(url) === "image";
-  const isPdf = (url: string) => getFileType(url) === "pdf";
+  const isImage = (url: string) => getFileType(url) === 'image';
+  const isPdf = (url: string) => getFileType(url) === 'pdf';
 
   const handlePreview = () => {
     if (value) {
@@ -116,9 +119,9 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
 
   const handleDownload = () => {
     if (value) {
-      if (value.startsWith("data:")) {
+      if (value.startsWith('data:')) {
         // Handle base64 data URLs
-        const link = document.createElement("a");
+        const link = document.createElement('a');
         link.href = value;
         link.download = getFileName(value);
         document.body.appendChild(link);
@@ -126,14 +129,14 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
         document.body.removeChild(link);
       } else {
         // Handle regular URLs
-        window.open(value, "_blank");
+        window.open(value, '_blank');
       }
     }
   };
 
   if (isEditing) {
     return (
-      <div className={cn("flex items-center gap-2", className)}>
+      <div className={cn('flex items-center gap-2', className)}>
         <Input
           value={attachmentUrl}
           onChange={(e) => setAttachmentUrl(e.target.value)}
@@ -147,7 +150,12 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
           className="hidden"
           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
         />
-        <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-8 px-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          className="h-8 px-2"
+        >
           <Paperclip className="h-3 w-3" />
         </Button>
         <Button variant="outline" size="sm" onClick={handleSave} className="h-8 px-2">
@@ -165,8 +173,14 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
 
     return (
       <>
-        <div className={cn("flex items-center gap-1", className)}>
-          <Button variant="ghost" size="sm" onClick={handlePreview} className="h-8 w-8 p-0" title={fileName}>
+        <div className={cn('flex items-center gap-1', className)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handlePreview}
+            className="h-8 w-8 p-0"
+            title={fileName}
+          >
             {isImage(value) ? (
               <Avatar className="h-8 w-8">
                 <AvatarImage src={value} alt={fileName} />
@@ -182,10 +196,22 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
               </Avatar>
             )}
           </Button>
-          <Button variant="ghost" size="sm" onClick={handleDownload} className="h-6 w-6 p-0" title="Скачать файл">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDownload}
+            className="h-6 w-6 p-0"
+            title="Скачать файл"
+          >
             <Download className="h-3 w-3" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-6 w-6 p-0" title="Изменить">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+            className="h-6 w-6 p-0"
+            title="Изменить"
+          >
             <Paperclip className="h-3 w-3" />
           </Button>
           <Button
@@ -204,7 +230,11 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
           <DialogContent className="max-h-[90vh] max-w-4xl overflow-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                {isImage(value) ? <ImageIcon className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+                {isImage(value) ? (
+                  <ImageIcon className="h-5 w-5" />
+                ) : (
+                  <FileText className="h-5 w-5" />
+                )}
                 {fileName}
               </DialogTitle>
             </DialogHeader>
@@ -220,8 +250,8 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
                     className="max-h-[70vh] max-w-full rounded-lg border object-contain"
                     onError={(e) => {
                       const target = e.target as unknown as HTMLImageElement;
-                      target.style.display = "none";
-                      target.nextElementSibling?.classList.remove("hidden");
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
                   <div className="text-muted-foreground flex hidden h-32 items-center justify-center">
@@ -230,7 +260,11 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
                 </div>
               ) : isPdf(value) ? (
                 <div className="h-[70vh] w-full">
-                  <iframe src={value} className="h-full w-full rounded-lg border" title={fileName} />
+                  <iframe
+                    src={value}
+                    className="h-full w-full rounded-lg border"
+                    title={fileName}
+                  />
                 </div>
               ) : (
                 <div className="text-muted-foreground flex h-32 flex-col items-center justify-center">
@@ -250,7 +284,12 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({ va
   }
 
   return (
-    <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className={cn("h-8 w-8 p-0", className)}>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => setIsEditing(true)}
+      className={cn('h-8 w-8 p-0', className)}
+    >
       <Paperclip className="h-4 w-4" />
     </Button>
   );
