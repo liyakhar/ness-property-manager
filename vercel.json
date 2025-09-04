@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node scripts/migrate.js && next build",
+  "buildCommand": "npm run migrate && next build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "functions": {
