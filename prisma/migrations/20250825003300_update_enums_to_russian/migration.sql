@@ -1,6 +1,4 @@
 -- RedefineTables
-PRAGMA defer_foreign_keys=ON;
-PRAGMA foreign_keys=OFF;
 CREATE TABLE "new_properties" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "apartmentNumber" INTEGER NOT NULL,
@@ -10,8 +8,8 @@ CREATE TABLE "new_properties" (
     "propertyType" TEXT NOT NULL DEFAULT 'аренда',
     "occupancyStatus" TEXT NOT NULL DEFAULT 'свободна',
     "urgentMatter" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 INSERT INTO "new_properties" ("apartmentNumber", "createdAt", "id", "location", "occupancyStatus", "propertyType", "readinessStatus", "rooms", "updatedAt", "urgentMatter") SELECT "apartmentNumber", "createdAt", "id", "location", "occupancyStatus", "propertyType", "readinessStatus", "rooms", "updatedAt", "urgentMatter" FROM "properties";
 DROP TABLE "properties";
@@ -21,17 +19,15 @@ CREATE TABLE "new_tenants" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "apartmentId" TEXT NOT NULL,
-    "entryDate" DATETIME NOT NULL,
-    "exitDate" DATETIME,
+    "entryDate" TIMESTAMP(3) NOT NULL,
+    "exitDate" TIMESTAMP(3),
     "status" TEXT NOT NULL DEFAULT 'current',
     "notes" TEXT,
-    "receivePaymentDate" DATETIME NOT NULL DEFAULT (strftime('%Y-%m-01', 'now')),
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "receivePaymentDate" TIMESTAMP(3) NOT NULL DEFAULT (date_trunc('month', CURRENT_DATE)),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "tenants_apartmentId_fkey" FOREIGN KEY ("apartmentId") REFERENCES "properties" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "new_tenants" ("apartmentId", "createdAt", "entryDate", "exitDate", "id", "name", "notes", "receivePaymentDate", "status", "updatedAt") SELECT "apartmentId", "createdAt", "entryDate", "exitDate", "id", "name", "notes", "receivePaymentDate", "status", "updatedAt" FROM "tenants";
 DROP TABLE "tenants";
 ALTER TABLE "new_tenants" RENAME TO "tenants";
-PRAGMA foreign_keys=ON;
-PRAGMA defer_foreign_keys=OFF;

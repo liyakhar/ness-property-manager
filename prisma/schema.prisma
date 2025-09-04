@@ -41,7 +41,7 @@ model Tenant {
   exitDate  DateTime?
   status    TenantStatus @default(current)
   notes     String?
-  receivePaymentDate DateTime @default(dbgenerated("(strftime('%Y-%m-01', 'now'))"))
+  receivePaymentDate DateTime @default(dbgenerated("(date_trunc('month', CURRENT_DATE))"))
   utilityPaymentDate DateTime?
   internetPaymentDate DateTime?
   isPaid    Boolean @default(false)

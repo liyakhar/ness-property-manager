@@ -6,8 +6,8 @@ CREATE TABLE "properties" (
     "rooms" INTEGER NOT NULL,
     "readinessStatus" TEXT NOT NULL DEFAULT 'UNFURNISHED',
     "urgentMatter" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -15,12 +15,12 @@ CREATE TABLE "tenants" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "apartmentId" TEXT NOT NULL,
-    "entryDate" DATETIME NOT NULL,
-    "exitDate" DATETIME,
+    "entryDate" TIMESTAMP(3) NOT NULL,
+    "exitDate" TIMESTAMP(3),
     "status" TEXT NOT NULL DEFAULT 'current',
     "notes" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "tenants_apartmentId_fkey" FOREIGN KEY ("apartmentId") REFERENCES "properties" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
