@@ -10,6 +10,6 @@ npm run lint
 
 # Run build check (skip environment-dependent parts)
 echo "🏗️  Running build check..."
-NEXT_PUBLIC_SUPABASE_URL=dummy NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy npx next build --no-lint
+NEXT_PUBLIC_SUPABASE_URL=https://dummy.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy npx next build --no-lint
 
 echo "✅ Pre-push checks passed!"
