@@ -180,7 +180,7 @@ export function OccupancyCalendar() {
       <AddTenantDialog
         open={isAddTenantDialogOpen}
         onOpenChange={setAddTenantDialogOpen}
-        onAddTenant={() => {
+        onAddTenant={async () => {
           // Handle adding tenant
           setAddTenantDialogOpen(false);
         }}

@@ -336,7 +336,7 @@ export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) 
       <AddTenantDialog
         open={isAddTenantDialogOpen}
         onOpenChange={setAddTenantDialogOpen}
-        onAddTenant={() => setAddTenantDialogOpen(false)}
+        onAddTenant={async () => setAddTenantDialogOpen(false)}
         properties={filteredProperties}
       />
     </div>
