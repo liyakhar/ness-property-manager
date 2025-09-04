@@ -11,7 +11,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
-import { useProperties } from '@/hooks/use-properties';
+import {
+  useCreatePropertyMutation,
+  useDeletePropertyMutation,
+  usePropertiesQuery,
+  useUpdatePropertyMutation,
+} from '@/hooks/use-properties-query';
 import { usePropertyManagementStore } from '@/stores/property-management';
 import { AddPropertyDialog } from './add-property-dialog';
 import { EditableCell } from './editable-cell';
@@ -20,18 +25,67 @@ import type { AddPropertyFormData, Property } from './schema';
 
 // import { HiddenPropertiesTable } from "./hidden-properties-table";
 
+// Loading skeleton component
+const PropertiesTableSkeleton = () => (
+  <div className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Building2 className="h-5 w-5" />
+          <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Table header skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="h-10 w-64 bg-muted animate-pulse rounded" />
+            <div className="flex gap-2">
+              <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+              <div className="h-10 w-10 bg-muted animate-pulse rounded" />
+            </div>
+          </div>
+          {/* Table rows skeleton */}
+          <div className="space-y-2">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div
+                key={`property-skeleton-row-${Date.now()}-${i}`}
+                className="flex items-center space-x-4"
+              >
+                <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-12 bg-muted animate-pulse rounded" />
+              </div>
+            ))}
+          </div>
+          {/* Pagination skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+            <div className="flex gap-2">
+              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+);
+
 interface PropertiesTableProps {
   searchQuery?: string;
 }
 
 export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
-  const {
-    properties: allProperties,
-    addProperty,
-    updateProperty,
-    deleteProperty,
-    setPropertiesHidden,
-  } = useProperties();
+  const { data: allProperties = [], isLoading } = usePropertiesQuery();
+  const createPropertyMutation = useCreatePropertyMutation();
+  const updatePropertyMutation = useUpdatePropertyMutation();
+  const deletePropertyMutation = useDeletePropertyMutation();
 
   const { isAddPropertyDialogOpen, setAddPropertyDialogOpen } = usePropertyManagementStore();
 
@@ -52,9 +106,9 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   });
 
   // Function to handle adding new columns
-  const handleAddColumn = (columnData: { id: string; header: string; type: string }) => {
+  const handleAddColumn = async (columnData: { id: string; header: string; type: string }) => {
     // Add the new field to all existing properties with a default value
-    allProperties.forEach((property) => {
+    for (const property of allProperties) {
       if (!(property as Record<string, unknown>)[columnData.id]) {
         let defaultValue: unknown;
         switch (columnData.type) {
@@ -76,9 +130,12 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
           default:
             defaultValue = '';
         }
-        updateProperty(property.id, { [columnData.id]: defaultValue });
+        await updatePropertyMutation.mutateAsync({
+          id: property.id,
+          updates: { [columnData.id]: defaultValue },
+        });
       }
-    });
+    }
 
     const newColumn: ColumnDef<Property> = {
       id: columnData.id,
@@ -90,9 +147,9 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
         return (
           <EditableCell
             value={value}
-            onSave={(newValue: unknown) => {
+            onSave={async (newValue: unknown) => {
               const updates = { [columnData.id]: newValue };
-              updateProperty(row.original.id, updates);
+              await updatePropertyMutation.mutateAsync({ id: row.original.id, updates });
             }}
             type={
               columnData.type === 'boolean'
@@ -126,13 +183,15 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
 
   // Create property columns with update function
   const propertyColumns = React.useMemo(() => {
-    return createPropertyColumns(updateProperty, (id: string) => {
-      // Optimistic local delete via store
-      usePropertyManagementStore.getState().deleteProperty(id);
-      // Fire-and-forget API delete to persist if backend used
-      fetch(`/api/properties/${id}`, { method: 'DELETE' }).catch(() => {});
-    });
-  }, [updateProperty]);
+    return createPropertyColumns(
+      async (id: string, updates: Partial<Property>) => {
+        await updatePropertyMutation.mutateAsync({ id, updates });
+      },
+      async (id: string) => {
+        await deletePropertyMutation.mutateAsync(id);
+      }
+    );
+  }, [updatePropertyMutation, deletePropertyMutation]);
 
   // Combine default columns with custom columns
   const allColumns = React.useMemo(() => {
@@ -175,35 +234,42 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const selectedPropertyIds = table.getSelectedRowModel().rows.map((r) => r.original.id);
   const hasSelection = selectedPropertyIds.length > 0;
 
-  const handleHideSelected = () => {
+  const handleHideSelected = async () => {
     if (!hasSelection) return;
-    setPropertiesHidden(selectedPropertyIds, true);
+    for (const id of selectedPropertyIds) {
+      await updatePropertyMutation.mutateAsync({ id, updates: { hidden: true } });
+    }
     table.resetRowSelection();
   };
-  const handleUnhideSelected = () => {
+  const handleUnhideSelected = async () => {
     if (!hasSelection) return;
-    setPropertiesHidden(selectedPropertyIds, false);
+    for (const id of selectedPropertyIds) {
+      await updatePropertyMutation.mutateAsync({ id, updates: { hidden: false } });
+    }
     table.resetRowSelection();
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (!hasSelection) return;
-    selectedPropertyIds.forEach((id) => {
-      deleteProperty(id);
-      fetch(`/api/properties/${id}`, { method: 'DELETE' }).catch(() => {});
-    });
+    for (const id of selectedPropertyIds) {
+      await deletePropertyMutation.mutateAsync(id);
+    }
     table.resetRowSelection();
   };
 
   const handleAddProperty = async (newProperty: AddPropertyFormData) => {
     try {
-      await addProperty(newProperty);
+      await createPropertyMutation.mutateAsync(newProperty);
       setAddPropertyDialogOpen(false);
     } catch (error) {
       console.error('Error adding property:', error);
       // Error handling is done in the dialog component
     }
   };
+
+  if (isLoading) {
+    return <PropertiesTableSkeleton />;
+  }
 
   return (
     <div className="space-y-4">

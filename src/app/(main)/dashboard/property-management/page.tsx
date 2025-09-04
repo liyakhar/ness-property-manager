@@ -5,11 +5,137 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { usePropertyManagementStore } from '@/stores/property-management';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usePropertyManagementQuery } from '@/hooks/use-property-management-query';
 import { DailyNotifications } from './_components/daily-notifications';
 
+// Loading skeleton component
+const PropertyManagementSkeleton = () => (
+  <div className="@container/main flex flex-col gap-4 md:gap-6">
+    <div className="flex flex-col gap-2">
+      <Skeleton className="h-8 w-64" />
+    </div>
+
+    {/* Search Bar Skeleton */}
+    <div className="relative">
+      <Skeleton className="h-10 w-full" />
+    </div>
+
+    {/* Main Statistics Skeleton */}
+    <div className="space-y-8">
+      {/* Total Properties, Rent, and Sale */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-8 w-8" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-6 bg-muted/30 rounded-xl border">
+                <Skeleton className="h-4 w-16 mb-2" />
+                <Skeleton className="h-6 w-8 mb-3" />
+                <div className="space-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+              <div className="p-6 bg-muted/30 rounded-xl border">
+                <Skeleton className="h-4 w-16 mb-2" />
+                <Skeleton className="h-6 w-8 mb-3" />
+                <div className="space-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-8 w-8" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-6 bg-muted/30 rounded-xl border">
+                <Skeleton className="h-4 w-16 mb-2" />
+                <Skeleton className="h-6 w-8 mb-3" />
+                <div className="space-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+              <div className="p-6 bg-muted/30 rounded-xl border">
+                <Skeleton className="h-4 w-16 mb-2" />
+                <Skeleton className="h-6 w-8 mb-3" />
+                <div className="space-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tenants and Room Distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-8 w-8" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div
+                  key={`tenant-skeleton-${Date.now()}-${i}`}
+                  className="p-6 bg-muted/30 rounded-xl border"
+                >
+                  <Skeleton className="h-6 w-8 mb-1" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-8 w-8" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div
+                  key={`room-skeleton-${Date.now()}-${i}`}
+                  className="p-6 bg-muted/30 rounded-xl border"
+                >
+                  <Skeleton className="h-6 w-8 mb-1" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </div>
+);
+
 export default function PropertyManagementPage() {
-  const { properties, tenants, updateProperty } = usePropertyManagementStore();
+  const { properties, tenants, updateProperty, isLoading } = usePropertyManagementQuery();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter properties and tenants based on search query
@@ -226,6 +352,10 @@ export default function PropertyManagementPage() {
 
   // Sort addresses by property count (descending)
   const sortedAddresses = Object.values(addressGroups).sort((a, b) => b.count - a.count);
+
+  if (isLoading) {
+    return <PropertyManagementSkeleton />;
+  }
 
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">
@@ -457,7 +587,10 @@ export default function PropertyManagementPage() {
                           size="sm"
                           variant="outline"
                           onClick={() =>
-                            updateProperty(property.id, { urgentMatterResolved: true })
+                            updateProperty({
+                              id: property.id,
+                              updates: { urgentMatterResolved: true },
+                            })
                           }
                           className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                         >

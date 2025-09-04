@@ -13,7 +13,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
-import { useTenants } from '@/hooks/use-tenants';
+import { usePropertiesQuery } from '@/hooks/use-properties-query';
+import {
+  useCreateTenantMutation,
+  useDeleteTenantMutation,
+  useTenantsQuery,
+  useUpdateTenantMutation,
+} from '@/hooks/use-tenants-query';
 import { usePropertyManagementStore } from '@/stores/property-management';
 
 import { AddTenantDialog } from './add-tenant-dialog';
@@ -21,19 +27,69 @@ import { EditableCell } from './editable-cell';
 import type { AddTenantFormData, Tenant } from './schema';
 import { createTenantColumns } from './tenant-columns';
 
+// Loading skeleton component
+const TenantDatabaseSkeleton = () => (
+  <div className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Table header skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="h-10 w-64 bg-muted animate-pulse rounded" />
+            <div className="flex gap-2">
+              <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+              <div className="h-10 w-10 bg-muted animate-pulse rounded" />
+            </div>
+          </div>
+          {/* Table rows skeleton */}
+          <div className="space-y-2">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div
+                key={`tenant-skeleton-row-${Date.now()}-${i}`}
+                className="flex items-center space-x-4"
+              >
+                <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-12 bg-muted animate-pulse rounded" />
+              </div>
+            ))}
+          </div>
+          {/* Pagination skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+            <div className="flex gap-2">
+              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+              <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+);
+
 interface TenantDatabaseProps {
   searchQuery?: string;
 }
 
 export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
-  const {
-    tenants: allTenants,
-    properties,
-    addTenant,
-    updateTenant,
-    deleteTenant,
-    setTenantsHidden,
-  } = useTenants();
+  const { data: allTenants = [], isLoading } = useTenantsQuery();
+  const createTenantMutation = useCreateTenantMutation();
+  const updateTenantMutation = useUpdateTenantMutation();
+  const deleteTenantMutation = useDeleteTenantMutation();
+
+  // Get properties for tenant property selection
+  const { data: properties = [] } = usePropertiesQuery();
 
   const { isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
 
@@ -54,9 +110,9 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
   });
 
   // Function to handle adding new columns
-  const handleAddColumn = (columnData: { id: string; header: string; type: string }) => {
+  const handleAddColumn = async (columnData: { id: string; header: string; type: string }) => {
     // Add the new field to all existing tenants with a default value
-    allTenants.forEach((tenant) => {
+    for (const tenant of allTenants) {
       if (!(tenant as Record<string, unknown>)[columnData.id]) {
         let defaultValue: unknown;
         switch (columnData.type) {
@@ -78,9 +134,12 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
           default:
             defaultValue = '';
         }
-        updateTenant(tenant.id, { [columnData.id]: defaultValue });
+        await updateTenantMutation.mutateAsync({
+          id: tenant.id,
+          updates: { [columnData.id]: defaultValue },
+        });
       }
-    });
+    }
 
     const newColumn: ColumnDef<Tenant> = {
       id: columnData.id,
@@ -92,9 +151,9 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
         return (
           <EditableCell
             value={value}
-            onSave={(newValue: unknown) => {
+            onSave={async (newValue: unknown) => {
               const updates = { [columnData.id]: newValue };
-              updateTenant(row.original.id, updates);
+              await updateTenantMutation.mutateAsync({ id: row.original.id, updates });
             }}
             type={columnData.type as 'text' | 'number' | 'date' | 'select'}
             options={
@@ -126,13 +185,16 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
 
   // Create tenant columns with update function
   const tenantColumns = React.useMemo(() => {
-    return createTenantColumns(updateTenant, properties, (id: string) => {
-      // Optimistic local delete via store
-      usePropertyManagementStore.getState().deleteTenant(id);
-      // Fire-and-forget API delete to persist if backend used
-      fetch(`/api/tenants/${id}`, { method: 'DELETE' }).catch(() => {});
-    });
-  }, [properties, updateTenant]);
+    return createTenantColumns(
+      async (id: string, updates: Partial<Tenant>) => {
+        await updateTenantMutation.mutateAsync({ id, updates });
+      },
+      properties,
+      async (id: string) => {
+        await deleteTenantMutation.mutateAsync(id);
+      }
+    );
+  }, [properties, updateTenantMutation, deleteTenantMutation]);
 
   // Combine default columns with custom columns
   const allColumns = React.useMemo(() => {
@@ -286,24 +348,25 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
 
   const hasSelection = selectedTenantIds.length > 0;
 
-  const handleToggleHideSelected = () => {
+  const handleToggleHideSelected = async () => {
     if (!hasSelection) return;
-    setTenantsHidden(selectedTenantIds, !showHiddenView);
+    for (const id of selectedTenantIds) {
+      await updateTenantMutation.mutateAsync({ id, updates: { hidden: !showHiddenView } });
+    }
     table.resetRowSelection();
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (!hasSelection) return;
-    selectedTenantIds.forEach((id) => {
-      deleteTenant(id);
-      fetch(`/api/tenants/${id}`, { method: 'DELETE' }).catch(() => {});
-    });
+    for (const id of selectedTenantIds) {
+      await deleteTenantMutation.mutateAsync(id);
+    }
     table.resetRowSelection();
   };
 
   const handleAddTenant = async (newTenant: AddTenantFormData) => {
     try {
-      await addTenant(newTenant);
+      await createTenantMutation.mutateAsync(newTenant);
       setAddTenantDialogOpen(false);
     } catch (error) {
       console.error('Error adding tenant:', error);
@@ -315,6 +378,10 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
   const getPastTenants = () => filteredTenants.filter((tenant) => tenant.status === 'past');
   const getFutureTenants = () => filteredTenants.filter((tenant) => tenant.status === 'future');
   const getUpcomingTenants = () => filteredTenants.filter((tenant) => tenant.status === 'upcoming');
+
+  if (isLoading) {
+    return <TenantDatabaseSkeleton />;
+  }
 
   return (
     <div className="space-y-4">
