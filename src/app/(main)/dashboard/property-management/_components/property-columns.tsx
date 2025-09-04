@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { EditableCell } from "./editable-cell";
+import { PropertyImagesCell } from "./property-images-cell";
 import { Property } from "./schema";
 
 export const createPropertyColumns = (
@@ -53,28 +54,12 @@ export const createPropertyColumns = (
       id: "images",
       accessorKey: "images",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Изображения" />,
-      cell: ({ row }) => {
-        const images = (row.original as Record<string, unknown>).images as string[] | undefined;
-        return (
-          <div className="flex items-center gap-1">
-            {(images ?? []).slice(0, 3).map((src) => (
-              <Avatar key={`img-${src}`} className="h-8 w-8">
-                <AvatarImage src={src} alt="" />
-                <AvatarFallback>
-                  <ImageIcon className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-            ))}
-            {!images || images.length === 0 ? (
-              <span className="text-muted-foreground text-xs">Нет</span>
-            ) : images.length > 3 ? (
-              <Badge variant="outline" className="text-[10px]">
-                +{images.length - 3}
-              </Badge>
-            ) : null}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <PropertyImagesCell
+          value={(row.original as Record<string, unknown>).images as string[] | undefined}
+          onSave={(value) => updateProperty(row.original.id, { images: value as any })}
+        />
+      ),
       enableSorting: false,
     },
     {

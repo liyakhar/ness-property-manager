@@ -9,6 +9,7 @@ export const propertySchema = z
     readinessStatus: z.enum(["меблированная", "немеблированная"]),
     propertyType: z.enum(["аренда", "продажа"]),
     occupancyStatus: z.enum(["занята", "свободна"]),
+    images: z.array(z.string()).optional(),
     apartmentContents: z.string().optional(),
     urgentMatter: z.string().optional(),
     urgentMatterResolved: z.boolean().default(false),

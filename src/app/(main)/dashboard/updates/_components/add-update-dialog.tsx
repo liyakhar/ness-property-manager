@@ -69,61 +69,63 @@ export const AddUpdateDialog: React.FC<AddUpdateDialogProps> = ({ onAddUpdate })
           Добавить обновление
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[425px]">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Добавить обновление</DialogTitle>
           <DialogDescription>Добавьте новое обновление в систему. Заполните все поля.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Имя
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                className="col-span-3"
-                placeholder="Введите имя"
-                required
-              />
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Имя
+                </Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  className="col-span-3"
+                  placeholder="Введите имя"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="update" className="text-right">
+                  Обновление
+                </Label>
+                <Textarea
+                  id="update"
+                  value={formData.update}
+                  onChange={(e) => handleInputChange("update", e.target.value)}
+                  className="col-span-3"
+                  placeholder="Опишите обновление"
+                  rows={3}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date" className="text-right">
+                  Дата
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleInputChange("date", e.target.value)}
+                  className="col-span-3"
+                  required
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="update" className="text-right">
-                Обновление
-              </Label>
-              <Textarea
-                id="update"
-                value={formData.update}
-                onChange={(e) => handleInputChange("update", e.target.value)}
-                className="col-span-3"
-                placeholder="Опишите обновление"
-                rows={3}
-                required
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">
-                Дата
-              </Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange("date", e.target.value)}
-                className="col-span-3"
-                required
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Отмена
-            </Button>
-            <Button type="submit">Добавить</Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter className="flex-shrink-0">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Отмена
+              </Button>
+              <Button type="submit">Добавить</Button>
+            </DialogFooter>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
