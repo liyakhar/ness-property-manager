@@ -6,6 +6,7 @@ import { TENANT_DATABASE_CONSTANTS } from '../constants/tenant-database.constant
 import type { TenantFiltersProps } from '../types/tenant-database.props';
 
 export const TenantFilters: React.FC<TenantFiltersProps> = ({
+  table,
   showHiddenView,
   onToggleHiddenView,
   onAddColumn,
@@ -44,7 +45,7 @@ export const TenantFilters: React.FC<TenantFiltersProps> = ({
             ? TENANT_DATABASE_CONSTANTS.MESSAGES.SHOW_MAIN
             : TENANT_DATABASE_CONSTANTS.MESSAGES.HIDDEN}
         </Button>
-        <DataTableViewOptions table={null as never} onAddColumn={onAddColumn} />
+        <DataTableViewOptions table={table} onAddColumn={onAddColumn} />
         <Button onClick={onAddTenant}>
           <Plus className="mr-2 h-4 w-4" />
           {TENANT_DATABASE_CONSTANTS.MESSAGES.ADD_TENANT}

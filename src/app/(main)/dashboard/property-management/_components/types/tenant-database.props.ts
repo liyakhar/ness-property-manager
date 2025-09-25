@@ -19,6 +19,7 @@ export interface TenantTableProps {
 }
 
 export interface TenantFiltersProps {
+  table: Table<Tenant>;
   showHiddenView: boolean;
   onToggleHiddenView: () => void;
   onAddColumn: (columnData: AddColumnData) => void;

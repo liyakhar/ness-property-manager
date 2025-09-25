@@ -90,20 +90,22 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const { isAddPropertyDialogOpen, setAddPropertyDialogOpen } = usePropertyManagementStore();
 
   // State for custom columns
-  const [customColumns, setCustomColumns] = React.useState<ColumnDef<Property>[]>(() => {
-    // Load custom columns from localStorage on component mount
+  const [customColumns, setCustomColumns] = React.useState<ColumnDef<Property>[]>([]);
+
+  // Load custom columns from localStorage on component mount
+  React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('property-custom-columns');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsedColumns = JSON.parse(saved);
+          setCustomColumns(parsedColumns);
         } catch (e) {
           console.error('Не удалось разобрать сохраненные пользовательские колонки:', e);
         }
       }
     }
-    return [];
-  });
+  }, []);
 
   // Function to handle adding new columns
   const handleAddColumn = async (columnData: { id: string; header: string; type: string }) => {

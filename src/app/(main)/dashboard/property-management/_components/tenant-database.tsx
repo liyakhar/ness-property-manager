@@ -49,6 +49,7 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
           <div className="mb-4 flex items-center justify-between">
             <TenantStats tenants={filteredTenants} />
             <TenantFilters
+              table={table}
               showHiddenView={showHiddenView}
               onToggleHiddenView={() => setShowHiddenView(!showHiddenView)}
               onAddColumn={handleAddColumn}
