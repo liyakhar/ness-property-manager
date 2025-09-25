@@ -7,6 +7,7 @@ export const usePropertyManagement = () => {
     usePropertyManagementStore();
 
   // Fetch both properties and tenants on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally want to fetch only on mount
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -17,7 +18,7 @@ export const usePropertyManagement = () => {
     };
 
     loadData();
-  }, [fetchProperties, fetchTenants]);
+  }, []); // Intentionally empty dependency array - we only want to fetch on mount
 
   const handleUpdateProperty = (id: string, updates: Partial<Property>) => {
     updateProperty(id, updates);
