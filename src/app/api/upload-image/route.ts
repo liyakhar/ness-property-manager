@@ -1,15 +1,21 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { PROPERTY_IMAGES_BUCKET, supabase } from '@/lib/supabase';
+import {
+  isSupabaseConfigured,
+  PROPERTY_IMAGES_BUCKET,
+  STORAGE_CONFIG,
+  supabase,
+} from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
     // Check if Supabase is properly configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (!isSupabaseConfigured()) {
       console.error('Supabase environment variables not configured');
       return NextResponse.json(
         {
-          error: 'Server configuration error: Supabase not configured',
+          error:
+            'Server configuration error: Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.',
         },
         { status: 500 }
       );
@@ -35,29 +41,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-      'image/svg+xml',
-    ];
-    if (!allowedTypes.includes(file.type)) {
+    if (!STORAGE_CONFIG.ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
         {
-          error: `Invalid file type. Allowed types: ${allowedTypes.join(', ')}`,
+          error: `Invalid file type. Allowed types: ${STORAGE_CONFIG.ALLOWED_TYPES.join(', ')}`,
         },
         { status: 400 }
       );
     }
 
-    // Validate file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
+    // Validate file size
+    if (file.size > STORAGE_CONFIG.MAX_FILE_SIZE) {
       return NextResponse.json(
         {
-          error: 'File too large. Maximum size is 10MB',
+          error: `File too large. Maximum size is ${STORAGE_CONFIG.MAX_FILE_SIZE / (1024 * 1024)}MB`,
         },
         { status: 400 }
       );

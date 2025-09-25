@@ -114,36 +114,10 @@ export function DataTableViewOptions<TData>({
 }: DataTableViewOptionsProps<TData>) {
   const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
 
-  // Define default columns that cannot be deleted
-  const defaultColumns = [
-    'select',
-    'name',
-    'apartmentId',
-    'status',
-    'entryDate',
-    'exitDate',
-    'notes',
-    'createdAt',
-    'updatedAt',
-    'apartmentNumber',
-    'location',
-    'rooms',
-    'readinessStatus',
-    'propertyType',
-    'occupancyStatus',
-    'urgentMatter',
-  ];
-
   // Get all columns that can be hidden
   const hideableColumns = table
     .getAllColumns()
     .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide());
-
-  // Separate custom columns from default columns
-  const customColumns = hideableColumns.filter((column) => !defaultColumns.includes(column.id));
-  const defaultHideableColumns = hideableColumns.filter((column) =>
-    defaultColumns.includes(column.id)
-  );
 
   return (
     <>
@@ -158,53 +132,33 @@ export function DataTableViewOptions<TData>({
           <DropdownMenuLabel>Показать колонки</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          {/* Default columns */}
-          {defaultHideableColumns.map((column) => {
+          {/* All columns with delete option */}
+          {hideableColumns.map((column) => {
             return (
-              <DropdownMenuCheckboxItem
-                key={column.id}
-                className="capitalize"
-                checked={column.getIsVisible()}
-                onCheckedChange={(value) => column.toggleVisibility(!!value)}
-              >
-                {getColumnDisplayName(column.id)}
-              </DropdownMenuCheckboxItem>
+              <div key={column.id} className="flex items-center justify-between">
+                <DropdownMenuCheckboxItem
+                  className="capitalize flex-1"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {getColumnDisplayName(column.id)}
+                </DropdownMenuCheckboxItem>
+                {onDeleteColumn && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteColumn(column.id);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
             );
           })}
-
-          {/* Custom columns with delete option */}
-          {customColumns.length > 0 && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Пользовательские колонки</DropdownMenuLabel>
-              {customColumns.map((column) => {
-                return (
-                  <div key={column.id} className="flex items-center justify-between">
-                    <DropdownMenuCheckboxItem
-                      className="capitalize flex-1"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {getColumnDisplayName(column.id)}
-                    </DropdownMenuCheckboxItem>
-                    {onDeleteColumn && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteColumn(column.id);
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-            </>
-          )}
 
           <DropdownMenuSeparator />
           <DropdownMenuCheckboxItem

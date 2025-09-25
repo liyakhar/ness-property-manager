@@ -19,9 +19,12 @@ import {
 } from '@/hooks/use-properties-query';
 import { usePropertyManagementStore } from '@/stores/property-management';
 import { AddPropertyDialog } from './add-property-dialog';
+import { PROPERTY_DATABASE_CONSTANTS } from './constants/property-database.constants';
 import { EditableCell } from './editable-cell';
 import { createPropertyColumns } from './property-columns';
 import type { AddPropertyFormData, Property } from './schema';
+import { propertyDatabaseService } from './services/property-database.service';
+import type { AddColumnData } from './types/property-database.props';
 
 // import { HiddenPropertiesTable } from "./hidden-properties-table";
 
@@ -95,10 +98,10 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   // Load custom columns from localStorage on component mount
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('property-custom-columns');
+      const saved = localStorage.getItem(PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS);
       if (saved) {
         try {
-          const parsedColumns = JSON.parse(saved);
+          const parsedColumns = JSON.parse(saved) as ColumnDef<Property>[];
 
           // Migrate any English headers to Russian
           const migratedColumns = parsedColumns.map((column: ColumnDef<Property>) => {
@@ -128,88 +131,106 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
           setCustomColumns(migratedColumns);
 
           // Save migrated columns back to localStorage
-          localStorage.setItem('property-custom-columns', JSON.stringify(migratedColumns));
+          localStorage.setItem(
+            PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
+            JSON.stringify(migratedColumns)
+          );
         } catch (e) {
-          console.error('Не удалось разобрать сохраненные пользовательские колонки:', e);
+          console.error(PROPERTY_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, e);
         }
       }
     }
   }, []);
 
   // Function to handle adding new columns
-  const handleAddColumn = async (columnData: { id: string; header: string; type: string }) => {
-    // Add the new field to all existing properties with a default value
-    for (const property of allProperties) {
-      if (!(property as Record<string, unknown>)[columnData.id]) {
-        let defaultValue: unknown;
-        switch (columnData.type) {
-          case 'text':
-            defaultValue = '';
-            break;
-          case 'number':
-            defaultValue = 0;
-            break;
-          case 'date':
-            defaultValue = new Date();
-            break;
-          case 'select':
-            defaultValue = 'option1';
-            break;
-          case 'boolean':
-            defaultValue = false;
-            break;
-          default:
-            defaultValue = '';
-        }
-        await updatePropertyMutation.mutateAsync({
-          id: property.id,
-          updates: { [columnData.id]: defaultValue },
-        });
+  const handleAddColumn = async (columnData: AddColumnData) => {
+    const result = await propertyDatabaseService.addCustomColumnToProperties(
+      allProperties,
+      columnData,
+      async (id: string, updates: Partial<Property>) => {
+        await updatePropertyMutation.mutateAsync({ id, updates });
       }
-    }
+    );
 
-    const newColumn: ColumnDef<Property> = {
-      id: columnData.id,
-      accessorKey: columnData.id,
-      header: () => <div className="font-medium">{columnData.header}</div>,
-      cell: ({ row }) => {
-        // Use EditableCell for custom columns
-        const value = (row.original as Record<string, unknown>)[columnData.id];
-        return (
-          <EditableCell
-            value={value}
-            onSave={async (newValue: unknown) => {
-              const updates = { [columnData.id]: newValue };
-              await updatePropertyMutation.mutateAsync({ id: row.original.id, updates });
-            }}
-            type={
-              columnData.type === 'boolean'
-                ? 'text'
-                : (columnData.type as 'text' | 'number' | 'date' | 'select')
-            }
-            options={
-              columnData.type === 'select'
-                ? [
-                    { value: 'option1', label: 'Опция 1' },
-                    { value: 'option2', label: 'Опция 2' },
-                    { value: 'option3', label: 'Опция 3' },
-                  ]
-                : []
-            }
-          />
-        );
+    result.match(
+      () => {
+        const newColumn: ColumnDef<Property> = {
+          id: columnData.id,
+          accessorKey: columnData.id,
+          header: () => <div className="font-medium">{columnData.header}</div>,
+          cell: ({ row }) => {
+            // Use EditableCell for custom columns
+            const value = (row.original as Record<string, unknown>)[columnData.id];
+            return (
+              <EditableCell
+                value={value}
+                onSave={async (newValue: unknown) => {
+                  const updates = { [columnData.id]: newValue };
+                  await updatePropertyMutation.mutateAsync({ id: row.original.id, updates });
+                }}
+                type={
+                  columnData.type === 'boolean'
+                    ? 'text'
+                    : (columnData.type as 'text' | 'number' | 'date' | 'select')
+                }
+                options={
+                  columnData.type === 'select'
+                    ? [
+                        { value: 'option1', label: 'Опция 1' },
+                        { value: 'option2', label: 'Опция 2' },
+                        { value: 'option3', label: 'Опция 3' },
+                      ]
+                    : []
+                }
+              />
+            );
+          },
+          enableSorting: true,
+          enableHiding: true,
+        };
+
+        const updatedColumns = [...customColumns, newColumn];
+        setCustomColumns(updatedColumns);
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(
+            PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
+            JSON.stringify(updatedColumns)
+          );
+        }
       },
-      enableSorting: true,
-      enableHiding: true,
-    };
+      (error) => {
+        console.error('Failed to add custom column:', error.message);
+      }
+    );
+  };
 
-    const updatedColumns = [...customColumns, newColumn];
-    setCustomColumns(updatedColumns);
+  // Function to handle deleting custom columns
+  const handleDeleteColumn = async (columnId: string) => {
+    const result = await propertyDatabaseService.deleteCustomColumnFromProperties(
+      allProperties,
+      columnId,
+      async (id: string, updates: Partial<Property>) => {
+        await updatePropertyMutation.mutateAsync({ id, updates });
+      }
+    );
 
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('property-custom-columns', JSON.stringify(updatedColumns));
-    }
+    result.match(
+      () => {
+        const updatedColumns = customColumns.filter((column) => column.id !== columnId);
+        setCustomColumns(updatedColumns);
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(
+            PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
+            JSON.stringify(updatedColumns)
+          );
+        }
+      },
+      (error) => {
+        console.error('Failed to delete custom column:', error.message);
+      }
+    );
   };
 
   // Create property columns with update function
@@ -336,7 +357,11 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
               <Button variant="outline" size="sm" onClick={() => setShowHiddenView((v) => !v)}>
                 {showHiddenView ? 'Показать основные' : 'Скрытые'}
               </Button>
-              <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
+              <DataTableViewOptions
+                table={table}
+                onAddColumn={handleAddColumn}
+                onDeleteColumn={handleDeleteColumn}
+              />
               <Button onClick={() => setAddPropertyDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить Недвижимость
