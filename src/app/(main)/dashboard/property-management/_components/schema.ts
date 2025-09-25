@@ -45,6 +45,7 @@ export const addTenantSchema = z.object({
   entryDate: z.date({
     required_error: 'Entry date is required',
   }),
+  exitDate: z.date().optional(),
   status: z.enum(['current', 'past', 'future', 'upcoming']).default('current'),
   notes: z.string().optional(),
   receivePaymentDate: z.date().default(() => {

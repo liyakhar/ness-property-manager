@@ -60,6 +60,7 @@ export function AddTenantDialog({
       name: '',
       apartmentId: '',
       entryDate: undefined,
+      exitDate: undefined,
       status: 'current',
       notes: '',
       receivePaymentDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -183,6 +184,35 @@ export function AddTenantDialog({
                           selected={field.value}
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="exitDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Дата Выезда (Необязательно)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button variant="outline" className="w-full pl-3 text-left font-normal">
+                            {field.value ? format(field.value, 'PPP') : <span>Выберите дату</span>}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
                           initialFocus
                         />
                       </PopoverContent>
