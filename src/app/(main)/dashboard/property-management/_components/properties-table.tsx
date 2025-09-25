@@ -99,7 +99,36 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
       if (saved) {
         try {
           const parsedColumns = JSON.parse(saved);
-          setCustomColumns(parsedColumns);
+
+          // Migrate any English headers to Russian
+          const migratedColumns = parsedColumns.map((column: ColumnDef<Property>) => {
+            if (column.header && typeof column.header === 'string') {
+              // Check if header is in English and needs translation
+              const englishToRussian: Record<string, string> = {
+                'Apartment Number': 'Номер Квартиры',
+                Location: 'Расположение',
+                Rooms: 'Комнаты',
+                'Readiness Status': 'Готовность',
+                'Property Type': 'Тип',
+                'Occupancy Status': 'Статус',
+                'Urgent Matter': 'Срочные Вопросы',
+                Test: 'Тест',
+                Created: 'Создано',
+                Updated: 'Обновлено',
+                Actions: 'Действия',
+              };
+
+              if (englishToRussian[column.header]) {
+                return { ...column, header: englishToRussian[column.header] };
+              }
+            }
+            return column;
+          });
+
+          setCustomColumns(migratedColumns);
+
+          // Save migrated columns back to localStorage
+          localStorage.setItem('property-custom-columns', JSON.stringify(migratedColumns));
         } catch (e) {
           console.error('Не удалось разобрать сохраненные пользовательские колонки:', e);
         }

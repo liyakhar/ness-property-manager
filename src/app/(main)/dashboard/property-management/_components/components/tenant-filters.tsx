@@ -10,6 +10,7 @@ export const TenantFilters: React.FC<TenantFiltersProps> = ({
   showHiddenView,
   onToggleHiddenView,
   onAddColumn,
+  onDeleteColumn,
   onAddTenant,
   selectedCount,
   onToggleHideSelected,
@@ -45,7 +46,11 @@ export const TenantFilters: React.FC<TenantFiltersProps> = ({
             ? TENANT_DATABASE_CONSTANTS.MESSAGES.SHOW_MAIN
             : TENANT_DATABASE_CONSTANTS.MESSAGES.HIDDEN}
         </Button>
-        <DataTableViewOptions table={table} onAddColumn={onAddColumn} />
+        <DataTableViewOptions
+          table={table}
+          onAddColumn={onAddColumn}
+          onDeleteColumn={onDeleteColumn}
+        />
         <Button onClick={onAddTenant}>
           <Plus className="mr-2 h-4 w-4" />
           {TENANT_DATABASE_CONSTANTS.MESSAGES.ADD_TENANT}

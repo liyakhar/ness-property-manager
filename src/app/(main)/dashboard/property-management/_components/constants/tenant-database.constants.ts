@@ -79,6 +79,11 @@ export const TENANT_DATABASE_CONSTANTS = {
     DELETE_DESCRIPTION: 'Действие необратимо. Запись будет удалена.',
     CANCEL: 'Отмена',
     DELETE: 'Удалить',
+    DELETE_COLUMN: 'Удалить колонку',
+    DELETE_COLUMN_CONFIRM: 'Удалить колонку?',
+    DELETE_COLUMN_DESCRIPTION: 'Действие необратимо. Колонка будет удалена из всех записей.',
+    ADD_COLUMN: 'Добавить колонку',
+    SHOW_COLUMNS: 'Показать колонки',
   },
 } as const;
 

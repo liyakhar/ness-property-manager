@@ -22,6 +22,7 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
     selectedTenantIds,
     setShowHiddenView,
     handleAddColumn,
+    handleDeleteColumn,
     handleToggleHideSelected,
     handleDeleteSelected,
     handleAddTenant,
@@ -53,6 +54,7 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
               showHiddenView={showHiddenView}
               onToggleHiddenView={() => setShowHiddenView(!showHiddenView)}
               onAddColumn={handleAddColumn}
+              onDeleteColumn={handleDeleteColumn}
               onAddTenant={() => {
                 // This would need to be connected to the store
                 console.log('Add tenant clicked');

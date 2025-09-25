@@ -36,6 +36,7 @@ interface UseTenantDatabaseReturn {
   // Actions
   setShowHiddenView: (show: boolean) => void;
   handleAddColumn: (columnData: AddColumnData) => Promise<void>;
+  handleDeleteColumn: (columnId: string) => Promise<void>;
   handleToggleHideSelected: () => Promise<void>;
   handleDeleteSelected: () => Promise<void>;
   handleAddTenant: (newTenant: AddTenantFormData) => Promise<void>;
@@ -64,8 +65,44 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
       const saved = localStorage.getItem(TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS);
       if (saved) {
         try {
-          const parsedColumns = JSON.parse(saved);
-          setCustomColumns(parsedColumns);
+          const parsedColumns = JSON.parse(saved) as ColumnDef<Tenant>[];
+
+          // Migrate any English headers to Russian
+          const migratedColumns = parsedColumns.map((column: ColumnDef<Tenant>) => {
+            if (column.header && typeof column.header === 'string') {
+              // Check if header is in English and needs translation
+              const englishToRussian: Record<string, string> = {
+                'Receive Payment Date': 'Платеж за аренду',
+                'Utility Payment Date': 'Платеж за счета',
+                'Internet Payment Date': 'Платеж за интернет',
+                'Is Paid': 'Оплачено',
+                Test: 'Тест',
+                'Payment Attachment': 'Вложение Платежа',
+                Apartment: 'Квартира',
+                Location: 'Расположение',
+                Status: 'Статус',
+                'Entry Date': 'Дата Заезда',
+                'Exit Date': 'Дата Выезда',
+                Notes: 'Заметки',
+                Created: 'Создано',
+                Updated: 'Обновлено',
+                Actions: 'Действия',
+              };
+
+              if (englishToRussian[column.header]) {
+                return { ...column, header: englishToRussian[column.header] };
+              }
+            }
+            return column;
+          });
+
+          setCustomColumns(migratedColumns);
+
+          // Save migrated columns back to localStorage
+          localStorage.setItem(
+            TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
+            JSON.stringify(migratedColumns)
+          );
         } catch (error) {
           console.error(TENANT_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, error);
         }
@@ -271,6 +308,34 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     );
   };
 
+  // Function to handle deleting custom columns
+  const handleDeleteColumn = async (columnId: string) => {
+    const result = await tenantDatabaseService.deleteCustomColumnFromTenants(
+      allTenants,
+      columnId,
+      async (id: string, updates: Partial<Tenant>) => {
+        await updateTenantMutation.mutateAsync({ id, updates });
+      }
+    );
+
+    result.match(
+      () => {
+        const updatedColumns = customColumns.filter((column) => column.id !== columnId);
+        setCustomColumns(updatedColumns);
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(
+            TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
+            JSON.stringify(updatedColumns)
+          );
+        }
+      },
+      (error) => {
+        console.error('Failed to delete custom column:', error.message);
+      }
+    );
+  };
+
   const handleToggleHideSelected = async () => {
     if (!hasSelection) return;
     for (const id of selectedTenantIds) {
@@ -315,6 +380,7 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     hasSelection,
     setShowHiddenView,
     handleAddColumn,
+    handleDeleteColumn,
     handleToggleHideSelected,
     handleDeleteSelected,
     handleAddTenant,

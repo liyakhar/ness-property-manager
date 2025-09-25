@@ -29,39 +29,53 @@ export const useProperties = (): UsePropertiesReturn => {
   } = usePropertyManagementStore();
 
   const [error, setError] = useState<string | null>(null);
-  const fetchPropertiesRef = useRef(fetchProperties);
+  const isMountedRef = useRef(true);
 
-  // Update ref when fetchProperties changes
+  // Cleanup on unmount
   useEffect(() => {
-    fetchPropertiesRef.current = fetchProperties;
-  }, [fetchProperties]);
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Fetch properties on mount
   useEffect(() => {
     const loadProperties = async () => {
       try {
         setError(null);
-        await fetchPropertiesRef.current();
+        await fetchProperties();
+
+        // Only update state if component is still mounted
+        if (isMountedRef.current) {
+          setError(null);
+        }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        setError(errorMessage);
-        console.error('Error loading properties:', error);
+        // Only update state if component is still mounted
+        if (isMountedRef.current) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          setError(errorMessage);
+          console.error('Error loading properties:', error);
+        }
       }
     };
 
     loadProperties();
-  }, []); // Empty dependency array - fetch only on mount
+  }, [fetchProperties]);
 
   const handleAddProperty = useCallback(
     async (propertyData: AddPropertyFormData): Promise<Result<Property, string>> => {
       try {
-        setError(null);
+        if (isMountedRef.current) {
+          setError(null);
+        }
         await addProperty(propertyData);
         return ok(propertyData as Property); // This would need to return the actual created property
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to add property';
-        setError(errorMessage);
-        console.error('Error adding property:', error);
+        if (isMountedRef.current) {
+          setError(errorMessage);
+          console.error('Error adding property:', error);
+        }
         return err(errorMessage);
       }
     },
@@ -75,8 +89,10 @@ export const useProperties = (): UsePropertiesReturn => {
         return ok(undefined);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to update property';
-        setError(errorMessage);
-        console.error('Error updating property:', error);
+        if (isMountedRef.current) {
+          setError(errorMessage);
+          console.error('Error updating property:', error);
+        }
         return err(errorMessage);
       }
     },
@@ -90,8 +106,10 @@ export const useProperties = (): UsePropertiesReturn => {
         return ok(undefined);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to delete property';
-        setError(errorMessage);
-        console.error('Error deleting property:', error);
+        if (isMountedRef.current) {
+          setError(errorMessage);
+          console.error('Error deleting property:', error);
+        }
         return err(errorMessage);
       }
     },
@@ -106,8 +124,10 @@ export const useProperties = (): UsePropertiesReturn => {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Failed to set properties hidden';
-        setError(errorMessage);
-        console.error('Error setting properties hidden:', error);
+        if (isMountedRef.current) {
+          setError(errorMessage);
+          console.error('Error setting properties hidden:', error);
+        }
         return err(errorMessage);
       }
     },
@@ -116,13 +136,17 @@ export const useProperties = (): UsePropertiesReturn => {
 
   const handleRefetch = useCallback(async (): Promise<Result<void, string>> => {
     try {
-      setError(null);
+      if (isMountedRef.current) {
+        setError(null);
+      }
       await fetchProperties();
       return ok(undefined);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to refetch properties';
-      setError(errorMessage);
-      console.error('Error refetching properties:', error);
+      if (isMountedRef.current) {
+        setError(errorMessage);
+        console.error('Error refetching properties:', error);
+      }
       return err(errorMessage);
     }
   }, [fetchProperties]);

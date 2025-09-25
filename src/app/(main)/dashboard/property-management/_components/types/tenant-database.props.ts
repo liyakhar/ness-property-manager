@@ -23,6 +23,7 @@ export interface TenantFiltersProps {
   showHiddenView: boolean;
   onToggleHiddenView: () => void;
   onAddColumn: (columnData: AddColumnData) => void;
+  onDeleteColumn: (columnId: string) => void;
   onAddTenant: () => void;
   selectedCount: number;
   onToggleHideSelected: () => void;

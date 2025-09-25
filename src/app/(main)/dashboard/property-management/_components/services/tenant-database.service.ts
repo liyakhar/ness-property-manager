@@ -99,6 +99,28 @@ class TenantDatabaseService {
       });
     }
   }
+
+  async deleteCustomColumnFromTenants(
+    tenants: Tenant[],
+    columnId: string,
+    updateTenant: (id: string, updates: Partial<Tenant>) => Promise<void>
+  ): Promise<ApiResult<void>> {
+    try {
+      for (const tenant of tenants) {
+        if ((tenant as Record<string, unknown>)[columnId] !== undefined) {
+          const updates = { [columnId]: undefined };
+          await updateTenant(tenant.id, updates);
+        }
+      }
+
+      return ok(undefined);
+    } catch (error) {
+      return err({
+        message: error instanceof Error ? error.message : 'Failed to delete custom column',
+        code: 'DELETE_COLUMN_ERROR',
+      });
+    }
+  }
 }
 
 export const tenantDatabaseService = new TenantDatabaseService();
