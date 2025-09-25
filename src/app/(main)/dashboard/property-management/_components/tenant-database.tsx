@@ -1,13 +1,14 @@
 'use client';
 
 import { Users } from 'lucide-react';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddTenantDialog } from './add-tenant-dialog';
 import { TenantDatabaseSkeleton } from './components/tenant-database-skeleton';
 import { TenantFilters } from './components/tenant-filters';
 import { TenantStats } from './components/tenant-stats';
-import { TenantTable } from './components/tenant-table';
 import { TENANT_DATABASE_CONSTANTS } from './constants/tenant-database.constants';
 import { useTenantDatabase } from './hooks/use-tenant-database';
 import type { TenantDatabaseProps } from './types/tenant-database.props';
@@ -63,20 +64,31 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
             />
           </div>
 
-          <TenantTable table={table} columns={allColumns} />
+          <div className="overflow-hidden rounded-md border">
+            <DataTable table={table} columns={allColumns} />
+          </div>
 
           <div className="mt-3 flex items-center justify-start">
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={selectedTenantIds.length === 0}
-                onClick={handleToggleHideSelected}
-              >
-                {showHiddenView
-                  ? TENANT_DATABASE_CONSTANTS.MESSAGES.RETURN_TO_MAIN
-                  : TENANT_DATABASE_CONSTANTS.MESSAGES.HIDE_SELECTED}
-              </Button>
+              {showHiddenView ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={selectedTenantIds.length === 0}
+                  onClick={handleToggleHideSelected}
+                >
+                  {TENANT_DATABASE_CONSTANTS.MESSAGES.RETURN_TO_MAIN}
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={selectedTenantIds.length === 0}
+                  onClick={handleToggleHideSelected}
+                >
+                  {TENANT_DATABASE_CONSTANTS.MESSAGES.HIDE_SELECTED}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -87,6 +99,8 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
               </Button>
             </div>
           </div>
+
+          <DataTablePagination table={table} />
 
           <AddTenantDialog
             open={false} // This would need to be connected to the store
