@@ -16,9 +16,38 @@ export const useImageUpload = () => {
     setError(null);
 
     try {
+      // Validate file before upload
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+        'image/svg+xml',
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        const errorMessage = `Invalid file type. Allowed types: ${allowedTypes.join(', ')}`;
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        const errorMessage = 'File too large. Maximum size is 10MB';
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('propertyId', propertyId);
+
+      console.log('Uploading image:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        propertyId,
+      });
 
       const response = await fetch('/api/upload-image', {
         method: 'POST',
@@ -28,12 +57,16 @@ export const useImageUpload = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error ?? 'Upload failed');
+        const errorMessage = result.error ?? `Upload failed with status ${response.status}`;
+        console.error('Upload failed:', errorMessage);
+        throw new Error(errorMessage);
       }
 
+      console.log('Upload successful:', result);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+      console.error('Upload error:', err);
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

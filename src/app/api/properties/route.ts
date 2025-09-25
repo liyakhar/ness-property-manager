@@ -15,7 +15,7 @@ async function getProperties(): Promise<ApiResponse<Property[]>> {
       },
     });
     return ok(properties);
-  } catch {
+  } catch (_error) {
     return err({ message: 'Failed to fetch properties', status: 500 });
   }
 }

@@ -9,9 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Property {
@@ -24,7 +23,7 @@ model Property {
   occupancyStatus OccupancyStatus @default(свободна)
   apartmentContents String?
   urgentMatter String?
-  images      String[] @default([])
+  images      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -42,7 +41,7 @@ model Tenant {
   exitDate  DateTime?
   status    TenantStatus @default(current)
   notes     String?
-  receivePaymentDate DateTime @default(dbgenerated("(date_trunc('month', CURRENT_DATE))"))
+  receivePaymentDate DateTime @default(now())
   utilityPaymentDate DateTime?
   internetPaymentDate DateTime?
   isPaid    Boolean @default(false)
