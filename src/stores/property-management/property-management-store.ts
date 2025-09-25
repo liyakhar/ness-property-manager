@@ -8,6 +8,26 @@ import type {
   Tenant,
 } from '@/app/(main)/dashboard/property-management/_components/schema';
 
+// Type for raw API response where dates are strings
+type TenantApiResponse = {
+  id: string;
+  name: string;
+  apartmentId: string;
+  entryDate: string;
+  exitDate: string | null;
+  status: 'current' | 'past' | 'future' | 'upcoming';
+  notes?: string;
+  receivePaymentDate: string;
+  utilityPaymentDate: string | null;
+  internetPaymentDate: string | null;
+  isPaid: boolean;
+  paymentAttachment?: string;
+  hidden?: boolean;
+  customFields?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+};
+
 interface PropertyManagementState {
   // Data
   properties: Property[];
@@ -88,8 +108,35 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
           if (!response.ok) {
             throw new Error('Failed to fetch tenants');
           }
-          const tenants = await response.json();
-          set({ tenants, isLoading: false });
+          const tenants: TenantApiResponse[] = await response.json();
+
+          // Convert date strings to Date objects
+          const processedTenants: Tenant[] = tenants.map((tenant) => ({
+            id: tenant.id,
+            name: tenant.name,
+            apartmentId: tenant.apartmentId,
+            status: tenant.status,
+            isPaid: tenant.isPaid,
+            notes: tenant.notes,
+            paymentAttachment: tenant.paymentAttachment,
+            hidden: tenant.hidden,
+            customFields: tenant.customFields,
+            entryDate: tenant.entryDate ? new Date(tenant.entryDate) : new Date(),
+            exitDate: tenant.exitDate ? new Date(tenant.exitDate) : undefined,
+            receivePaymentDate: tenant.receivePaymentDate
+              ? new Date(tenant.receivePaymentDate)
+              : new Date(),
+            utilityPaymentDate: tenant.utilityPaymentDate
+              ? new Date(tenant.utilityPaymentDate)
+              : undefined,
+            internetPaymentDate: tenant.internetPaymentDate
+              ? new Date(tenant.internetPaymentDate)
+              : undefined,
+            createdAt: tenant.createdAt ? new Date(tenant.createdAt) : new Date(),
+            updatedAt: tenant.updatedAt ? new Date(tenant.updatedAt) : new Date(),
+          }));
+
+          set({ tenants: processedTenants, isLoading: false });
         } catch (error) {
           console.error('Error fetching tenants:', error);
           set({ isLoading: false });
@@ -161,10 +208,36 @@ export const usePropertyManagementStore = create<PropertyManagementState>()(
             throw new Error(errorData.error || 'Failed to create tenant');
           }
 
-          const newTenant = await response.json();
+          const newTenant: TenantApiResponse = await response.json();
+
+          // Convert date strings to Date objects for the new tenant
+          const processedTenant: Tenant = {
+            id: newTenant.id,
+            name: newTenant.name,
+            apartmentId: newTenant.apartmentId,
+            status: newTenant.status,
+            isPaid: newTenant.isPaid,
+            notes: newTenant.notes,
+            paymentAttachment: newTenant.paymentAttachment,
+            hidden: newTenant.hidden,
+            customFields: newTenant.customFields,
+            entryDate: newTenant.entryDate ? new Date(newTenant.entryDate) : new Date(),
+            exitDate: newTenant.exitDate ? new Date(newTenant.exitDate) : undefined,
+            receivePaymentDate: newTenant.receivePaymentDate
+              ? new Date(newTenant.receivePaymentDate)
+              : new Date(),
+            utilityPaymentDate: newTenant.utilityPaymentDate
+              ? new Date(newTenant.utilityPaymentDate)
+              : undefined,
+            internetPaymentDate: newTenant.internetPaymentDate
+              ? new Date(newTenant.internetPaymentDate)
+              : undefined,
+            createdAt: newTenant.createdAt ? new Date(newTenant.createdAt) : new Date(),
+            updatedAt: newTenant.updatedAt ? new Date(newTenant.updatedAt) : new Date(),
+          };
 
           set((state) => ({
-            tenants: [...state.tenants, newTenant],
+            tenants: [...state.tenants, processedTenant],
           }));
         } catch (error) {
           console.error('Error creating tenant:', error);

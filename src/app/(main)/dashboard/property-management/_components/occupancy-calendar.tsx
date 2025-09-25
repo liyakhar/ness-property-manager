@@ -1,7 +1,7 @@
 'use client';
 
 import { eachDayOfInterval, endOfMonth, isWithinInterval, startOfMonth } from 'date-fns';
-import { Plus } from 'lucide-react';
+import { Calendar, Plus } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { usePropertyManagement } from '@/hooks/use-property-management';
 import { usePropertyManagementStore } from '@/stores/property-management';
 
 import { AddTenantDialog } from './add-tenant-dialog';
@@ -32,8 +33,8 @@ export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) 
   const [selectedDayTenants, setSelectedDayTenants] = React.useState<
     Array<{ id: string; name: string; apartmentId: string; entryDate: Date; exitDate?: Date }>
   >([]);
-  const { properties, tenants, isAddTenantDialogOpen, setAddTenantDialogOpen } =
-    usePropertyManagementStore();
+  const { properties, tenants, isLoading, error } = usePropertyManagement();
+  const { isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -74,30 +75,6 @@ export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) 
     },
     []
   );
-
-  // Filter properties and tenants based on search query
-  const filteredProperties = React.useMemo(() => {
-    if (!searchQuery) return properties;
-
-    const query = searchQuery.toLowerCase();
-
-    // First, check if any tenants match the search query
-    const matchingTenantPropertyIds = tenants
-      .filter((tenant) => isTenantMatch(tenant, query))
-      .map((tenant) => tenant.apartmentId);
-
-    // Return properties that either match the search directly OR have matching tenants
-    return properties.filter((property) => {
-      if (isPropertyMatch(property, query)) return true;
-
-      // Include properties that have matching tenants
-      if (matchingTenantPropertyIds.includes(property.id)) {
-        return true;
-      }
-
-      return false;
-    });
-  }, [properties, searchQuery, tenants, isTenantMatch, isPropertyMatch]);
 
   // Helper function to check DD/MM format
   const isDDMMFormat = React.useCallback((day: string, month: string, query: string) => {
@@ -151,71 +128,101 @@ export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) 
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear().toString();
 
-      // Check different date formats
-      if (isDDMMFormat(day, month, query)) return true;
-      if (isDDMMYYYYFormat(day, month, year, query)) return true;
-      if (isMMDDFormat(day, month, query)) return true;
-      if (isMMDDYYYYFormat(day, month, year, query)) return true;
-
-      // Check individual components
-      if (day.includes(query) || month.includes(query) || year.includes(query)) return true;
-
-      // Check date string representation
-      if (date.toDateString().toLowerCase().includes(query)) return true;
-
-      return false;
+      return (
+        isDDMMFormat(day, month, query) ||
+        isDDMMYYYYFormat(day, month, year, query) ||
+        isMMDDFormat(day, month, query) ||
+        isMMDDYYYYFormat(day, month, year, query)
+      );
     },
     [isDDMMFormat, isDDMMYYYYFormat, isMMDDFormat, isMMDDYYYYFormat]
   );
 
-  // Helper function to check if tenant matches property search
-  const isTenantPropertyMatch = React.useCallback(
-    (tenant: { apartmentId: string }, query: string) => {
-      const property = properties.find((p) => p.id === tenant.apartmentId);
-      if (!property) return false;
+  // Filter properties and tenants based on search query
+  const filteredProperties = React.useMemo(() => {
+    if (!searchQuery) return properties;
 
-      return (
-        property.apartmentNumber.toString().includes(query) ||
-        property.location.toLowerCase().includes(query) ||
-        property.readinessStatus.toLowerCase().includes(query) ||
-        property.rooms.toString().includes(query) ||
-        (property.urgentMatter?.toLowerCase().includes(query) ?? false)
-      );
-    },
-    [properties]
-  );
+    const query = searchQuery.toLowerCase();
 
+    // First, check if any tenants match the search query
+    const matchingTenantPropertyIds = tenants
+      .filter((tenant) => isTenantMatch(tenant, query))
+      .map((tenant) => tenant.apartmentId);
+
+    // Return properties that either match the search directly OR have matching tenants
+    return properties.filter((property) => {
+      if (isPropertyMatch(property, query)) return true;
+
+      // Include properties that have matching tenants
+      if (matchingTenantPropertyIds.includes(property.id)) {
+        return true;
+      }
+
+      return false;
+    });
+  }, [properties, searchQuery, tenants, isTenantMatch, isPropertyMatch]);
+
+  // Filter tenants based on search query
   const filteredTenants = React.useMemo(() => {
     if (!searchQuery) return tenants;
 
     const query = searchQuery.toLowerCase();
 
     return tenants.filter((tenant) => {
-      // Basic text search
-      const basicMatch =
-        tenant.name.toLowerCase().includes(query) ||
-        tenant.apartmentId.toLowerCase().includes(query) ||
-        (tenant.notes?.toLowerCase().includes(query) ?? false);
+      // Check basic text matches
+      if (isTenantMatch(tenant, query)) return true;
 
-      if (basicMatch) return true;
+      // Check date matches for entry and exit dates
+      const entryDate = new Date(tenant.entryDate);
+      const exitDate = tenant.exitDate ? new Date(tenant.exitDate) : null;
 
-      // Date search
-      if (isDateMatch(tenant.entryDate, query)) return true;
-      if (tenant.exitDate && isDateMatch(tenant.exitDate, query)) return true;
-
-      // Search by property details
-      if (isTenantPropertyMatch(tenant, query)) return true;
+      if (isDateMatch(entryDate, query)) return true;
+      if (exitDate && isDateMatch(exitDate, query)) return true;
 
       return false;
     });
-  }, [tenants, searchQuery, isDateMatch, isTenantPropertyMatch]);
+  }, [tenants, searchQuery, isTenantMatch, isDateMatch]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Календарь заселения
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">Загрузка данных...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Календарь заселения
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-destructive">Ошибка загрузки: {error}</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const getTenantsForDay = (date: Date) => {
     return filteredTenants.filter((tenant) => {
-      // Only show tenants that are associated with visible properties
-      const property = filteredProperties.find((p) => p.id === tenant.apartmentId);
-      if (!property) return false;
-
       const entryDate = new Date(tenant.entryDate);
       const exitDate = tenant.exitDate
         ? new Date(tenant.exitDate)
@@ -227,22 +234,18 @@ export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) 
 
   const getPropertyColor = (propertyId: string) => {
     const colors = [
-      'bg-blue-200',
-      'bg-green-200',
-      'bg-purple-200',
-      'bg-orange-200',
-      'bg-pink-200',
-      'bg-indigo-200',
-      'bg-red-200',
-      'bg-yellow-200',
-      'bg-teal-200',
-      'bg-cyan-200',
-      'bg-lime-200',
-      'bg-amber-200',
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-purple-500',
+      'bg-orange-500',
+      'bg-pink-500',
+      'bg-indigo-500',
+      'bg-red-500',
+      'bg-yellow-500',
     ];
 
     const propertyIndex = filteredProperties.findIndex((p) => p.id === propertyId);
-    return colors[propertyIndex % colors.length] || 'bg-gray-200';
+    return colors[propertyIndex % colors.length] || 'bg-gray-500';
   };
 
   return (
@@ -250,37 +253,36 @@ export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {searchQuery && (
-              <span className="text-muted-foreground text-sm font-normal">
-                (Найдено: {filteredProperties.length} недвижимость, {filteredTenants.length}{' '}
-                арендаторов)
-              </span>
-            )}
+            <Calendar className="h-5 w-5" />
+            Календарь заселения
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-6 flex items-center justify-between">
-            <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Выберите недвижимость" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Вся Недвижимость</SelectItem>
-                {filteredProperties.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>
-                    Квартира #{property.apartmentNumber}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="default" size="default" onClick={() => setAddTenantDialogOpen(true)}>
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Выберите квартиру" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все квартиры</SelectItem>
+                  {filteredProperties.map((property) => (
+                    <SelectItem key={property.id} value={property.id}>
+                      Квартира #{property.apartmentNumber} - {property.location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button onClick={() => setAddTenantDialogOpen(true)} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
-              Добавить Арендатора
+              Add Tenant
             </Button>
           </div>
 
           <div className="mb-4 grid grid-cols-7 gap-1">
-            {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day) => (
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div key={day} className="text-muted-foreground p-2 text-center text-sm font-medium">
                 {day}
               </div>

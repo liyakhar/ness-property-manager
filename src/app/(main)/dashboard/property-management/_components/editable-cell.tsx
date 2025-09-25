@@ -330,8 +330,13 @@ export function EditableCell({
   }
 
   const renderDisplayValue = () => {
-    if (type === 'date' && value instanceof Date) {
-      return format(value, 'dd/MM/yyyy');
+    if (type === 'date') {
+      // Handle both Date objects and date strings
+      const dateValue = value instanceof Date ? value : value ? new Date(value as string) : null;
+      if (dateValue && !Number.isNaN(dateValue.getTime())) {
+        return format(dateValue, 'dd/MM/yyyy');
+      }
+      return value ? String(value) : '-';
     }
 
     if (type === 'status') {

@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { usePropertyManagement } from '@/hooks/use-property-management';
 import { usePropertyManagementStore } from '@/stores/property-management';
 
 import { AddTenantDialog } from './add-tenant-dialog';
@@ -20,8 +21,8 @@ import { AddTenantDialog } from './add-tenant-dialog';
 export function OccupancyCalendar() {
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
   const [selectedProperty, setSelectedProperty] = React.useState<string>('all');
-  const { properties, tenants, isAddTenantDialogOpen, setAddTenantDialogOpen } =
-    usePropertyManagementStore();
+  const { properties, tenants, isLoading, error } = usePropertyManagement();
+  const { isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -57,44 +58,76 @@ export function OccupancyCalendar() {
   const filteredProperties =
     selectedProperty === 'all' ? properties : properties.filter((p) => p.id === selectedProperty);
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Календарь заселения
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="text-muted-foreground">Загрузка данных...</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Календарь заселения
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="text-destructive">Ошибка загрузки: {error}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Occupancy Calendar
+            Календарь заселения
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select property" />
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Выберите квартиру" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Properties</SelectItem>
-                  {properties.map((property) => (
+                  <SelectItem value="all">Все квартиры</SelectItem>
+                  {filteredProperties.map((property) => (
                     <SelectItem key={property.id} value={property.id}>
-                      Apartment #{property.apartmentNumber}
+                      Квартира #{property.apartmentNumber} - {property.location}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-sm">Legend:</span>
-                {filteredProperties.slice(0, 6).map((property) => (
-                  <div key={property.id} className="flex items-center gap-1">
-                    <div className={`h-3 w-3 rounded-full ${getPropertyColor(property.id)}`} />
-                    <span className="text-xs">#{property.apartmentNumber}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            <Button variant="default" size="default" onClick={() => setAddTenantDialogOpen(true)}>
+            <Button onClick={() => setAddTenantDialogOpen(true)} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add Tenant
             </Button>
@@ -147,6 +180,11 @@ export function OccupancyCalendar() {
           </div>
 
           <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Users className="h-4 w-4" />
+              <span>Активных арендаторов: {tenants.length}</span>
+            </div>
+
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -155,9 +193,11 @@ export function OccupancyCalendar() {
                   setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
                 }
               >
-                Previous Month
+                Предыдущий
               </Button>
-              <span className="text-sm font-medium">{format(currentMonth, 'MMMM yyyy')}</span>
+              <span className="text-sm font-medium">
+                {format(currentMonth, 'MMMM yyyy', { locale: undefined })}
+              </span>
               <Button
                 variant="outline"
                 size="sm"
@@ -165,13 +205,8 @@ export function OccupancyCalendar() {
                   setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
                 }
               >
-                Next Month
+                Следующий
               </Button>
-            </div>
-
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4" />
-              {tenants.length} Active Tenants
             </div>
           </div>
         </CardContent>
@@ -180,11 +215,8 @@ export function OccupancyCalendar() {
       <AddTenantDialog
         open={isAddTenantDialogOpen}
         onOpenChange={setAddTenantDialogOpen}
-        onAddTenant={async () => {
-          // Handle adding tenant
-          setAddTenantDialogOpen(false);
-        }}
-        properties={properties}
+        onAddTenant={async () => setAddTenantDialogOpen(false)}
+        properties={filteredProperties}
       />
     </div>
   );
