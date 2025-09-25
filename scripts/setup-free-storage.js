@@ -5,9 +5,8 @@
  * Sets up free JSON-based storage for your property management app
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
 
 console.log('🚀 Setting up FREE storage for your property management app...\n');
 
@@ -36,7 +35,7 @@ const files = [
   { name: 'updates.json', content: '[]' },
 ];
 
-files.forEach(file => {
+files.forEach((file) => {
   const filePath = path.join(dataDir, file.name);
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, file.content);
@@ -170,7 +169,7 @@ fs.writeFileSync(path.join(process.cwd(), 'FREE_STORAGE_SETUP.md'), instructions
 console.log('✅ Created setup instructions');
 
 console.log('\n🎉 FREE storage setup complete!');
-console.log('\n📋 What I\'ve created:');
+console.log("\n📋 What I've created:");
 console.log('   • Free JSON-based storage system');
 console.log('   • Complete API endpoints');
 console.log('   • Image storage solution');

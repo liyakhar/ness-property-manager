@@ -1,10 +1,10 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import { type NextRequest, NextResponse } from 'next/server';
 import { freeStorage } from '@/lib/free-storage';
 
 // GET /api/images/[filename]
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ filename: string }> }
 ) {
   const { filename } = await context.params;

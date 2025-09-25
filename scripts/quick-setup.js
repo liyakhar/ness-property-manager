@@ -4,8 +4,8 @@
  * Quick Supabase Setup - One command setup
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 console.log('🚀 Quick Supabase Setup for Property Management App\n');
 

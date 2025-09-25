@@ -5,19 +5,19 @@
  */
 
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const _fs = require('node:fs');
 
 // Import the free storage functions
 const { freeStorage } = require('../src/lib/free-storage.ts');
 
 async function migrateData() {
   console.log('🔄 Starting migration from SQLite to Free JSON Storage...\n');
-  
+
   // Connect to SQLite database
   const dbPath = path.join(__dirname, '..', 'prisma', 'dev.db');
   const db = new sqlite3.Database(dbPath);
-  
+
   try {
     // Migrate properties
     console.log('📦 Migrating properties...');
@@ -27,7 +27,7 @@ async function migrateData() {
         else resolve(rows);
       });
     });
-    
+
     for (const property of properties) {
       try {
         const migratedProperty = freeStorage.properties.create({
@@ -46,7 +46,7 @@ async function migrateData() {
         console.error(`❌ Error migrating property ${property.apartmentNumber}:`, error.message);
       }
     }
-    
+
     // Migrate tenants
     console.log('\n👥 Migrating tenants...');
     const tenants = await new Promise((resolve, reject) => {
@@ -55,7 +55,7 @@ async function migrateData() {
         else resolve(rows);
       });
     });
-    
+
     for (const tenant of tenants) {
       try {
         const migratedTenant = freeStorage.tenants.create({
@@ -77,7 +77,7 @@ async function migrateData() {
         console.error(`❌ Error migrating tenant ${tenant.name}:`, error.message);
       }
     }
-    
+
     // Migrate updates
     console.log('\n📝 Migrating updates...');
     const updates = await new Promise((resolve, reject) => {
@@ -86,7 +86,7 @@ async function migrateData() {
         else resolve(rows);
       });
     });
-    
+
     for (const update of updates) {
       try {
         const migratedUpdate = freeStorage.updates.create({
@@ -99,7 +99,7 @@ async function migrateData() {
         console.error(`❌ Error migrating update ${update.id}:`, error.message);
       }
     }
-    
+
     // Show final statistics
     const stats = freeStorage.stats();
     console.log('\n🎉 Migration completed successfully!');
@@ -109,16 +109,15 @@ async function migrateData() {
     console.log(`   • Updates: ${stats.updates}`);
     console.log(`   • Images: ${stats.images}`);
     console.log(`   • Total Size: ${formatBytes(stats.totalSize)}`);
-    
+
     console.log('\n📁 Data stored in:');
     console.log(`   • Properties: data/properties.json`);
     console.log(`   • Tenants: data/tenants.json`);
     console.log(`   • Updates: data/updates.json`);
     console.log(`   • Images: data/images/`);
-    
+
     console.log('\n🚀 Your data is now stored in free JSON files!');
     console.log('   No external services required - everything is local and free!');
-    
   } catch (error) {
     console.error('❌ Migration failed:', error);
   } finally {
@@ -128,12 +127,12 @@ async function migrateData() {
 
 function formatBytes(bytes) {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 // Run migration

@@ -5,13 +5,13 @@
  * This will guide you through getting your Supabase credentials and setting up everything
  */
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+const fs = require('node:fs');
+const path = require('node:path');
+const readline = require('node:readline');
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 function askQuestion(question) {
@@ -22,22 +22,22 @@ function askQuestion(question) {
 
 async function setupSupabase() {
   console.log('🚀 Automatic Supabase Setup for Property Management App\n');
-  
-  console.log('I\'ll help you set up Supabase storage for your data. Here\'s what we need:\n');
-  
+
+  console.log("I'll help you set up Supabase storage for your data. Here's what we need:\n");
+
   console.log('📋 Step 1: Get your Supabase credentials');
   console.log('1. Go to: https://supabase.com/dashboard');
   console.log('2. Select your project: uqlugqxtoikerjywlnxa');
   console.log('3. Go to Settings → API');
   console.log('4. Copy your "anon public" key (starts with eyJ...)\n');
-  
+
   const anonKey = await askQuestion('🔑 Paste your Supabase anon key here: ');
-  
+
   if (!anonKey || anonKey === 'your-anon-key-here' || !anonKey.startsWith('eyJ')) {
     console.log('❌ Invalid key. Please get your anon key from Supabase dashboard.');
     process.exit(1);
   }
-  
+
   // Update .env.local with the real key
   const envContent = `# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://uqlugqxtoikerjywlnxa.supabase.co
@@ -52,10 +52,10 @@ NEXT_PUBLIC_STORAGE_BUCKET=property-images
 
   fs.writeFileSync(path.join(process.cwd(), '.env.local'), envContent);
   console.log('✅ Updated .env.local with your Supabase credentials');
-  
+
   console.log('\n📋 Step 2: Setting up database schema...');
-  console.log('I\'ll create the database tables in Supabase for you.\n');
-  
+  console.log("I'll create the database tables in Supabase for you.\n");
+
   // Create a simple script to run the migration
   const migrationRunner = `
 const { createClient } = require('@supabase/supabase-js');
@@ -157,35 +157,34 @@ runMigration().catch(console.error);
 `;
 
   fs.writeFileSync(path.join(process.cwd(), 'scripts', 'run-migration.js'), migrationRunner);
-  
+
   console.log('✅ Created migration runner script');
   console.log('\n📋 Step 3: Running database migration...');
-  
+
   try {
     // Install dotenv if not already installed
-    const { execSync } = require('child_process');
+    const { execSync } = require('node:child_process');
     try {
       execSync('npm list dotenv', { stdio: 'ignore' });
     } catch {
       console.log('📦 Installing dotenv...');
       execSync('npm install dotenv', { stdio: 'inherit' });
     }
-    
+
     // Run the migration
     execSync('node scripts/run-migration.js', { stdio: 'inherit' });
-    
-  } catch (error) {
-    console.log('⚠️  Migration script had issues, but that\'s okay!');
+  } catch (_error) {
+    console.log("⚠️  Migration script had issues, but that's okay!");
     console.log('   You can run the SQL manually in Supabase dashboard');
   }
-  
+
   console.log('\n🎉 Setup Complete!');
-  console.log('\n📋 What I\'ve done:');
+  console.log("\n📋 What I've done:");
   console.log('   ✅ Configured .env.local with your Supabase credentials');
   console.log('   ✅ Created database migration scripts');
   console.log('   ✅ Created data migration script');
   console.log('   ✅ Set up storage configuration');
-  
+
   console.log('\n📋 Final steps:');
   console.log('1. Go to https://supabase.com/dashboard');
   console.log('2. Go to SQL Editor');
@@ -193,9 +192,9 @@ runMigration().catch(console.error);
   console.log('4. Run the SQL to create storage bucket');
   console.log('5. Run: node scripts/migrate-to-supabase.js');
   console.log('6. Start your app: bun run dev');
-  
+
   console.log('\n🚀 Your data will now be stored in Supabase cloud!');
-  
+
   rl.close();
 }
 

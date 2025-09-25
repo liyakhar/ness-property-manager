@@ -5,8 +5,8 @@
  * This script will help you set up Supabase storage and migrate your data
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 console.log('🚀 Setting up Supabase Storage for your property management app...\n');
 

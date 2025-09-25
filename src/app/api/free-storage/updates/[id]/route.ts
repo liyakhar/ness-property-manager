@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { freeStorage } from '@/lib/free-storage';
 
 // GET /api/free-storage/updates/[id]
-export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   try {
     const update = freeStorage.updates.getById(id);
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 }
 
 // DELETE /api/free-storage/updates/[id]
-export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   try {
     const success = freeStorage.updates.delete(id);

@@ -3,8 +3,8 @@
  * Uses JSON files and free image hosting services
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 // Storage configuration
 const STORAGE_DIR = path.join(process.cwd(), 'data');
@@ -103,10 +103,12 @@ export const getProperties = (): Property[] => {
 
 export const getProperty = (id: string): Property | undefined => {
   const properties = getProperties();
-  return properties.find(p => p.id === id);
+  return properties.find((p) => p.id === id);
 };
 
-export const createProperty = (property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>): Property => {
+export const createProperty = (
+  property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>
+): Property => {
   const properties = getProperties();
   const newProperty: Property = {
     ...property,
@@ -114,7 +116,7 @@ export const createProperty = (property: Omit<Property, 'id' | 'createdAt' | 'up
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  
+
   properties.push(newProperty);
   writeJsonFile(PROPERTIES_FILE, properties);
   return newProperty;
@@ -122,26 +124,26 @@ export const createProperty = (property: Omit<Property, 'id' | 'createdAt' | 'up
 
 export const updateProperty = (id: string, updates: Partial<Property>): Property | null => {
   const properties = getProperties();
-  const index = properties.findIndex(p => p.id === id);
-  
+  const index = properties.findIndex((p) => p.id === id);
+
   if (index === -1) return null;
-  
+
   properties[index] = {
     ...properties[index],
     ...updates,
     updatedAt: new Date().toISOString(),
   };
-  
+
   writeJsonFile(PROPERTIES_FILE, properties);
   return properties[index];
 };
 
 export const deleteProperty = (id: string): boolean => {
   const properties = getProperties();
-  const filtered = properties.filter(p => p.id !== id);
-  
+  const filtered = properties.filter((p) => p.id !== id);
+
   if (filtered.length === properties.length) return false;
-  
+
   writeJsonFile(PROPERTIES_FILE, filtered);
   return true;
 };
@@ -153,7 +155,7 @@ export const getTenants = (): Tenant[] => {
 
 export const getTenant = (id: string): Tenant | undefined => {
   const tenants = getTenants();
-  return tenants.find(t => t.id === id);
+  return tenants.find((t) => t.id === id);
 };
 
 export const createTenant = (tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>): Tenant => {
@@ -164,7 +166,7 @@ export const createTenant = (tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedA
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  
+
   tenants.push(newTenant);
   writeJsonFile(TENANTS_FILE, tenants);
   return newTenant;
@@ -172,26 +174,26 @@ export const createTenant = (tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedA
 
 export const updateTenant = (id: string, updates: Partial<Tenant>): Tenant | null => {
   const tenants = getTenants();
-  const index = tenants.findIndex(t => t.id === id);
-  
+  const index = tenants.findIndex((t) => t.id === id);
+
   if (index === -1) return null;
-  
+
   tenants[index] = {
     ...tenants[index],
     ...updates,
     updatedAt: new Date().toISOString(),
   };
-  
+
   writeJsonFile(TENANTS_FILE, tenants);
   return tenants[index];
 };
 
 export const deleteTenant = (id: string): boolean => {
   const tenants = getTenants();
-  const filtered = tenants.filter(t => t.id !== id);
-  
+  const filtered = tenants.filter((t) => t.id !== id);
+
   if (filtered.length === tenants.length) return false;
-  
+
   writeJsonFile(TENANTS_FILE, filtered);
   return true;
 };
@@ -203,7 +205,7 @@ export const getUpdates = (): Update[] => {
 
 export const getUpdate = (id: string): Update | undefined => {
   const updates = getUpdates();
-  return updates.find(u => u.id === id);
+  return updates.find((u) => u.id === id);
 };
 
 export const createUpdate = (update: Omit<Update, 'id' | 'createdAt' | 'updatedAt'>): Update => {
@@ -214,7 +216,7 @@ export const createUpdate = (update: Omit<Update, 'id' | 'createdAt' | 'updatedA
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  
+
   updates.push(newUpdate);
   writeJsonFile(UPDATES_FILE, updates);
   return newUpdate;
@@ -222,26 +224,26 @@ export const createUpdate = (update: Omit<Update, 'id' | 'createdAt' | 'updatedA
 
 export const updateUpdate = (id: string, updates: Partial<Update>): Update | null => {
   const allUpdates = getUpdates();
-  const index = allUpdates.findIndex(u => u.id === id);
-  
+  const index = allUpdates.findIndex((u) => u.id === id);
+
   if (index === -1) return null;
-  
+
   allUpdates[index] = {
     ...allUpdates[index],
     ...updates,
     updatedAt: new Date().toISOString(),
   };
-  
+
   writeJsonFile(UPDATES_FILE, allUpdates);
   return allUpdates[index];
 };
 
 export const deleteUpdate = (id: string): boolean => {
   const updates = getUpdates();
-  const filtered = updates.filter(u => u.id !== id);
-  
+  const filtered = updates.filter((u) => u.id !== id);
+
   if (filtered.length === updates.length) return false;
-  
+
   writeJsonFile(UPDATES_FILE, filtered);
   return true;
 };
@@ -271,11 +273,11 @@ export const getStorageStats = () => {
   const properties = getProperties();
   const tenants = getTenants();
   const updates = getUpdates();
-  
-  const imageFiles = fs.readdirSync(IMAGES_DIR).filter(file => 
-    /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file)
-  );
-  
+
+  const imageFiles = fs
+    .readdirSync(IMAGES_DIR)
+    .filter((file) => /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file));
+
   return {
     properties: properties.length,
     tenants: tenants.length,
@@ -287,19 +289,19 @@ export const getStorageStats = () => {
 
 const getDirectorySize = (dirPath: string): number => {
   let totalSize = 0;
-  
+
   const files = fs.readdirSync(dirPath);
   for (const file of files) {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
-    
+
     if (stats.isDirectory()) {
       totalSize += getDirectorySize(filePath);
     } else {
       totalSize += stats.size;
     }
   }
-  
+
   return totalSize;
 };
 
