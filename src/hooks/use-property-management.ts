@@ -1,11 +1,14 @@
 import { err, ok, type Result } from 'neverthrow';
 import { useCallback, useEffect, useState } from 'react';
-import type { Property } from '@/app/(main)/dashboard/property-management/_components/schema';
+import type {
+  Property,
+  Tenant,
+} from '@/app/(main)/dashboard/property-management/_components/schema';
 import { usePropertyManagementStore } from '@/stores/property-management';
 
 interface UsePropertyManagementReturn {
   properties: Property[];
-  tenants: unknown[]; // This would need proper typing
+  tenants: Tenant[];
   isLoading: boolean;
   error: string | null;
   updateProperty: (id: string, updates: Partial<Property>) => Result<void, string>;
