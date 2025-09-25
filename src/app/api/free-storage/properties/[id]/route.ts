@@ -1,18 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { freeStorage } from '@/lib/free-storage';
 
 // GET /api/free-storage/properties/[id]
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
-    const property = freeStorage.properties.getById(params.id);
+    const property = freeStorage.properties.getById(id);
     if (!property) {
-      return NextResponse.json(
-        { success: false, error: 'Property not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Property not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: property });
   } catch (error) {
@@ -25,18 +20,13 @@ export async function GET(
 }
 
 // PUT /api/free-storage/properties/[id]
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
     const body = await request.json();
-    const property = freeStorage.properties.update(params.id, body);
+    const property = freeStorage.properties.update(id, body);
     if (!property) {
-      return NextResponse.json(
-        { success: false, error: 'Property not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Property not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: property });
   } catch (error) {
@@ -49,17 +39,12 @@ export async function PUT(
 }
 
 // DELETE /api/free-storage/properties/[id]
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
-    const success = freeStorage.properties.delete(params.id);
+    const success = freeStorage.properties.delete(id);
     if (!success) {
-      return NextResponse.json(
-        { success: false, error: 'Property not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Property not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true });
   } catch (error) {

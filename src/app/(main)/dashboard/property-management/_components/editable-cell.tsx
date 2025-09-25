@@ -341,31 +341,31 @@ export function EditableCell({
             return {
               variant: 'default' as const,
               text: 'Текущий',
-              className: 'bg-green-100 text-green-800 hover:bg-green-100',
+              className: 'bg-green-500/10 text-green-700 dark:text-green-300',
             };
           case 'past':
             return {
               variant: 'secondary' as const,
               text: 'Прошлый',
-              className: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
+              className: 'bg-muted text-muted-foreground',
             };
           case 'future':
             return {
               variant: 'outline' as const,
               text: 'Будущий',
-              className: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
+              className: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
             };
           case 'upcoming':
             return {
               variant: 'outline' as const,
               text: 'Скоро',
-              className: 'bg-orange-100 text-orange-800 hover:bg-orange-100',
+              className: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
             };
           default:
             return {
               variant: 'secondary' as const,
               text: 'Неизвестно',
-              className: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
+              className: 'bg-muted text-muted-foreground',
             };
         }
       };

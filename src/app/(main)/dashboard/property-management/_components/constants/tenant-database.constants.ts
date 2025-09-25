@@ -38,10 +38,10 @@ export const TENANT_DATABASE_CONSTANTS = {
     UPCOMING: 'upcoming',
   },
   BADGE_VARIANTS: {
-    CURRENT: 'bg-green-100 text-green-800 hover:bg-green-100',
-    UPCOMING: 'bg-orange-100 text-orange-800 hover:bg-orange-100',
-    FUTURE: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
-    PAST: 'bg-gray-100 text-gray-800 hover:bg-gray-100',
+    CURRENT: 'bg-green-500/10 text-green-700 dark:text-green-300',
+    UPCOMING: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
+    FUTURE: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
+    PAST: 'bg-muted text-muted-foreground',
   },
   MESSAGES: {
     LOADING: 'Loading user profile...',

@@ -1,28 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { freeStorage } from '@/lib/free-storage';
 import fs from 'fs';
+import { type NextRequest, NextResponse } from 'next/server';
+import { freeStorage } from '@/lib/free-storage';
 
 // GET /api/images/[filename]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  context: { params: Promise<{ filename: string }> }
 ) {
+  const { filename } = await context.params;
   try {
-    const imagePath = freeStorage.images.getPath(params.filename);
-    
+    const imagePath = freeStorage.images.getPath(filename);
+
     if (!fs.existsSync(imagePath)) {
-      return NextResponse.json(
-        { success: false, error: 'Image not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Image not found' }, { status: 404 });
     }
 
     const imageBuffer = fs.readFileSync(imagePath);
-    
+
     // Determine content type based on file extension
-    const extension = params.filename.split('.').pop()?.toLowerCase();
+    const extension = filename.split('.').pop()?.toLowerCase();
     let contentType = 'application/octet-stream';
-    
+
     switch (extension) {
       case 'jpg':
       case 'jpeg':
@@ -50,9 +48,6 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error serving image:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to serve image' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to serve image' }, { status: 500 });
   }
 }

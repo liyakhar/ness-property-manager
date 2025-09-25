@@ -574,14 +574,16 @@ export default function PropertyManagementPage() {
                   {urgentMatters.slice(0, 3).map((property) => (
                     <div
                       key={property.id}
-                      className="p-4 rounded-lg border bg-white border-l-4 border-l-red-500"
+                      className="p-4 rounded-lg border bg-card border-l-4 border-l-destructive"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="mb-2">
-                            <span className="font-medium">Кв. {property.apartmentNumber}</span>
+                            <span className="font-medium text-card-foreground">
+                              Кв. {property.apartmentNumber}
+                            </span>
                           </div>
-                          <p className="text-sm text-gray-700">{property.urgentMatter}</p>
+                          <p className="text-sm text-muted-foreground">{property.urgentMatter}</p>
                         </div>
                         <Button
                           size="sm"
@@ -592,7 +594,6 @@ export default function PropertyManagementPage() {
                               updates: { urgentMatterResolved: true },
                             })
                           }
-                          className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                         >
                           Решено
                         </Button>

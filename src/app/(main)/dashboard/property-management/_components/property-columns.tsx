@@ -202,7 +202,7 @@ export const createPropertyColumns = (
 
         if (!hasUrgentMatter) {
           return (
-            <Badge variant="outline" className="bg-gray-100 text-gray-600">
+            <Badge variant="outline" className="bg-muted text-muted-foreground">
               Нет проблем
             </Badge>
           );

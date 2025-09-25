@@ -140,15 +140,15 @@ export function DailyNotifications() {
 
   if (notifications.length === 0) {
     return (
-      <Card className="bg-white">
+      <Card className="bg-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900">
+          <CardTitle className="flex items-center gap-2 text-card-foreground">
             <Calendar className="h-5 w-5" />
             Ежедневные Уведомления
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-8 text-center text-gray-500">
+          <div className="py-8 text-center text-muted-foreground">
             <Calendar className="mx-auto mb-4 h-12 w-12 opacity-50" />
             <p>Нет активных уведомлений</p>
             <p className="text-sm">Все в порядке!</p>
@@ -161,11 +161,11 @@ export function DailyNotifications() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'border-l-4 border-l-red-500 bg-red-50';
+        return 'border-l-4 border-l-destructive bg-destructive/10';
       case 'medium':
-        return 'border-l-4 border-l-orange-500 bg-orange-50';
+        return 'border-l-4 border-l-orange-500 bg-orange-500/10';
       default:
-        return 'border-l-4 border-l-gray-500 bg-gray-50';
+        return 'border-l-4 border-l-muted-foreground bg-muted/50';
     }
   };
 
@@ -200,12 +200,12 @@ export function DailyNotifications() {
   };
 
   return (
-    <Card className="bg-white">
+    <Card className="bg-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-900">
+        <CardTitle className="flex items-center gap-2 text-card-foreground">
           <Calendar className="h-5 w-5" />
           Ежедневные Уведомления
-          <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-700">
+          <Badge variant="secondary" className="ml-2">
             {notifications.length}
           </Badge>
         </CardTitle>
@@ -215,35 +215,26 @@ export function DailyNotifications() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`rounded-lg border bg-white p-4 ${getPriorityColor(notification.priority)}`}
+              className={`rounded-lg border bg-card p-4 ${getPriorityColor(notification.priority)}`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex flex-1 items-start gap-3">
-                  <div className="text-gray-600">{getTypeIcon(notification.type)}</div>
+                  <div className="text-muted-foreground">{getTypeIcon(notification.type)}</div>
                   <div className="flex-1">
                     <div className="mb-2 flex items-center gap-2">
-                      <Badge variant="outline" className="border-gray-300 bg-white text-gray-700">
-                        {getTypeLabel(notification.type)}
-                      </Badge>
+                      <Badge variant="outline">{getTypeLabel(notification.type)}</Badge>
                       {notification.daysRemaining !== undefined && (
-                        <Badge
-                          variant={notification.isToday ? 'destructive' : 'secondary'}
-                          className={
-                            notification.isToday
-                              ? 'bg-red-600 text-white'
-                              : 'bg-gray-100 text-gray-700'
-                          }
-                        >
+                        <Badge variant={notification.isToday ? 'destructive' : 'secondary'}>
                           {notification.isToday ? 'Сегодня' : `${notification.daysRemaining} дн.`}
                         </Badge>
                       )}
                     </div>
                     {notification.title && (
-                      <h4 className="mb-1 text-sm font-medium text-gray-900">
+                      <h4 className="mb-1 text-sm font-medium text-card-foreground">
                         {notification.title}
                       </h4>
                     )}
-                    <p className="text-sm text-gray-600">{notification.description}</p>
+                    <p className="text-sm text-muted-foreground">{notification.description}</p>
                   </div>
                 </div>
 
@@ -255,7 +246,7 @@ export function DailyNotifications() {
                     onClick={() =>
                       updateProperty(notification.propertyId, { urgentMatterResolved: true })
                     }
-                    className="ml-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    className="ml-2"
                   >
                     Решено
                   </Button>

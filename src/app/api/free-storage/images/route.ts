@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { freeStorage } from '@/lib/free-storage';
 
 // POST /api/free-storage/images
@@ -6,12 +7,9 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
     }
 
     // Validate file type
@@ -56,10 +54,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error uploading image:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to upload image' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to upload image' }, { status: 500 });
   }
 }
 
@@ -86,10 +81,10 @@ export async function GET() {
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }

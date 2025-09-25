@@ -52,11 +52,11 @@ export function CalendarDayCell({
           return (
             <div
               key={tenant.id}
-              className={`rounded p-1 text-xs text-gray-800 ${getPropertyColor(property.id)}`}
+              className={`rounded p-1 text-xs text-card-foreground ${getPropertyColor(property.id)}`}
               title={`${tenant.name} - Квартира №${property.apartmentNumber}`}
             >
               <div className="truncate">{tenant.name}</div>
-              <div className="text-xs text-gray-600">#{property.apartmentNumber}</div>
+              <div className="text-xs text-muted-foreground">#{property.apartmentNumber}</div>
             </div>
           );
         })}

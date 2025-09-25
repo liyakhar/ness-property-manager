@@ -43,10 +43,12 @@ export function CalendarDayDialog({
                 className="flex items-center justify-between rounded border p-2 text-sm"
               >
                 <div className="min-w-0">
-                  <div className="truncate font-medium">{tenant.name}</div>
-                  <div className="text-xs text-gray-700">Кв. #{property.apartmentNumber}</div>
+                  <div className="truncate font-medium text-card-foreground">{tenant.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Кв. #{property.apartmentNumber}
+                  </div>
                 </div>
-                <div className="text-xs text-gray-700">
+                <div className="text-xs text-muted-foreground">
                   {format(new Date(tenant.entryDate), 'd MMM')} –{' '}
                   {tenant.exitDate ? format(new Date(tenant.exitDate), 'd MMM') : '…'}
                 </div>

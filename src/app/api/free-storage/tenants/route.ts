@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { freeStorage } from '@/lib/free-storage';
 
 // GET /api/free-storage/tenants
@@ -8,10 +9,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: tenants });
   } catch (error) {
     console.error('Error fetching tenants:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch tenants' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to fetch tenants' }, { status: 500 });
   }
 }
 
@@ -23,9 +21,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: tenant });
   } catch (error) {
     console.error('Error creating tenant:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to create tenant' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to create tenant' }, { status: 500 });
   }
 }
