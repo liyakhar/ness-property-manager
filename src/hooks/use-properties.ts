@@ -1,5 +1,5 @@
 import { err, ok, type Result } from 'neverthrow';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   AddPropertyFormData,
   Property,
@@ -29,13 +29,19 @@ export const useProperties = (): UsePropertiesReturn => {
   } = usePropertyManagementStore();
 
   const [error, setError] = useState<string | null>(null);
+  const fetchPropertiesRef = useRef(fetchProperties);
+
+  // Update ref when fetchProperties changes
+  useEffect(() => {
+    fetchPropertiesRef.current = fetchProperties;
+  }, [fetchProperties]);
 
   // Fetch properties on mount
   useEffect(() => {
     const loadProperties = async () => {
       try {
         setError(null);
-        await fetchProperties();
+        await fetchPropertiesRef.current();
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         setError(errorMessage);
@@ -44,7 +50,7 @@ export const useProperties = (): UsePropertiesReturn => {
     };
 
     loadProperties();
-  }, [fetchProperties]); // We intentionally want to fetch only on mount
+  }, []); // Empty dependency array - fetch only on mount
 
   const handleAddProperty = useCallback(
     async (propertyData: AddPropertyFormData): Promise<Result<Property, string>> => {

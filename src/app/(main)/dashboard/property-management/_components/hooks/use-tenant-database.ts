@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
 import { usePropertiesQuery } from '@/hooks/use-properties-query';
 import {
@@ -56,19 +56,22 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
   const { setAddTenantDialogOpen } = usePropertyManagementStore();
 
   // State for custom columns
-  const [customColumns, setCustomColumns] = useState<ColumnDef<Tenant>[]>(() => {
+  const [customColumns, setCustomColumns] = useState<ColumnDef<Tenant>[]>([]);
+
+  // Load custom columns from localStorage on component mount
+  React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS);
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsedColumns = JSON.parse(saved);
+          setCustomColumns(parsedColumns);
         } catch (error) {
           console.error(TENANT_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, error);
         }
       }
     }
-    return [];
-  });
+  }, []);
 
   const [showHiddenView, setShowHiddenView] = useState(false);
 
