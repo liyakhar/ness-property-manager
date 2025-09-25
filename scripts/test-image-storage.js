@@ -5,8 +5,8 @@
  * Run with: node scripts/test-image-storage.js
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 console.log('🔍 Testing Image Storage Configuration...\n');
 

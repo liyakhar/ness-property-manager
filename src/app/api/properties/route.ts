@@ -24,9 +24,9 @@ const createPropertySchema = z.object({
   apartmentNumber: z.number().int().nonnegative(),
   location: z.string().min(1),
   rooms: z.number().int().positive(),
-  readinessStatus: z.nativeEnum(ReadinessStatus).default('немеблированная'),
-  propertyType: z.nativeEnum(PropertyType).default('аренда'),
-  occupancyStatus: z.nativeEnum(OccupancyStatus).default('свободна'),
+  readinessStatus: z.nativeEnum(ReadinessStatus).default('unfurnished'),
+  propertyType: z.nativeEnum(PropertyType).default('rent'),
+  occupancyStatus: z.nativeEnum(OccupancyStatus).default('available'),
   apartmentContents: z.string().optional().nullable(),
   urgentMatter: z.string().optional().nullable(),
 });

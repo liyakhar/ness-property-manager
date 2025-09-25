@@ -12,50 +12,23 @@ export const TenantFilters: React.FC<TenantFiltersProps> = ({
   onAddColumn,
   onDeleteColumn,
   onAddTenant,
-  selectedCount,
-  onToggleHideSelected,
-  onDeleteSelected,
 }) => {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={selectedCount === 0}
-            onClick={onToggleHideSelected}
-          >
-            {showHiddenView
-              ? TENANT_DATABASE_CONSTANTS.MESSAGES.RETURN_TO_MAIN
-              : TENANT_DATABASE_CONSTANTS.MESSAGES.HIDE_SELECTED}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={selectedCount === 0}
-            onClick={onDeleteSelected}
-          >
-            {TENANT_DATABASE_CONSTANTS.MESSAGES.DELETE_SELECTED}
-          </Button>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={onToggleHiddenView}>
-          {showHiddenView
-            ? TENANT_DATABASE_CONSTANTS.MESSAGES.SHOW_MAIN
-            : TENANT_DATABASE_CONSTANTS.MESSAGES.HIDDEN}
-        </Button>
-        <DataTableViewOptions
-          table={table}
-          onAddColumn={onAddColumn}
-          onDeleteColumn={onDeleteColumn}
-        />
-        <Button onClick={onAddTenant}>
-          <Plus className="mr-2 h-4 w-4" />
-          {TENANT_DATABASE_CONSTANTS.MESSAGES.ADD_TENANT}
-        </Button>
-      </div>
+    <div className="flex items-center gap-2">
+      <Button variant="outline" size="sm" onClick={onToggleHiddenView}>
+        {showHiddenView
+          ? TENANT_DATABASE_CONSTANTS.MESSAGES.SHOW_MAIN
+          : TENANT_DATABASE_CONSTANTS.MESSAGES.HIDDEN}
+      </Button>
+      <DataTableViewOptions
+        table={table}
+        onAddColumn={onAddColumn}
+        onDeleteColumn={onDeleteColumn}
+      />
+      <Button onClick={onAddTenant}>
+        <Plus className="mr-2 h-4 w-4" />
+        {TENANT_DATABASE_CONSTANTS.MESSAGES.ADD_TENANT}
+      </Button>
     </div>
   );
 };

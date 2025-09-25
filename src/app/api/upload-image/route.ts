@@ -41,7 +41,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    if (!STORAGE_CONFIG.ALLOWED_TYPES.includes(file.type)) {
+    if (
+      !STORAGE_CONFIG.ALLOWED_TYPES.includes(
+        file.type as (typeof STORAGE_CONFIG.ALLOWED_TYPES)[number]
+      )
+    ) {
       return NextResponse.json(
         {
           error: `Invalid file type. Allowed types: ${STORAGE_CONFIG.ALLOWED_TYPES.join(', ')}`,

@@ -26,7 +26,11 @@ export async function uploadImage(file: File, propertyId: string): Promise<Image
     }
 
     // Validate file type
-    if (!STORAGE_CONFIG.ALLOWED_TYPES.includes(file.type)) {
+    if (
+      !STORAGE_CONFIG.ALLOWED_TYPES.includes(
+        file.type as (typeof STORAGE_CONFIG.ALLOWED_TYPES)[number]
+      )
+    ) {
       return {
         success: false,
         error: `Invalid file type. Allowed types: ${STORAGE_CONFIG.ALLOWED_TYPES.join(', ')}`,
@@ -142,7 +146,11 @@ export async function getPropertyImages(propertyId: string): Promise<string[]> {
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
   // Check file type
-  if (!STORAGE_CONFIG.ALLOWED_TYPES.includes(file.type)) {
+  if (
+    !STORAGE_CONFIG.ALLOWED_TYPES.includes(
+      file.type as (typeof STORAGE_CONFIG.ALLOWED_TYPES)[number]
+    )
+  ) {
     return {
       valid: false,
       error: `Invalid file type. Allowed types: ${STORAGE_CONFIG.ALLOWED_TYPES.join(', ')}`,
@@ -167,7 +175,7 @@ export function extractImagePathFromUrl(url: string): string | null {
   try {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split('/');
-    const bucketIndex = pathParts.findIndex((part) => part === STORAGE_CONFIG.BUCKET_NAME);
+    const bucketIndex = pathParts.indexOf(STORAGE_CONFIG.BUCKET_NAME);
 
     if (bucketIndex === -1 || bucketIndex === pathParts.length - 1) {
       return null;

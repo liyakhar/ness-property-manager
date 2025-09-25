@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,68 +8,42 @@ datasource db {
 }
 
 model Property {
-  id          String   @id @default(cuid())
-  apartmentNumber Int      @unique
-  location    String
-  rooms       Int
-  readinessStatus ReadinessStatus @default(немеблированная)
-  propertyType PropertyType @default(аренда)
-  occupancyStatus OccupancyStatus @default(свободна)
+  id                String          @id @default(cuid())
+  apartmentNumber   Int             @unique
+  location          String
+  rooms             Int
+  readinessStatus   ReadinessStatus @default(unfurnished)
+  propertyType      PropertyType    @default(rent)
+  occupancyStatus   OccupancyStatus @default(available)
+  urgentMatter      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
   apartmentContents String?
-  urgentMatter String?
-  images      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  tenants    Tenant[]
-  
+  images            String?
+  tenants           Tenant[]
+
   @@map("properties")
 }
 
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  apartmentId String
-  entryDate DateTime
-  exitDate  DateTime?
-  status    TenantStatus @default(current)
-  notes     String?
-  receivePaymentDate DateTime @default(now())
-  utilityPaymentDate DateTime?
+  id                  String       @id @default(cuid())
+  name                String
+  apartmentId         String
+  entryDate           DateTime
+  exitDate            DateTime?
+  status              TenantStatus @default(current)
+  notes               String?
+  receivePaymentDate  DateTime     @default(now())
+  utilityPaymentDate  DateTime?
   internetPaymentDate DateTime?
-  isPaid    Boolean @default(false)
-  paymentAttachment String?
-  hidden    Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  apartment Property @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
-  
+  isPaid              Boolean      @default(false)
+  paymentAttachment   String?
+  hidden              Boolean      @default(false)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  apartment           Property     @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
   @@map("tenants")
-}
-
-enum ReadinessStatus {
-  меблированная
-  немеблированная
-}
-
-enum PropertyType {
-  аренда
-  продажа
-}
-
-enum OccupancyStatus {
-  занята
-  свободна
-}
-
-enum TenantStatus {
-  current
-  past
-  future
-  upcoming
 }
 
 model Update {
@@ -87,4 +55,26 @@ model Update {
   updatedAt DateTime @updatedAt
 
   @@map("updates")
+}
+
+enum ReadinessStatus {
+  furnished
+  unfurnished
+}
+
+enum PropertyType {
+  rent
+  sale
+}
+
+enum OccupancyStatus {
+  occupied
+  available
+}
+
+enum TenantStatus {
+  current
+  past
+  future
+  upcoming
 }

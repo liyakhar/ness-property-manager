@@ -25,9 +25,6 @@ export interface TenantFiltersProps {
   onAddColumn: (columnData: AddColumnData) => void;
   onDeleteColumn: (columnId: string) => void;
   onAddTenant: () => void;
-  selectedCount: number;
-  onToggleHideSelected: () => void;
-  onDeleteSelected: () => void;
 }
 
 export interface AddColumnData {

@@ -1,6 +1,7 @@
 'use client';
 
 import { Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddTenantDialog } from './add-tenant-dialog';
 import { TenantDatabaseSkeleton } from './components/tenant-database-skeleton';
@@ -59,13 +60,33 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
                 // This would need to be connected to the store
                 console.log('Add tenant clicked');
               }}
-              selectedCount={selectedTenantIds.length}
-              onToggleHideSelected={handleToggleHideSelected}
-              onDeleteSelected={handleDeleteSelected}
             />
           </div>
 
           <TenantTable table={table} columns={allColumns} />
+
+          <div className="mt-3 flex items-center justify-start">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={selectedTenantIds.length === 0}
+                onClick={handleToggleHideSelected}
+              >
+                {showHiddenView
+                  ? TENANT_DATABASE_CONSTANTS.MESSAGES.RETURN_TO_MAIN
+                  : TENANT_DATABASE_CONSTANTS.MESSAGES.HIDE_SELECTED}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={selectedTenantIds.length === 0}
+                onClick={handleDeleteSelected}
+              >
+                {TENANT_DATABASE_CONSTANTS.MESSAGES.DELETE_SELECTED}
+              </Button>
+            </div>
+          </div>
 
           <AddTenantDialog
             open={false} // This would need to be connected to the store
