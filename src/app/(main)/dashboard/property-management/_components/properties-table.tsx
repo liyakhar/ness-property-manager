@@ -362,7 +362,7 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
                 onAddColumn={handleAddColumn}
                 onDeleteColumn={handleDeleteColumn}
               />
-              <Button onClick={() => setAddPropertyDialogOpen(true)}>
+              <Button variant="default" size="default" onClick={() => setAddPropertyDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить Недвижимость
               </Button>

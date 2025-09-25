@@ -94,7 +94,7 @@ export function OccupancyCalendar() {
               </div>
             </div>
 
-            <Button onClick={() => setAddTenantDialogOpen(true)}>
+            <Button variant="default" size="default" onClick={() => setAddTenantDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Tenant
             </Button>

@@ -1,0 +1,15 @@
+[
+  {
+    "apartmentNumber": 101,
+    "location": "Test Location",
+    "rooms": 2,
+    "readinessStatus": "немеблированная",
+    "propertyType": "аренда",
+    "occupancyStatus": "свободна",
+    "apartmentContents": "Test contents",
+    "urgentMatter": "No urgent matters",
+    "id": "prop_1758830925051_bk6rng5mo",
+    "createdAt": "2025-09-25T20:08:45.051Z",
+    "updatedAt": "2025-09-25T20:08:45.056Z"
+  }
+]

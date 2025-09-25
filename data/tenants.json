@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Test Tenant",
+    "apartmentId": "prop_1758830925051_bk6rng5mo",
+    "entryDate": "2025-09-25T20:08:45.056Z",
+    "status": "current",
+    "isPaid": false,
+    "hidden": false,
+    "id": "tenant_1758830925056_7sawt79k4",
+    "createdAt": "2025-09-25T20:08:45.056Z",
+    "updatedAt": "2025-09-25T20:08:45.056Z"
+  }
+]

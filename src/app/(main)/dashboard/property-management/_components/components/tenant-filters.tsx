@@ -25,7 +25,7 @@ export const TenantFilters: React.FC<TenantFiltersProps> = ({
         onAddColumn={onAddColumn}
         onDeleteColumn={onDeleteColumn}
       />
-      <Button onClick={onAddTenant}>
+      <Button variant="default" size="default" onClick={onAddTenant}>
         <Plus className="mr-2 h-4 w-4" />
         {TENANT_DATABASE_CONSTANTS.MESSAGES.ADD_TENANT}
       </Button>

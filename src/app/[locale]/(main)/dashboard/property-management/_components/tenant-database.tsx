@@ -135,7 +135,7 @@ export function TenantDatabase() {
             </div>
             <div className="flex items-center gap-2">
               <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
-              <Button onClick={() => setAddTenantDialogOpen(true)}>
+              <Button variant="default" size="default" onClick={() => setAddTenantDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить Арендатора
               </Button>

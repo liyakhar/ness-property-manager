@@ -11,6 +11,7 @@ import { TenantFilters } from './components/tenant-filters';
 import { TenantStats } from './components/tenant-stats';
 import { TENANT_DATABASE_CONSTANTS } from './constants/tenant-database.constants';
 import { useTenantDatabase } from './hooks/use-tenant-database';
+import { usePropertyManagementStore } from '@/stores/property-management';
 import type { TenantDatabaseProps } from './types/tenant-database.props';
 
 export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
@@ -29,6 +30,8 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
     handleDeleteSelected,
     handleAddTenant,
   } = useTenantDatabase(searchQuery);
+
+  const { isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
 
   if (isLoading) {
     return <TenantDatabaseSkeleton />;
@@ -57,10 +60,7 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
               onToggleHiddenView={() => setShowHiddenView(!showHiddenView)}
               onAddColumn={handleAddColumn}
               onDeleteColumn={handleDeleteColumn}
-              onAddTenant={() => {
-                // This would need to be connected to the store
-                console.log('Add tenant clicked');
-              }}
+              onAddTenant={() => setAddTenantDialogOpen(true)}
             />
           </div>
 
@@ -103,8 +103,8 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
           <DataTablePagination table={table} />
 
           <AddTenantDialog
-            open={false} // This would need to be connected to the store
-            onOpenChange={() => {}}
+            open={isAddTenantDialogOpen}
+            onOpenChange={setAddTenantDialogOpen}
             onAddTenant={handleAddTenant}
             properties={properties as never}
           />
