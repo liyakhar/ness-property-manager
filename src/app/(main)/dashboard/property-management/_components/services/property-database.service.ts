@@ -80,7 +80,7 @@ class PropertyDatabaseService {
               defaultValue = 0;
               break;
             case 'date':
-              defaultValue = new Date().toISOString();
+              defaultValue = new Date();
               break;
             case 'select':
               defaultValue = 'option1';

@@ -20,7 +20,6 @@ import {
 import { usePropertyManagementStore } from '@/stores/property-management';
 import { AddPropertyDialog } from './add-property-dialog';
 import { PROPERTY_DATABASE_CONSTANTS } from './constants/property-database.constants';
-import { EditableCell } from './editable-cell';
 import { createPropertyColumns } from './property-columns';
 import type { AddPropertyFormData, Property } from './schema';
 import { propertyDatabaseService } from './services/property-database.service';
@@ -157,45 +156,11 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
         const newColumn: ColumnDef<Property> = {
           id: columnData.id,
           accessorKey: columnData.id,
-          header: () => <div className="font-medium">{columnData.header}</div>,
+          header: columnData.header,
           cell: ({ row }) => {
-            // Use EditableCell for custom columns
-            const customFields =
-              ((row.original as Record<string, unknown>).customFields as Record<string, unknown>) ||
-              {};
+            const customFields = (row.original.customFields as Record<string, unknown>) || {};
             const value = customFields[columnData.id];
-            return (
-              <EditableCell
-                value={value}
-                onSave={async (newValue: unknown) => {
-                  const existingCustomFields =
-                    ((row.original as Record<string, unknown>).customFields as Record<
-                      string,
-                      unknown
-                    >) || {};
-                  const updatedCustomFields = {
-                    ...existingCustomFields,
-                    [columnData.id]: newValue,
-                  };
-                  const updates = { customFields: updatedCustomFields };
-                  await updatePropertyMutation.mutateAsync({ id: row.original.id, updates });
-                }}
-                type={
-                  columnData.type === 'boolean'
-                    ? 'text'
-                    : (columnData.type as 'text' | 'number' | 'date' | 'select')
-                }
-                options={
-                  columnData.type === 'select'
-                    ? [
-                        { value: 'option1', label: 'Опция 1' },
-                        { value: 'option2', label: 'Опция 2' },
-                        { value: 'option3', label: 'Опция 3' },
-                      ]
-                    : []
-                }
-              />
-            );
+            return String(value || '');
           },
           enableSorting: true,
           enableHiding: true,
