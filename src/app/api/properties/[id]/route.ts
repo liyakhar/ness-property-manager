@@ -20,21 +20,7 @@ async function getPropertyById(id: string): Promise<ApiResponse<Property | null>
 
 async function updateProperty(
   id: string,
-  data: Partial<
-    Pick<
-      Property,
-      | 'apartmentNumber'
-      | 'location'
-      | 'rooms'
-      | 'readinessStatus'
-      | 'apartmentContents'
-      | 'urgentMatter'
-      | 'propertyType'
-      | 'occupancyStatus'
-      | 'hidden'
-      | 'customFields'
-    >
-  > & {
+  data: Partial<Property> & {
     images?: string[] | null;
     [key: string]: unknown; // Allow custom fields
   }
@@ -45,15 +31,90 @@ async function updateProperty(
       return err({ message: 'Invalid readinessStatus', status: 400 });
     }
 
-    // Transform the data to match Prisma's expected types
-    const updateData: Record<string, unknown> = { ...data };
-    if (data.images !== undefined) {
-      updateData.images = data.images;
+    // Separate standard fields from custom fields
+    const {
+      apartmentNumber,
+      location,
+      rooms,
+      readinessStatus,
+      propertyType,
+      occupancyStatus,
+      urgentMatter,
+      apartmentContents,
+      images,
+      hidden,
+      customFields,
+      ...otherFields
+    } = data;
+
+    // Prepare standard fields
+    const standardFields: Partial<
+      Pick<
+        Property,
+        | 'apartmentNumber'
+        | 'location'
+        | 'rooms'
+        | 'readinessStatus'
+        | 'propertyType'
+        | 'occupancyStatus'
+        | 'urgentMatter'
+        | 'apartmentContents'
+        | 'images'
+        | 'hidden'
+        | 'customFields'
+      >
+    > = {
+      apartmentNumber,
+      location,
+      rooms,
+      readinessStatus,
+      propertyType,
+      occupancyStatus,
+      urgentMatter,
+      apartmentContents,
+      images,
+      hidden,
+      customFields,
+    };
+
+    // Handle custom fields - merge with existing customFields
+    let finalCustomFields: Record<string, unknown> | undefined = customFields as
+      | Record<string, unknown>
+      | undefined;
+    if (Object.keys(otherFields).length > 0) {
+      // Get existing custom fields
+      const existingProperty = await prisma.property.findUnique({
+        where: { id },
+        select: { customFields: true },
+      });
+
+      const existingCustomFields =
+        (existingProperty?.customFields as Record<string, unknown>) || {};
+
+      // Merge new custom fields with existing ones
+      finalCustomFields = {
+        ...existingCustomFields,
+        ...otherFields,
+      };
+
+      // Remove undefined values
+      if (finalCustomFields) {
+        Object.keys(finalCustomFields).forEach((key) => {
+          if (finalCustomFields?.[key] === undefined) {
+            delete finalCustomFields![key];
+          }
+        });
+      }
+    }
+
+    // Add custom fields to the update data
+    if (finalCustomFields !== undefined) {
+      standardFields.customFields = finalCustomFields as any; // Cast to JsonValue
     }
 
     const updated = await prisma.property.update({
       where: { id },
-      data: updateData,
+      data: standardFields as Record<string, unknown>, // Type assertion needed due to Prisma's strict typing
     });
     return ok(updated);
   } catch (error) {
