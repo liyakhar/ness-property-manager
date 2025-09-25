@@ -147,7 +147,7 @@ async function updateTenant(id: string, data: Partial<Tenant>): Promise<ApiRespo
       if (finalCustomFields) {
         Object.keys(finalCustomFields).forEach((key) => {
           if (finalCustomFields?.[key] === undefined) {
-            delete finalCustomFields[key];
+            delete finalCustomFields![key];
           }
         });
       }
