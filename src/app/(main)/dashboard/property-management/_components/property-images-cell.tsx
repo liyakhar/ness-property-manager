@@ -77,15 +77,23 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
     const imageUrl = images[idx];
     const next = images.filter((_, i) => i !== idx);
 
-    // Try to delete from Supabase Storage
-    // Extract path from URL for deletion
+    // Try to delete from storage
     try {
       const url = new URL(imageUrl);
       const pathParts = url.pathname.split('/');
-      const bucketIndex = pathParts.indexOf('property-images');
-      if (bucketIndex !== -1 && bucketIndex + 1 < pathParts.length) {
-        const imagePath = pathParts.slice(bucketIndex + 1).join('/');
-        await deleteImage(imagePath);
+
+      // Check if it's a free storage URL (contains /api/images/)
+      if (pathParts.includes('api') && pathParts.includes('images')) {
+        // Free storage URL - extract filename
+        const filename = pathParts[pathParts.length - 1];
+        await deleteImage(filename);
+      } else {
+        // Supabase URL - extract path from bucket
+        const bucketIndex = pathParts.indexOf('property-images');
+        if (bucketIndex !== -1 && bucketIndex + 1 < pathParts.length) {
+          const imagePath = pathParts.slice(bucketIndex + 1).join('/');
+          await deleteImage(imagePath);
+        }
       }
     } catch (err) {
       console.error('Delete error:', err);
