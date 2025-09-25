@@ -26,7 +26,13 @@ export const STORAGE_CONFIG = {
 
 // Helper function to check if Supabase is properly configured
 export const isSupabaseConfigured = (): boolean => {
-  return !!(supabaseUrl && supabaseAnonKey);
+  return !!(
+    supabaseUrl &&
+    supabaseAnonKey &&
+    supabaseUrl !== 'https://your-project-id.supabase.co' &&
+    supabaseAnonKey !== 'your-anon-key-here' &&
+    supabaseUrl.includes('supabase.co')
+  );
 };
 
 // Helper function to get storage URL

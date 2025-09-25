@@ -12,6 +12,7 @@ const transformPropertyFromApi = (property: Record<string, unknown>): Property =
     readinessStatus: property.readinessStatus === 'furnished' ? 'меблированная' : 'немеблированная',
     propertyType: property.propertyType === 'rent' ? 'аренда' : 'продажа',
     occupancyStatus: property.occupancyStatus === 'occupied' ? 'занята' : 'свободна',
+    images: property.images as string[] | undefined,
   }) as Property;
 
 export const propertiesApi = {
@@ -66,7 +67,7 @@ export const propertiesApi = {
   // Update property
   updateProperty: async (id: string, updates: Partial<Property>): Promise<Property> => {
     // Transform Russian enum values to English for API if they exist
-    const transformedUpdates: any = { ...updates };
+    const transformedUpdates: Record<string, unknown> = { ...updates };
     if (updates.readinessStatus) {
       transformedUpdates.readinessStatus =
         updates.readinessStatus === 'меблированная' ? 'furnished' : 'unfurnished';
@@ -77,6 +78,10 @@ export const propertiesApi = {
     if (updates.occupancyStatus) {
       transformedUpdates.occupancyStatus =
         updates.occupancyStatus === 'занята' ? 'occupied' : 'available';
+    }
+    // Handle images field - ensure it's properly serialized
+    if (updates.images !== undefined) {
+      transformedUpdates.images = updates.images;
     }
 
     const response = await fetch(`${API_BASE_URL}/properties/${id}`, {

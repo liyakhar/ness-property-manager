@@ -29,6 +29,7 @@ const createPropertySchema = z.object({
   occupancyStatus: z.nativeEnum(OccupancyStatus).default('available'),
   apartmentContents: z.string().optional().nullable(),
   urgentMatter: z.string().optional().nullable(),
+  images: z.array(z.string()).optional().nullable(),
 });
 
 async function createProperty(data: Partial<Property>): Promise<ApiResponse<Property>> {
@@ -38,17 +39,24 @@ async function createProperty(data: Partial<Property>): Promise<ApiResponse<Prop
       return err({ message: 'Invalid request body', status: 400 });
     }
 
+    // Transform the data to match Prisma's expected types
+    const createData: any = {
+      apartmentNumber: parsed.data.apartmentNumber,
+      location: parsed.data.location,
+      rooms: parsed.data.rooms,
+      readinessStatus: parsed.data.readinessStatus,
+      propertyType: parsed.data.propertyType,
+      occupancyStatus: parsed.data.occupancyStatus,
+      apartmentContents: parsed.data.apartmentContents ?? undefined,
+      urgentMatter: parsed.data.urgentMatter ?? undefined,
+    };
+
+    if (parsed.data.images !== undefined) {
+      createData.images = parsed.data.images;
+    }
+
     const property = await prisma.property.create({
-      data: {
-        apartmentNumber: parsed.data.apartmentNumber,
-        location: parsed.data.location,
-        rooms: parsed.data.rooms,
-        readinessStatus: parsed.data.readinessStatus,
-        propertyType: parsed.data.propertyType,
-        occupancyStatus: parsed.data.occupancyStatus,
-        apartmentContents: parsed.data.apartmentContents ?? undefined,
-        urgentMatter: parsed.data.urgentMatter ?? undefined,
-      },
+      data: createData,
     });
     return ok(property);
   } catch {

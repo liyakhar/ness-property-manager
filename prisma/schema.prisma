@@ -19,7 +19,7 @@ model Property {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   apartmentContents String?
-  images            String?
+  images            Json?
   tenants           Tenant[]
 
   @@map("properties")

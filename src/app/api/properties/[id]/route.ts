@@ -30,7 +30,9 @@ async function updateProperty(
       | 'apartmentContents'
       | 'urgentMatter'
     >
-  >
+  > & {
+    images?: string[] | null;
+  }
 ): Promise<ApiResponse<Property>> {
   try {
     // Basic validation
@@ -38,9 +40,15 @@ async function updateProperty(
       return err({ message: 'Invalid readinessStatus', status: 400 });
     }
 
+    // Transform the data to match Prisma's expected types
+    const updateData: any = { ...data };
+    if (data.images !== undefined) {
+      updateData.images = data.images;
+    }
+
     const updated = await prisma.property.update({
       where: { id },
-      data,
+      data: updateData,
     });
     return ok(updated);
   } catch {
