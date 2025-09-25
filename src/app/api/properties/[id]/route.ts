@@ -29,9 +29,14 @@ async function updateProperty(
       | 'readinessStatus'
       | 'apartmentContents'
       | 'urgentMatter'
+      | 'propertyType'
+      | 'occupancyStatus'
+      | 'hidden'
+      | 'customFields'
     >
   > & {
     images?: string[] | null;
+    [key: string]: unknown; // Allow custom fields
   }
 ): Promise<ApiResponse<Property>> {
   try {
@@ -41,7 +46,7 @@ async function updateProperty(
     }
 
     // Transform the data to match Prisma's expected types
-    const updateData: any = { ...data };
+    const updateData: Record<string, unknown> = { ...data };
     if (data.images !== undefined) {
       updateData.images = data.images;
     }
@@ -51,7 +56,8 @@ async function updateProperty(
       data: updateData,
     });
     return ok(updated);
-  } catch {
+  } catch (error) {
+    console.error('Error updating property:', error);
     return err({ message: 'Failed to update property', status: 500 });
   }
 }

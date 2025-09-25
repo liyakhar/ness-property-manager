@@ -20,6 +20,8 @@ model Property {
   updatedAt         DateTime        @updatedAt
   apartmentContents String?
   images            Json?
+  customFields      Json?
+  hidden            Boolean         @default(false)
   tenants           Tenant[]
 
   @@map("properties")

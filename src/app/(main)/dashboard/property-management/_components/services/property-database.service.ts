@@ -64,7 +64,12 @@ class PropertyDatabaseService {
   ): Promise<ApiResult<void>> {
     try {
       for (const property of properties) {
-        if (!(property as Record<string, unknown>)[columnData.id]) {
+        // Get existing custom fields or initialize empty object
+        const existingCustomFields =
+          ((property as Record<string, unknown>).customFields as Record<string, unknown>) || {};
+
+        // Only add the column if it doesn't already exist
+        if (!(existingCustomFields as Record<string, unknown>)[columnData.id]) {
           let defaultValue: unknown;
 
           switch (columnData.type) {
@@ -75,7 +80,7 @@ class PropertyDatabaseService {
               defaultValue = 0;
               break;
             case 'date':
-              defaultValue = new Date();
+              defaultValue = new Date().toISOString();
               break;
             case 'select':
               defaultValue = 'option1';
@@ -87,7 +92,13 @@ class PropertyDatabaseService {
               defaultValue = '';
           }
 
-          await updateProperty(property.id, { [columnData.id]: defaultValue });
+          // Update the customFields with the new column
+          const updatedCustomFields = {
+            ...existingCustomFields,
+            [columnData.id]: defaultValue,
+          };
+
+          await updateProperty(property.id, { customFields: updatedCustomFields });
         }
       }
 
@@ -107,9 +118,16 @@ class PropertyDatabaseService {
   ): Promise<ApiResult<void>> {
     try {
       for (const property of properties) {
-        if ((property as Record<string, unknown>)[columnId] !== undefined) {
-          const updates = { [columnId]: undefined };
-          await updateProperty(property.id, updates);
+        // Get existing custom fields
+        const existingCustomFields =
+          ((property as Record<string, unknown>).customFields as Record<string, unknown>) || {};
+
+        // Only update if the column exists in custom fields
+        if ((existingCustomFields as Record<string, unknown>)[columnId] !== undefined) {
+          // Remove the column from custom fields
+          const { [columnId]: _removed, ...updatedCustomFields } = existingCustomFields;
+
+          await updateProperty(property.id, { customFields: updatedCustomFields });
         }
       }
 

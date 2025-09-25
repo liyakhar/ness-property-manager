@@ -14,6 +14,7 @@ export const propertySchema = z
     urgentMatter: z.string().optional(),
     urgentMatterResolved: z.boolean().default(false),
     hidden: z.boolean().optional(),
+    customFields: z.record(z.unknown()).optional(),
     createdAt: z.date(),
     updatedAt: z.date(),
   })

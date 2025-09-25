@@ -160,12 +160,24 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
           header: () => <div className="font-medium">{columnData.header}</div>,
           cell: ({ row }) => {
             // Use EditableCell for custom columns
-            const value = (row.original as Record<string, unknown>)[columnData.id];
+            const customFields =
+              ((row.original as Record<string, unknown>).customFields as Record<string, unknown>) ||
+              {};
+            const value = customFields[columnData.id];
             return (
               <EditableCell
                 value={value}
                 onSave={async (newValue: unknown) => {
-                  const updates = { [columnData.id]: newValue };
+                  const existingCustomFields =
+                    ((row.original as Record<string, unknown>).customFields as Record<
+                      string,
+                      unknown
+                    >) || {};
+                  const updatedCustomFields = {
+                    ...existingCustomFields,
+                    [columnData.id]: newValue,
+                  };
+                  const updates = { customFields: updatedCustomFields };
                   await updatePropertyMutation.mutateAsync({ id: row.original.id, updates });
                 }}
                 type={
@@ -362,7 +374,11 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
                 onAddColumn={handleAddColumn}
                 onDeleteColumn={handleDeleteColumn}
               />
-              <Button variant="default" size="default" onClick={() => setAddPropertyDialogOpen(true)}>
+              <Button
+                variant="default"
+                size="default"
+                onClick={() => setAddPropertyDialogOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить Недвижимость
               </Button>
