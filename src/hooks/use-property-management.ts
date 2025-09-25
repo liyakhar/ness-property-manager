@@ -27,7 +27,7 @@ export const usePropertyManagement = (): UsePropertyManagementReturn => {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         setError(errorMessage);
-        console.error('Error loading data:', error);
+        console.error('Error loading data:', errorMessage);
       }
     };
 
@@ -42,7 +42,7 @@ export const usePropertyManagement = (): UsePropertyManagementReturn => {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to update property';
         setError(errorMessage);
-        console.error('Error updating property:', error);
+        console.error('Error updating property:', errorMessage);
         return err(errorMessage);
       }
     },
@@ -57,7 +57,7 @@ export const usePropertyManagement = (): UsePropertyManagementReturn => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to refetch data';
       setError(errorMessage);
-      console.error('Error refetching data:', error);
+      console.error('Error refetching data:', errorMessage);
       return err(errorMessage);
     }
   }, [fetchProperties, fetchTenants]);

@@ -66,7 +66,8 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
       toast.success('Недвижимость успешно добавлена');
       form.reset();
     } catch (error) {
-      console.error('Error adding property:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error adding property:', errorMessage);
       toast.error('Не удалось добавить недвижимость');
     } finally {
       setIsLoading(false);

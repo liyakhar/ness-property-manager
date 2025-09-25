@@ -54,7 +54,7 @@ export const useProperties = (): UsePropertiesReturn => {
         if (isMountedRef.current) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           setError(errorMessage);
-          console.error('Error loading properties:', error);
+          console.error('Error loading properties:', errorMessage);
         }
       }
     };
@@ -74,7 +74,7 @@ export const useProperties = (): UsePropertiesReturn => {
         const errorMessage = error instanceof Error ? error.message : 'Failed to add property';
         if (isMountedRef.current) {
           setError(errorMessage);
-          console.error('Error adding property:', error);
+          console.error('Error adding property:', errorMessage);
         }
         return err(errorMessage);
       }
@@ -91,7 +91,7 @@ export const useProperties = (): UsePropertiesReturn => {
         const errorMessage = error instanceof Error ? error.message : 'Failed to update property';
         if (isMountedRef.current) {
           setError(errorMessage);
-          console.error('Error updating property:', error);
+          console.error('Error updating property:', errorMessage);
         }
         return err(errorMessage);
       }
@@ -108,7 +108,7 @@ export const useProperties = (): UsePropertiesReturn => {
         const errorMessage = error instanceof Error ? error.message : 'Failed to delete property';
         if (isMountedRef.current) {
           setError(errorMessage);
-          console.error('Error deleting property:', error);
+          console.error('Error deleting property:', errorMessage);
         }
         return err(errorMessage);
       }
@@ -126,7 +126,7 @@ export const useProperties = (): UsePropertiesReturn => {
           error instanceof Error ? error.message : 'Failed to set properties hidden';
         if (isMountedRef.current) {
           setError(errorMessage);
-          console.error('Error setting properties hidden:', error);
+          console.error('Error setting properties hidden:', errorMessage);
         }
         return err(errorMessage);
       }
@@ -145,7 +145,7 @@ export const useProperties = (): UsePropertiesReturn => {
       const errorMessage = error instanceof Error ? error.message : 'Failed to refetch properties';
       if (isMountedRef.current) {
         setError(errorMessage);
-        console.error('Error refetching properties:', error);
+        console.error('Error refetching properties:', errorMessage);
       }
       return err(errorMessage);
     }

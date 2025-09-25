@@ -54,13 +54,14 @@ export function AddColumnDialog({ open, onOpenChange, onAddColumn }: AddColumnDi
     },
   });
 
-  const onSubmit = async (data: AddColumnFormData) => {
+  const onSubmit = (data: AddColumnFormData) => {
     try {
       onAddColumn(data);
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error('Не удалось добавить колонку:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Не удалось добавить колонку:', errorMessage);
     }
   };
 

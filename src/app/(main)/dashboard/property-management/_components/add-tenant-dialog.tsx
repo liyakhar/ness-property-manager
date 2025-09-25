@@ -78,7 +78,8 @@ export function AddTenantDialog({
       toast.success('Арендатор успешно добавлен');
       form.reset();
     } catch (error) {
-      console.error('Error adding tenant:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error adding tenant:', errorMessage);
       toast.error('Не удалось добавить арендатора');
     } finally {
       setIsLoading(false);

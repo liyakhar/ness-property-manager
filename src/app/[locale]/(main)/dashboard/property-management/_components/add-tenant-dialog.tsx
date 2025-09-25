@@ -63,12 +63,14 @@ export function AddTenantDialog({
     },
   });
 
-  const onSubmit = async (data: AddTenantFormData) => {
+  const onSubmit = (data: AddTenantFormData) => {
     try {
       onAddTenant(data);
       toast.success('Tenant added successfully');
       form.reset();
-    } catch {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error adding tenant:', errorMessage);
       toast.error('Failed to add tenant');
     }
   };

@@ -181,7 +181,8 @@ async function updateTenant(id: string, data: Partial<Tenant>): Promise<ApiRespo
     });
     return ok(updated);
   } catch (error) {
-    console.error('Error updating tenant:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Error updating tenant:', errorMessage);
     return err({ message: 'Failed to update tenant', status: 500 });
   }
 }
