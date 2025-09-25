@@ -1,7 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { useTenants } from '@/hooks/use-tenants';
@@ -9,9 +9,25 @@ import { TenantDatabase } from '../_components/tenant-database';
 
 export default function TenantsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const { isLoading } = useTenants();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { isLoading, refetch } = useTenants();
 
-  if (isLoading) {
+  // Initialize data on mount
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        await refetch();
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error initializing tenants data:', error);
+        setIsInitialized(true); // Still set to true to show the UI even if there's an error
+      }
+    };
+
+    initializeData();
+  }, [refetch]);
+
+  if (isLoading || !isInitialized) {
     return (
       <div className="@container/main flex flex-col gap-4 md:gap-6">
         <div className="flex flex-col gap-2">

@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import type {
   AddTenantFormData,
   Tenant,
@@ -16,19 +15,6 @@ export const useTenants = () => {
     deleteTenant,
     setTenantsHidden,
   } = usePropertyManagementStore();
-
-  // Fetch tenants on mount
-  useEffect(() => {
-    const loadTenants = async () => {
-      try {
-        await fetchTenants();
-      } catch (error) {
-        console.error('Error loading tenants:', error);
-      }
-    };
-
-    loadTenants();
-  }, [fetchTenants]);
 
   const handleAddTenant = async (tenantData: AddTenantFormData) => {
     try {
