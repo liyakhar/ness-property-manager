@@ -64,7 +64,10 @@ class TenantDatabaseService {
   ): Promise<ApiResult<void>> {
     try {
       for (const tenant of tenants) {
-        if (!(tenant as Record<string, unknown>)[columnData.id]) {
+        // Check if the custom field already exists in customFields
+        const existingCustomFields = (tenant.customFields as Record<string, unknown>) || {};
+
+        if (!existingCustomFields[columnData.id]) {
           let defaultValue: unknown;
 
           switch (columnData.type) {
@@ -87,7 +90,13 @@ class TenantDatabaseService {
               defaultValue = '';
           }
 
-          await updateTenant(tenant.id, { [columnData.id]: defaultValue });
+          // Update the tenant with the new custom field
+          const updatedCustomFields = {
+            ...existingCustomFields,
+            [columnData.id]: defaultValue,
+          };
+
+          await updateTenant(tenant.id, { customFields: updatedCustomFields });
         }
       }
 
@@ -107,9 +116,14 @@ class TenantDatabaseService {
   ): Promise<ApiResult<void>> {
     try {
       for (const tenant of tenants) {
-        if ((tenant as Record<string, unknown>)[columnId] !== undefined) {
-          const updates = { [columnId]: undefined };
-          await updateTenant(tenant.id, updates);
+        const existingCustomFields = (tenant.customFields as Record<string, unknown>) || {};
+
+        if (existingCustomFields[columnId] !== undefined) {
+          // Remove the custom field from customFields
+          const updatedCustomFields = { ...existingCustomFields };
+          delete updatedCustomFields[columnId];
+
+          await updateTenant(tenant.id, { customFields: updatedCustomFields });
         }
       }
 

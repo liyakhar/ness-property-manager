@@ -285,8 +285,9 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
           accessorKey: columnData.id,
           header: columnData.header,
           cell: ({ row }) => {
-            const value = (row.original as Record<string, unknown>)[columnData.id];
-            return String(value);
+            const customFields = (row.original.customFields as Record<string, unknown>) || {};
+            const value = customFields[columnData.id];
+            return String(value || '');
           },
           enableSorting: true,
           enableHiding: true,

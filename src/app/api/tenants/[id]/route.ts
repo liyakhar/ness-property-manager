@@ -60,29 +60,28 @@ async function getTargetDates(
 }
 
 /* eslint-disable complexity */
-async function updateTenant(
-  id: string,
-  data: Partial<
-    Pick<
-      Tenant,
-      | 'name'
-      | 'apartmentId'
-      | 'entryDate'
-      | 'exitDate'
-      | 'status'
-      | 'notes'
-      | 'receivePaymentDate'
-      | 'utilityPaymentDate'
-      | 'internetPaymentDate'
-      | 'isPaid'
-      | 'paymentAttachment'
-      | 'hidden'
-    >
-  >
-): Promise<ApiResponse<Tenant>> {
+async function updateTenant(id: string, data: Partial<Tenant>): Promise<ApiResponse<Tenant>> {
   try {
-    // Convert date strings to Date if provided
-    const preparedData: Partial<
+    // Separate standard fields from custom fields
+    const {
+      name,
+      apartmentId,
+      entryDate,
+      exitDate,
+      status,
+      notes,
+      receivePaymentDate,
+      utilityPaymentDate,
+      internetPaymentDate,
+      isPaid,
+      paymentAttachment,
+      hidden,
+      customFields,
+      ...otherFields
+    } = data;
+
+    // Prepare standard fields
+    const standardFields: Partial<
       Pick<
         Tenant,
         | 'name'
@@ -97,27 +96,76 @@ async function updateTenant(
         | 'isPaid'
         | 'paymentAttachment'
         | 'hidden'
+        | 'customFields'
       >
     > = {
-      ...data,
+      name,
+      apartmentId,
+      entryDate,
+      exitDate,
+      status,
+      notes,
+      receivePaymentDate,
+      utilityPaymentDate,
+      internetPaymentDate,
+      isPaid,
+      paymentAttachment,
+      hidden,
+      customFields,
     };
-    if (preparedData.entryDate) preparedData.entryDate = new Date(preparedData.entryDate);
-    if (preparedData.exitDate) preparedData.exitDate = new Date(preparedData.exitDate);
-    if (preparedData.receivePaymentDate)
-      preparedData.receivePaymentDate = new Date(preparedData.receivePaymentDate);
-    if (preparedData.utilityPaymentDate)
-      preparedData.utilityPaymentDate = new Date(preparedData.utilityPaymentDate);
-    if (preparedData.internetPaymentDate)
-      preparedData.internetPaymentDate = new Date(preparedData.internetPaymentDate);
+
+    // Convert date strings to Date if provided
+    if (standardFields.entryDate) standardFields.entryDate = new Date(standardFields.entryDate);
+    if (standardFields.exitDate) standardFields.exitDate = new Date(standardFields.exitDate);
+    if (standardFields.receivePaymentDate)
+      standardFields.receivePaymentDate = new Date(standardFields.receivePaymentDate);
+    if (standardFields.utilityPaymentDate)
+      standardFields.utilityPaymentDate = new Date(standardFields.utilityPaymentDate);
+    if (standardFields.internetPaymentDate)
+      standardFields.internetPaymentDate = new Date(standardFields.internetPaymentDate);
+
+    // Handle custom fields - merge with existing customFields
+    let finalCustomFields: Record<string, unknown> | undefined = customFields as
+      | Record<string, unknown>
+      | undefined;
+    if (Object.keys(otherFields).length > 0) {
+      // Get existing custom fields
+      const existingTenant = await prisma.tenant.findUnique({
+        where: { id },
+        select: { customFields: true },
+      });
+
+      const existingCustomFields = (existingTenant?.customFields as Record<string, unknown>) || {};
+
+      // Merge new custom fields with existing ones
+      finalCustomFields = {
+        ...existingCustomFields,
+        ...otherFields,
+      };
+
+      // Remove undefined values
+      if (finalCustomFields) {
+        Object.keys(finalCustomFields).forEach((key) => {
+          if (finalCustomFields?.[key] === undefined) {
+            delete finalCustomFields[key];
+          }
+        });
+      }
+    }
+
+    // Add custom fields to the update data
+    if (finalCustomFields !== undefined) {
+      standardFields.customFields = finalCustomFields as any; // Cast to JsonValue
+    }
 
     // Business rule: prevent multiple active tenants for the same apartment (no overlapping occupancy)
     const targetApartmentId: string | undefined =
-      preparedData.apartmentId ??
+      standardFields.apartmentId ??
       (await prisma.tenant.findUnique({ where: { id }, select: { apartmentId: true } }))
         ?.apartmentId;
 
-    if (targetApartmentId && preparedData.entryDate) {
-      const { entryDate, exitDate } = await getTargetDates(id, preparedData);
+    if (targetApartmentId && standardFields.entryDate) {
+      const { entryDate, exitDate } = await getTargetDates(id, standardFields);
       if (entryDate) {
         const hasOverlap = await checkTenantOverlap(id, targetApartmentId, entryDate, exitDate);
         if (hasOverlap) {
@@ -128,11 +176,12 @@ async function updateTenant(
 
     const updated = await prisma.tenant.update({
       where: { id },
-      data: preparedData,
+      data: standardFields as any, // Type assertion needed due to Prisma's strict typing
       include: { apartment: true },
     });
     return ok(updated);
-  } catch {
+  } catch (error) {
+    console.error('Error updating tenant:', error);
     return err({ message: 'Failed to update tenant', status: 500 });
   }
 }

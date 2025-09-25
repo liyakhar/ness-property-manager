@@ -39,6 +39,7 @@ model Tenant {
   isPaid              Boolean      @default(false)
   paymentAttachment   String?
   hidden              Boolean      @default(false)
+  customFields        Json?
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
   apartment           Property     @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
