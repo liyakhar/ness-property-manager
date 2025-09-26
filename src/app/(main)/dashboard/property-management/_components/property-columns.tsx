@@ -148,41 +148,29 @@ export const createPropertyColumns = (
     {
       accessorKey: 'occupancyStatus',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
-      cell: ({ row }) => (
-        <EditableCell
-          value={row.original.occupancyStatus}
-          onSave={(newValue: unknown) => {
-            updateProperty(row.original.id, { occupancyStatus: newValue as 'занята' | 'свободна' });
-          }}
-          type="occupancy"
-          options={[
-            { value: 'свободна', label: 'Свободна' },
-            {
-              value: 'занята',
-              label: row.original.propertyType === 'продажа' ? 'Продана' : 'Занята',
-            },
-          ]}
-        />
-      ),
-      enableSorting: true,
-    },
-    {
-      accessorKey: 'status',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
-      cell: ({ row }) => (
-        <EditableCell
-          value={row.original.status || 'current'}
-          onSave={(value: unknown) => {
-            updateProperty(row.original.id, {
-              status: value as 'current' | 'past' | 'future' | 'upcoming',
-            });
-          }}
-          type="status"
-          options={customStatusOptions}
-          onAddStatus={onAddStatus}
-          onDeleteStatus={onDeleteStatus}
-        />
-      ),
+      cell: ({ row }) => {
+        const defaultOptions = [
+          { value: 'свободна', label: 'Свободна' },
+          {
+            value: 'занята',
+            label: row.original.propertyType === 'продажа' ? 'Продана' : 'Занята',
+          },
+        ];
+        const allOptions = [...defaultOptions, ...(customStatusOptions || [])];
+
+        return (
+          <EditableCell
+            value={row.original.occupancyStatus}
+            onSave={(newValue: unknown) => {
+              updateProperty(row.original.id, { occupancyStatus: newValue as string });
+            }}
+            type="select"
+            options={allOptions}
+            onAddStatus={onAddStatus}
+            onDeleteStatus={onDeleteStatus}
+          />
+        );
+      },
       enableSorting: true,
     },
     {

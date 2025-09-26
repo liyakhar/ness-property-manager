@@ -10,40 +10,26 @@ export const PropertyStats: React.FC<PropertyStatsProps> = ({
   onStatusFilter,
   onDeleteStatus,
 }) => {
-  const getCurrentProperties = () =>
-    properties.filter((property) => (property.status || 'current') === 'current');
-  const getPastProperties = () => properties.filter((property) => property.status === 'past');
-  const getFutureProperties = () => properties.filter((property) => property.status === 'future');
-  const getUpcomingProperties = () =>
-    properties.filter((property) => property.status === 'upcoming');
+  const getAvailableProperties = () =>
+    properties.filter((property) => property.occupancyStatus === 'свободна');
+  const getOccupiedProperties = () =>
+    properties.filter((property) => property.occupancyStatus === 'занята');
 
   const getCustomStatusProperties = (statusValue: string) =>
-    properties.filter((property) => property.status === statusValue);
+    properties.filter((property) => property.occupancyStatus === statusValue);
 
   const defaultStatuses = [
     {
-      value: 'current',
-      label: 'Текущие',
-      count: getCurrentProperties().length,
+      value: 'свободна',
+      label: 'Свободна',
+      count: getAvailableProperties().length,
       className: 'bg-green-500/10 text-green-700 dark:text-green-300',
     },
     {
-      value: 'upcoming',
-      label: 'Скоро',
-      count: getUpcomingProperties().length,
+      value: 'занята',
+      label: 'Занята',
+      count: getOccupiedProperties().length,
       className: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
-    },
-    {
-      value: 'future',
-      label: 'Будущие',
-      count: getFutureProperties().length,
-      className: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
-    },
-    {
-      value: 'past',
-      label: 'Прошлые',
-      count: getPastProperties().length,
-      className: 'bg-muted text-muted-foreground',
     },
   ];
 

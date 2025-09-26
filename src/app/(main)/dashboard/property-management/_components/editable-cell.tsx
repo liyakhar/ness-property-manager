@@ -162,21 +162,100 @@ export function EditableCell({
 
       case 'select':
         return (
-          <Select
-            value={typeof editValue === 'string' ? editValue : ''}
-            onValueChange={setEditValue}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Выберите значение" />
-            </SelectTrigger>
-            <SelectContent>
-              {options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-1">
+            <Select
+              value={typeof editValue === 'string' ? editValue : ''}
+              onValueChange={setEditValue}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Выберите значение" />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((option) => {
+                  const isCustomOption = options.some((opt) => opt.value === option.value);
+                  return (
+                    <div key={option.value} className="flex items-center justify-between group">
+                      <SelectItem value={option.value} className="flex-1">
+                        {option.label}
+                      </SelectItem>
+                      {isCustomOption && onDeleteStatus && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onDeleteStatus(option.value);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+                {onAddStatus && (
+                  <Dialog open={isAddStatusDialogOpen} onOpenChange={setIsAddStatusDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsAddStatusDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Добавить статус
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Добавить новый статус</DialogTitle>
+                        <DialogDescription>
+                          Введите значение и название для нового статуса
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor={statusValueId} className="text-sm font-medium">
+                            Значение
+                          </label>
+                          <Input
+                            id={statusValueId}
+                            value={newStatusValue}
+                            onChange={(e) => setNewStatusValue(e.target.value)}
+                            placeholder="custom_status"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor={statusLabelId} className="text-sm font-medium">
+                            Название
+                          </label>
+                          <Input
+                            id={statusLabelId}
+                            value={newStatusLabel}
+                            onChange={(e) => setNewStatusLabel(e.target.value)}
+                            placeholder="Пользовательский статус"
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddStatusDialogOpen(false)}>
+                          Отмена
+                        </Button>
+                        <Button onClick={handleAddNewStatus}>Добавить</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         );
 
       case 'occupancy':

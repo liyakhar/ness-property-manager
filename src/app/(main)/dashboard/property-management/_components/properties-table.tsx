@@ -318,7 +318,7 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
 
     // Apply status filter
     if (selectedStatus) {
-      base = base.filter((property) => (property.status || 'current') === selectedStatus);
+      base = base.filter((property) => property.occupancyStatus === selectedStatus);
     }
 
     if (!searchQuery) return base;
