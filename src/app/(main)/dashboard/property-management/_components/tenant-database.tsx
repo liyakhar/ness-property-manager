@@ -29,6 +29,7 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
     handleToggleHideSelected,
     handleDeleteSelected,
     handleAddTenant,
+    handleDeleteStatus,
     customStatusOptions,
     selectedStatus,
     handleStatusFilter,
@@ -61,6 +62,7 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
               customStatusOptions={customStatusOptions}
               selectedStatus={selectedStatus}
               onStatusFilter={handleStatusFilter}
+              onDeleteStatus={handleDeleteStatus}
             />
             <TenantFilters
               table={table}

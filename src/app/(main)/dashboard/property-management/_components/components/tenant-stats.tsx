@@ -1,3 +1,4 @@
+import { Trash2 } from 'lucide-react';
 import type React from 'react';
 import { Button } from '@/components/ui/button';
 import { TENANT_DATABASE_CONSTANTS } from '../constants/tenant-database.constants';
@@ -8,6 +9,7 @@ export const TenantStats: React.FC<TenantStatsProps> = ({
   customStatusOptions = [],
   selectedStatus,
   onStatusFilter,
+  onDeleteStatus,
 }) => {
   const getActiveTenants = () => tenants.filter((tenant) => tenant.status === 'current');
   const getPastTenants = () => tenants.filter((tenant) => tenant.status === 'past');
@@ -55,17 +57,31 @@ export const TenantStats: React.FC<TenantStatsProps> = ({
 
   return (
     <div className="flex items-center gap-2">
-      {allStatuses.map((status) => (
-        <Button
-          key={status.value}
-          variant={selectedStatus === status.value ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => onStatusFilter?.(status.value)}
-          className={`${status.className} ${selectedStatus === status.value ? 'ring-2 ring-offset-2' : ''}`}
-        >
-          {status.count} {status.label}
-        </Button>
-      ))}
+      {allStatuses.map((status) => {
+        const isCustomStatus = customStatusOptions.some((opt) => opt.value === status.value);
+        return (
+          <div key={status.value} className="flex items-center gap-1 group">
+            <Button
+              variant={selectedStatus === status.value ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => onStatusFilter?.(status.value)}
+              className={`${status.className} ${selectedStatus === status.value ? 'ring-2 ring-offset-2' : ''}`}
+            >
+              {status.count} {status.label}
+            </Button>
+            {isCustomStatus && onDeleteStatus && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                onClick={() => onDeleteStatus(status.value)}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

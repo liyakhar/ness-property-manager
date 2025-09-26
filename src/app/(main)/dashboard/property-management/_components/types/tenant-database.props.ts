@@ -14,6 +14,7 @@ export interface TenantStatsProps {
   customStatusOptions?: { value: string; label: string }[];
   selectedStatus?: string;
   onStatusFilter?: (status: string) => void;
+  onDeleteStatus?: (statusValue: string) => void;
 }
 
 export interface TenantTableProps {

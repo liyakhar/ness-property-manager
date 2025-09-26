@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { CalendarIcon, Check, Edit2, Plus, X } from 'lucide-react';
+import { CalendarIcon, Check, Edit2, Plus, Trash2, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +46,7 @@ interface EditableCellProps {
   options?: { value: string; label: string }[];
   properties?: Array<{ id: string; apartmentNumber: number; location: string }>;
   onAddStatus?: (status: { value: string; label: string }) => void;
+  onDeleteStatus?: (statusValue: string) => void;
 }
 
 export function EditableCell({
@@ -55,6 +56,7 @@ export function EditableCell({
   options = [],
   properties = [],
   onAddStatus,
+  onDeleteStatus,
 }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState<string | number | Date | undefined>(
@@ -272,11 +274,30 @@ export function EditableCell({
                 <SelectValue placeholder="Выберите статус" />
               </SelectTrigger>
               <SelectContent>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                {statusOptions.map((option) => {
+                  const isCustomStatus = options.some((opt) => opt.value === option.value);
+                  return (
+                    <div key={option.value} className="flex items-center justify-between group">
+                      <SelectItem value={option.value} className="flex-1">
+                        {option.label}
+                      </SelectItem>
+                      {isCustomStatus && onDeleteStatus && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onDeleteStatus(option.value);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
                 {onAddStatus && (
                   <Dialog open={isAddStatusDialogOpen} onOpenChange={setIsAddStatusDialogOpen}>
                     <DialogTrigger asChild>

@@ -41,6 +41,7 @@ interface UseTenantDatabaseReturn {
   handleDeleteSelected: () => Promise<void>;
   handleAddTenant: (newTenant: AddTenantFormData) => Promise<void>;
   handleAddStatus: (status: { value: string; label: string }) => void;
+  handleDeleteStatus: (statusValue: string) => void;
   customStatusOptions: { value: string; label: string }[];
   selectedStatus?: string;
   handleStatusFilter: (status: string) => void;
@@ -153,6 +154,17 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     [selectedStatus]
   );
 
+  // Function to handle deleting custom status options
+  const handleDeleteStatus = useCallback((statusValue: string) => {
+    setCustomStatusOptions((prev) => {
+      const newOptions = prev.filter((option) => option.value !== statusValue);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('tenant-custom-status-options', JSON.stringify(newOptions));
+      }
+      return newOptions;
+    });
+  }, []);
+
   // Create tenant columns with update function
   const tenantColumns = useMemo(() => {
     return createTenantColumns(
@@ -164,6 +176,7 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
         await deleteTenantMutation.mutateAsync(id);
       },
       handleAddStatus,
+      handleDeleteStatus,
       customStatusOptions
     );
   }, [
@@ -171,6 +184,7 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     updateTenantMutation,
     deleteTenantMutation,
     handleAddStatus,
+    handleDeleteStatus,
     customStatusOptions,
   ]);
 
@@ -448,6 +462,7 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     handleDeleteSelected,
     handleAddTenant,
     handleAddStatus,
+    handleDeleteStatus,
     customStatusOptions,
     selectedStatus,
     handleStatusFilter,

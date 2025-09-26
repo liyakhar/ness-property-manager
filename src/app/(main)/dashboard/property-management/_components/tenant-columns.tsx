@@ -25,6 +25,7 @@ export const createTenantColumns = (
   properties: Array<{ id: string; location: string; apartmentNumber: number }>,
   onDeleteTenant?: (id: string) => void,
   onAddStatus?: (status: { value: string; label: string }) => void,
+  onDeleteStatus?: (statusValue: string) => void,
   customStatusOptions?: { value: string; label: string }[]
 ): ColumnDef<Tenant>[] => {
   const persistUpdate = (id: string, updates: Partial<Tenant>) => {
@@ -117,6 +118,7 @@ export const createTenantColumns = (
           type="status"
           options={customStatusOptions}
           onAddStatus={onAddStatus}
+          onDeleteStatus={onDeleteStatus}
         />
       ),
       enableSorting: true,
