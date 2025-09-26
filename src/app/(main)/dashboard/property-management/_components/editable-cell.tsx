@@ -260,7 +260,7 @@ export function EditableCell({
           { value: 'future', label: 'Будущий' },
           { value: 'upcoming', label: 'Скоро' },
         ];
-        const statusOptions = options.length > 0 ? options : defaultStatusOptions;
+        const statusOptions = [...defaultStatusOptions, ...options];
 
         return (
           <div className="flex items-center gap-1">
@@ -441,7 +441,7 @@ export function EditableCell({
         { value: 'future', label: 'Будущий' },
         { value: 'upcoming', label: 'Скоро' },
       ];
-      const statusOptions = options.length > 0 ? options : defaultStatusOptions;
+      const statusOptions = [...defaultStatusOptions, ...options];
 
       const getStatusDisplay = (status: string) => {
         // First check if it's in the provided options

@@ -11,6 +11,9 @@ export interface TenantDatabaseSkeletonProps {
 
 export interface TenantStatsProps {
   tenants: Tenant[];
+  customStatusOptions?: { value: string; label: string }[];
+  selectedStatus?: string;
+  onStatusFilter?: (status: string) => void;
 }
 
 export interface TenantTableProps {

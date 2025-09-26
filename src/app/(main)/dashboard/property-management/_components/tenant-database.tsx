@@ -5,13 +5,13 @@ import { DataTable } from '@/components/data-table/data-table';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { usePropertyManagementStore } from '@/stores/property-management';
 import { AddTenantDialog } from './add-tenant-dialog';
 import { TenantDatabaseSkeleton } from './components/tenant-database-skeleton';
 import { TenantFilters } from './components/tenant-filters';
 import { TenantStats } from './components/tenant-stats';
 import { TENANT_DATABASE_CONSTANTS } from './constants/tenant-database.constants';
 import { useTenantDatabase } from './hooks/use-tenant-database';
-import { usePropertyManagementStore } from '@/stores/property-management';
 import type { TenantDatabaseProps } from './types/tenant-database.props';
 
 export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
@@ -29,6 +29,9 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
     handleToggleHideSelected,
     handleDeleteSelected,
     handleAddTenant,
+    customStatusOptions,
+    selectedStatus,
+    handleStatusFilter,
   } = useTenantDatabase(searchQuery);
 
   const { isAddTenantDialogOpen, setAddTenantDialogOpen } = usePropertyManagementStore();
@@ -53,7 +56,12 @@ export function TenantDatabase({ searchQuery = '' }: TenantDatabaseProps) {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
-            <TenantStats tenants={filteredTenants} />
+            <TenantStats
+              tenants={filteredTenants}
+              customStatusOptions={customStatusOptions}
+              selectedStatus={selectedStatus}
+              onStatusFilter={handleStatusFilter}
+            />
             <TenantFilters
               table={table}
               showHiddenView={showHiddenView}

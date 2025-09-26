@@ -42,6 +42,8 @@ interface UseTenantDatabaseReturn {
   handleAddTenant: (newTenant: AddTenantFormData) => Promise<void>;
   handleAddStatus: (status: { value: string; label: string }) => void;
   customStatusOptions: { value: string; label: string }[];
+  selectedStatus?: string;
+  handleStatusFilter: (status: string) => void;
 
   // Computed
   getActiveTenants: () => Tenant[];
@@ -65,6 +67,9 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
   const [customStatusOptions, setCustomStatusOptions] = useState<
     { value: string; label: string }[]
   >([]);
+
+  // State for status filtering
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
 
   // Load custom columns from localStorage on component mount
   React.useEffect(() => {
@@ -139,6 +144,14 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
       return newOptions;
     });
   }, []);
+
+  // Function to handle status filtering
+  const handleStatusFilter = useCallback(
+    (status: string) => {
+      setSelectedStatus(selectedStatus === status ? undefined : status);
+    },
+    [selectedStatus]
+  );
 
   // Create tenant columns with update function
   const tenantColumns = useMemo(() => {
@@ -279,7 +292,13 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
 
   // Non-hidden, filtered by search
   const filteredTenants = useMemo(() => {
-    const base = allTenants.filter((t) => !t.hidden);
+    let base = allTenants.filter((t) => !t.hidden);
+
+    // Apply status filter
+    if (selectedStatus) {
+      base = base.filter((tenant) => tenant.status === selectedStatus);
+    }
+
     if (!searchQuery) return base;
 
     const query = searchQuery.toLowerCase();
@@ -290,7 +309,14 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
       if (isTenantPropertyMatch(tenant, query)) return true;
       return false;
     });
-  }, [allTenants, searchQuery, isBasicMatch, isDateSearchMatch, isTenantPropertyMatch]);
+  }, [
+    allTenants,
+    searchQuery,
+    selectedStatus,
+    isBasicMatch,
+    isDateSearchMatch,
+    isTenantPropertyMatch,
+  ]);
 
   const hiddenTenants = useMemo(() => allTenants.filter((t) => !!t.hidden), [allTenants]);
   const tableData = showHiddenView ? hiddenTenants : filteredTenants;
@@ -423,6 +449,8 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     handleAddTenant,
     handleAddStatus,
     customStatusOptions,
+    selectedStatus,
+    handleStatusFilter,
     getActiveTenants,
     getPastTenants,
     getFutureTenants,
