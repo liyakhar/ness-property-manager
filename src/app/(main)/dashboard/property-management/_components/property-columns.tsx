@@ -162,7 +162,9 @@ export const createPropertyColumns = (
           <EditableCell
             value={row.original.occupancyStatus}
             onSave={(newValue: unknown) => {
-              updateProperty(row.original.id, { occupancyStatus: newValue as string });
+              updateProperty(row.original.id, {
+                occupancyStatus: newValue as 'занята' | 'свободна',
+              });
             }}
             type="select"
             options={allOptions}
