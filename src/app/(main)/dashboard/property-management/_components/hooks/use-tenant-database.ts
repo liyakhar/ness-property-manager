@@ -40,6 +40,8 @@ interface UseTenantDatabaseReturn {
   handleToggleHideSelected: () => Promise<void>;
   handleDeleteSelected: () => Promise<void>;
   handleAddTenant: (newTenant: AddTenantFormData) => Promise<void>;
+  handleAddStatus: (status: { value: string; label: string }) => void;
+  customStatusOptions: { value: string; label: string }[];
 
   // Computed
   getActiveTenants: () => Tenant[];
@@ -58,6 +60,11 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
 
   // State for custom columns
   const [customColumns, setCustomColumns] = useState<ColumnDef<Tenant>[]>([]);
+
+  // State for custom status options
+  const [customStatusOptions, setCustomStatusOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   // Load custom columns from localStorage on component mount
   React.useEffect(() => {
@@ -107,10 +114,31 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
           console.error(TENANT_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, error);
         }
       }
+
+      const savedStatusOptions = localStorage.getItem('tenant-custom-status-options');
+      if (savedStatusOptions) {
+        try {
+          const parsedStatusOptions = JSON.parse(savedStatusOptions);
+          setCustomStatusOptions(parsedStatusOptions);
+        } catch (e) {
+          console.error('Failed to parse custom status options:', e);
+        }
+      }
     }
   }, []);
 
   const [showHiddenView, setShowHiddenView] = useState(false);
+
+  // Function to handle adding new status options
+  const handleAddStatus = useCallback((status: { value: string; label: string }) => {
+    setCustomStatusOptions((prev) => {
+      const newOptions = [...prev, status];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('tenant-custom-status-options', JSON.stringify(newOptions));
+      }
+      return newOptions;
+    });
+  }, []);
 
   // Create tenant columns with update function
   const tenantColumns = useMemo(() => {
@@ -121,9 +149,17 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
       properties,
       async (id: string) => {
         await deleteTenantMutation.mutateAsync(id);
-      }
+      },
+      handleAddStatus,
+      customStatusOptions
     );
-  }, [properties, updateTenantMutation, deleteTenantMutation]);
+  }, [
+    properties,
+    updateTenantMutation,
+    deleteTenantMutation,
+    handleAddStatus,
+    customStatusOptions,
+  ]);
 
   // Combine default columns with custom columns
   const allColumns = useMemo(() => {
@@ -385,6 +421,8 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     handleToggleHideSelected,
     handleDeleteSelected,
     handleAddTenant,
+    handleAddStatus,
+    customStatusOptions,
     getActiveTenants,
     getPastTenants,
     getFutureTenants,

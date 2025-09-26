@@ -1,12 +1,21 @@
 'use client';
 
 import { format } from 'date-fns';
-import { CalendarIcon, Check, Edit2, X } from 'lucide-react';
+import { CalendarIcon, Check, Edit2, Plus, X } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -36,6 +45,7 @@ interface EditableCellProps {
     | 'readiness';
   options?: { value: string; label: string }[];
   properties?: Array<{ id: string; apartmentNumber: number; location: string }>;
+  onAddStatus?: (status: { value: string; label: string }) => void;
 }
 
 export function EditableCell({
@@ -44,6 +54,7 @@ export function EditableCell({
   type = 'text',
   options = [],
   properties = [],
+  onAddStatus,
 }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState<string | number | Date | undefined>(
@@ -54,8 +65,13 @@ export function EditableCell({
   const [tempDate, setTempDate] = useState<Date | undefined>(
     value instanceof Date ? value : undefined
   );
+  const [isAddStatusDialogOpen, setIsAddStatusDialogOpen] = useState(false);
+  const [newStatusValue, setNewStatusValue] = useState('');
+  const [newStatusLabel, setNewStatusLabel] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const statusValueId = useId();
+  const statusLabelId = useId();
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -95,6 +111,15 @@ export function EditableCell({
       handleSave();
     } else if (e.key === 'Escape') {
       handleCancel();
+    }
+  };
+
+  const handleAddNewStatus = () => {
+    if (newStatusValue.trim() && newStatusLabel.trim() && onAddStatus) {
+      onAddStatus({ value: newStatusValue.trim(), label: newStatusLabel.trim() });
+      setNewStatusValue('');
+      setNewStatusLabel('');
+      setIsAddStatusDialogOpen(false);
     }
   };
 
@@ -228,23 +253,93 @@ export function EditableCell({
           </Select>
         );
 
-      case 'status':
+      case 'status': {
+        const defaultStatusOptions = [
+          { value: 'current', label: 'Текущий' },
+          { value: 'past', label: 'Прошлый' },
+          { value: 'future', label: 'Будущий' },
+          { value: 'upcoming', label: 'Скоро' },
+        ];
+        const statusOptions = options.length > 0 ? options : defaultStatusOptions;
+
         return (
-          <Select
-            value={typeof editValue === 'string' ? editValue : ''}
-            onValueChange={setEditValue}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Выберите статус" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="current">Текущий</SelectItem>
-              <SelectItem value="past">Прошлый</SelectItem>
-              <SelectItem value="future">Будущий</SelectItem>
-              <SelectItem value="upcoming">Скоро</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-1">
+            <Select
+              value={typeof editValue === 'string' ? editValue : ''}
+              onValueChange={setEditValue}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Выберите статус" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+                {onAddStatus && (
+                  <Dialog open={isAddStatusDialogOpen} onOpenChange={setIsAddStatusDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsAddStatusDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Добавить статус
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Добавить новый статус</DialogTitle>
+                        <DialogDescription>
+                          Введите значение и название для нового статуса
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor={statusValueId} className="text-sm font-medium">
+                            Значение
+                          </label>
+                          <Input
+                            id={statusValueId}
+                            value={newStatusValue}
+                            onChange={(e) => setNewStatusValue(e.target.value)}
+                            placeholder="current"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor={statusLabelId} className="text-sm font-medium">
+                            Название
+                          </label>
+                          <Input
+                            id={statusLabelId}
+                            value={newStatusLabel}
+                            onChange={(e) => setNewStatusLabel(e.target.value)}
+                            placeholder="Текущий"
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddStatusDialogOpen(false)}>
+                          Отмена
+                        </Button>
+                        <Button onClick={handleAddNewStatus}>Добавить</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         );
+      }
 
       case 'apartment':
         return (
@@ -340,7 +435,26 @@ export function EditableCell({
     }
 
     if (type === 'status') {
+      const defaultStatusOptions = [
+        { value: 'current', label: 'Текущий' },
+        { value: 'past', label: 'Прошлый' },
+        { value: 'future', label: 'Будущий' },
+        { value: 'upcoming', label: 'Скоро' },
+      ];
+      const statusOptions = options.length > 0 ? options : defaultStatusOptions;
+
       const getStatusDisplay = (status: string) => {
+        // First check if it's in the provided options
+        const matchedOption = statusOptions.find((opt) => opt.value === status);
+        if (matchedOption) {
+          return {
+            variant: 'outline' as const,
+            text: matchedOption.label,
+            className: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
+          };
+        }
+
+        // Fallback to hardcoded statuses
         switch (status) {
           case 'current':
             return {

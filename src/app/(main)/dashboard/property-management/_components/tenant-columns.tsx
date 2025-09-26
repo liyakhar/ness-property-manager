@@ -23,7 +23,9 @@ import type { Tenant } from './schema';
 export const createTenantColumns = (
   onUpdateTenant: (id: string, updates: Partial<Tenant>) => void,
   properties: Array<{ id: string; location: string; apartmentNumber: number }>,
-  onDeleteTenant?: (id: string) => void
+  onDeleteTenant?: (id: string) => void,
+  onAddStatus?: (status: { value: string; label: string }) => void,
+  customStatusOptions?: { value: string; label: string }[]
 ): ColumnDef<Tenant>[] => {
   const persistUpdate = (id: string, updates: Partial<Tenant>) => {
     onUpdateTenant(id, updates);
@@ -113,6 +115,8 @@ export const createTenantColumns = (
             })
           }
           type="status"
+          options={customStatusOptions}
+          onAddStatus={onAddStatus}
         />
       ),
       enableSorting: true,

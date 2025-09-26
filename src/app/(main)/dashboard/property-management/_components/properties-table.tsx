@@ -93,40 +93,49 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
 
   // State for custom columns
   const [customColumns, setCustomColumns] = React.useState<ColumnDef<Property>[]>([]);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  // Track component mounting state
+  React.useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   // Load custom columns from localStorage on component mount
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS);
-      if (saved) {
-        try {
-          const parsedColumns = JSON.parse(saved) as ColumnDef<Property>[];
+    if (!isMounted || typeof window === 'undefined') return;
 
-          // Migrate any English headers to Russian
-          const migratedColumns = parsedColumns.map((column: ColumnDef<Property>) => {
-            if (column.header && typeof column.header === 'string') {
-              // Check if header is in English and needs translation
-              const englishToRussian: Record<string, string> = {
-                'Apartment Number': 'Номер Квартиры',
-                Location: 'Расположение',
-                Rooms: 'Комнаты',
-                'Readiness Status': 'Готовность',
-                'Property Type': 'Тип',
-                'Occupancy Status': 'Статус',
-                'Urgent Matter': 'Срочные Вопросы',
-                Test: 'Тест',
-                Created: 'Создано',
-                Updated: 'Обновлено',
-                Actions: 'Действия',
-              };
+    const saved = localStorage.getItem(PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS);
+    if (saved) {
+      try {
+        const parsedColumns = JSON.parse(saved) as ColumnDef<Property>[];
 
-              if (englishToRussian[column.header]) {
-                return { ...column, header: englishToRussian[column.header] };
-              }
+        // Migrate any English headers to Russian
+        const migratedColumns = parsedColumns.map((column: ColumnDef<Property>) => {
+          if (column.header && typeof column.header === 'string') {
+            // Check if header is in English and needs translation
+            const englishToRussian: Record<string, string> = {
+              'Apartment Number': 'Номер Квартиры',
+              Location: 'Расположение',
+              Rooms: 'Комнаты',
+              'Readiness Status': 'Готовность',
+              'Property Type': 'Тип',
+              'Occupancy Status': 'Статус',
+              'Urgent Matter': 'Срочные Вопросы',
+              Test: 'Тест',
+              Created: 'Создано',
+              Updated: 'Обновлено',
+              Actions: 'Действия',
+            };
+
+            if (englishToRussian[column.header]) {
+              return { ...column, header: englishToRussian[column.header] };
             }
-            return column;
-          });
+          }
+          return column;
+        });
 
+        if (isMounted) {
           setCustomColumns(migratedColumns);
 
           // Save migrated columns back to localStorage
@@ -134,25 +143,31 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
             PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
             JSON.stringify(migratedColumns)
           );
-        } catch (e) {
-          console.error(PROPERTY_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, e);
         }
+      } catch (e) {
+        console.error(PROPERTY_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, e);
       }
     }
-  }, []);
+  }, [isMounted]);
 
   // Function to handle adding new columns
   const handleAddColumn = async (columnData: AddColumnData) => {
+    if (!isMounted) return;
+
     const result = await propertyDatabaseService.addCustomColumnToProperties(
       allProperties,
       columnData,
       async (id: string, updates: Partial<Property>) => {
-        await updatePropertyMutation.mutateAsync({ id, updates });
+        if (isMounted) {
+          await updatePropertyMutation.mutateAsync({ id, updates });
+        }
       }
     );
 
     result.match(
       () => {
+        if (!isMounted) return;
+
         const newColumn: ColumnDef<Property> = {
           id: columnData.id,
           accessorKey: columnData.id,
@@ -184,16 +199,22 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
 
   // Function to handle deleting custom columns
   const handleDeleteColumn = async (columnId: string) => {
+    if (!isMounted) return;
+
     const result = await propertyDatabaseService.deleteCustomColumnFromProperties(
       allProperties,
       columnId,
       async (id: string, updates: Partial<Property>) => {
-        await updatePropertyMutation.mutateAsync({ id, updates });
+        if (isMounted) {
+          await updatePropertyMutation.mutateAsync({ id, updates });
+        }
       }
     );
 
     result.match(
       () => {
+        if (!isMounted) return;
+
         const updatedColumns = customColumns.filter((column) => column.id !== columnId);
         setCustomColumns(updatedColumns);
 
@@ -214,13 +235,17 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const propertyColumns = React.useMemo(() => {
     return createPropertyColumns(
       async (id: string, updates: Partial<Property>) => {
-        await updatePropertyMutation.mutateAsync({ id, updates });
+        if (isMounted) {
+          await updatePropertyMutation.mutateAsync({ id, updates });
+        }
       },
       async (id: string) => {
-        await deletePropertyMutation.mutateAsync(id);
+        if (isMounted) {
+          await deletePropertyMutation.mutateAsync(id);
+        }
       }
     );
-  }, [updatePropertyMutation, deletePropertyMutation]);
+  }, [updatePropertyMutation, deletePropertyMutation, isMounted]);
 
   // Combine default columns with custom columns
   const allColumns = React.useMemo(() => {
@@ -264,32 +289,48 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const hasSelection = selectedPropertyIds.length > 0;
 
   const handleHideSelected = async () => {
-    if (!hasSelection) return;
+    if (!hasSelection || !isMounted) return;
     for (const id of selectedPropertyIds) {
-      await updatePropertyMutation.mutateAsync({ id, updates: { hidden: true } });
+      if (isMounted) {
+        await updatePropertyMutation.mutateAsync({ id, updates: { hidden: true } });
+      }
     }
-    table.resetRowSelection();
+    if (isMounted) {
+      table.resetRowSelection();
+    }
   };
   const handleUnhideSelected = async () => {
-    if (!hasSelection) return;
+    if (!hasSelection || !isMounted) return;
     for (const id of selectedPropertyIds) {
-      await updatePropertyMutation.mutateAsync({ id, updates: { hidden: false } });
+      if (isMounted) {
+        await updatePropertyMutation.mutateAsync({ id, updates: { hidden: false } });
+      }
     }
-    table.resetRowSelection();
+    if (isMounted) {
+      table.resetRowSelection();
+    }
   };
 
   const handleDeleteSelected = async () => {
-    if (!hasSelection) return;
+    if (!hasSelection || !isMounted) return;
     for (const id of selectedPropertyIds) {
-      await deletePropertyMutation.mutateAsync(id);
+      if (isMounted) {
+        await deletePropertyMutation.mutateAsync(id);
+      }
     }
-    table.resetRowSelection();
+    if (isMounted) {
+      table.resetRowSelection();
+    }
   };
 
   const handleAddProperty = async (newProperty: AddPropertyFormData) => {
+    if (!isMounted) return;
+
     try {
       await createPropertyMutation.mutateAsync(newProperty);
-      setAddPropertyDialogOpen(false);
+      if (isMounted) {
+        setAddPropertyDialogOpen(false);
+      }
     } catch (error) {
       console.error('Error adding property:', error);
       // Error handling is done in the dialog component
