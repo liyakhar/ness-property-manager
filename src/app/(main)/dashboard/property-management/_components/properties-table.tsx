@@ -7,7 +7,6 @@ import * as React from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
 import { DataTableViewOptions } from '@/components/data-table/data-table-view-options';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
@@ -19,6 +18,7 @@ import {
 } from '@/hooks/use-properties-query';
 import { usePropertyManagementStore } from '@/stores/property-management';
 import { AddPropertyDialog } from './add-property-dialog';
+import { PropertyStats } from './components/property-stats';
 import { PROPERTY_DATABASE_CONSTANTS } from './constants/property-database.constants';
 import { createPropertyColumns } from './property-columns';
 import type { AddPropertyFormData, Property } from './schema';
@@ -95,6 +95,14 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const [customColumns, setCustomColumns] = React.useState<ColumnDef<Property>[]>([]);
   const [isMounted, setIsMounted] = React.useState(false);
 
+  // State for custom status options
+  const [customStatusOptions, setCustomStatusOptions] = React.useState<
+    { value: string; label: string }[]
+  >([]);
+
+  // State for status filtering
+  const [selectedStatus, setSelectedStatus] = React.useState<string | undefined>(undefined);
+
   // Track component mounting state
   React.useEffect(() => {
     setIsMounted(true);
@@ -148,7 +156,47 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
         console.error(PROPERTY_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, e);
       }
     }
+
+    const savedStatusOptions = localStorage.getItem('property-custom-status-options');
+    if (savedStatusOptions) {
+      try {
+        const parsedStatusOptions = JSON.parse(savedStatusOptions);
+        setCustomStatusOptions(parsedStatusOptions);
+      } catch (e) {
+        console.error('Failed to parse custom status options:', e);
+      }
+    }
   }, [isMounted]);
+
+  // Function to handle adding new status options
+  const handleAddStatus = React.useCallback((status: { value: string; label: string }) => {
+    setCustomStatusOptions((prev) => {
+      const newOptions = [...prev, status];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('property-custom-status-options', JSON.stringify(newOptions));
+      }
+      return newOptions;
+    });
+  }, []);
+
+  // Function to handle deleting custom status options
+  const handleDeleteStatus = React.useCallback((statusValue: string) => {
+    setCustomStatusOptions((prev) => {
+      const newOptions = prev.filter((option) => option.value !== statusValue);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('property-custom-status-options', JSON.stringify(newOptions));
+      }
+      return newOptions;
+    });
+  }, []);
+
+  // Function to handle status filtering
+  const handleStatusFilter = React.useCallback(
+    (status: string) => {
+      setSelectedStatus(selectedStatus === status ? undefined : status);
+    },
+    [selectedStatus]
+  );
 
   // Function to handle adding new columns
   const handleAddColumn = async (columnData: AddColumnData) => {
@@ -243,9 +291,19 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
         if (isMounted) {
           await deletePropertyMutation.mutateAsync(id);
         }
-      }
+      },
+      handleAddStatus,
+      handleDeleteStatus,
+      customStatusOptions
     );
-  }, [updatePropertyMutation, deletePropertyMutation, isMounted]);
+  }, [
+    updatePropertyMutation,
+    deletePropertyMutation,
+    isMounted,
+    handleAddStatus,
+    handleDeleteStatus,
+    customStatusOptions,
+  ]);
 
   // Combine default columns with custom columns
   const allColumns = React.useMemo(() => {
@@ -254,9 +312,15 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
 
   const [showHiddenView, setShowHiddenView] = React.useState(false);
 
-  // Non-hidden, filtered by search
+  // Non-hidden, filtered by search and status
   const filteredProperties = React.useMemo(() => {
-    const base = allProperties.filter((p) => !p.hidden);
+    let base = allProperties.filter((p) => !p.hidden);
+
+    // Apply status filter
+    if (selectedStatus) {
+      base = base.filter((property) => (property.status || 'current') === selectedStatus);
+    }
+
     if (!searchQuery) return base;
     const query = searchQuery.toLowerCase();
     return base.filter(
@@ -269,7 +333,7 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
         property.rooms.toString().includes(query) ||
         property.urgentMatter?.toLowerCase().includes(query)
     );
-  }, [allProperties, searchQuery]);
+  }, [allProperties, searchQuery, selectedStatus]);
 
   // Hidden (not search-filtered to keep all hidden visible)
   const hiddenProperties = React.useMemo(
@@ -357,20 +421,13 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50">
-                  {filteredProperties.filter((p) => p.occupancyStatus === 'свободна').length}{' '}
-                  Свободна
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="bg-orange-50 text-orange-700 hover:bg-orange-50"
-                >
-                  {filteredProperties.filter((p) => p.occupancyStatus === 'занята').length} Занята
-                </Badge>
-              </div>
-            </div>
+            <PropertyStats
+              properties={filteredProperties}
+              customStatusOptions={customStatusOptions}
+              selectedStatus={selectedStatus}
+              onStatusFilter={handleStatusFilter}
+              onDeleteStatus={handleDeleteStatus}
+            />
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setShowHiddenView((v) => !v)}>
                 {showHiddenView ? 'Показать основные' : 'Скрытые'}

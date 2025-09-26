@@ -11,6 +11,10 @@ export interface PropertyDatabaseSkeletonProps {
 
 export interface PropertyStatsProps {
   properties: Property[];
+  customStatusOptions?: { value: string; label: string }[];
+  selectedStatus?: string;
+  onStatusFilter?: (status: string) => void;
+  onDeleteStatus?: (statusValue: string) => void;
 }
 
 export interface PropertyTableProps {

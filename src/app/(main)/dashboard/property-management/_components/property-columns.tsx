@@ -23,7 +23,10 @@ import type { Property } from './schema';
 
 export const createPropertyColumns = (
   updateProperty: (id: string, updates: Partial<Property>) => void,
-  onDeleteProperty?: (id: string) => void
+  onDeleteProperty?: (id: string) => void,
+  onAddStatus?: (status: { value: string; label: string }) => void,
+  onDeleteStatus?: (statusValue: string) => void,
+  customStatusOptions?: { value: string; label: string }[]
 ): ColumnDef<Property>[] => {
   const columns: ColumnDef<Property>[] = [
     {
@@ -159,6 +162,25 @@ export const createPropertyColumns = (
               label: row.original.propertyType === 'продажа' ? 'Продана' : 'Занята',
             },
           ]}
+        />
+      ),
+      enableSorting: true,
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Статус" />,
+      cell: ({ row }) => (
+        <EditableCell
+          value={row.original.status || 'current'}
+          onSave={(value: unknown) => {
+            updateProperty(row.original.id, {
+              status: value as 'current' | 'past' | 'future' | 'upcoming',
+            });
+          }}
+          type="status"
+          options={customStatusOptions}
+          onAddStatus={onAddStatus}
+          onDeleteStatus={onDeleteStatus}
         />
       ),
       enableSorting: true,
