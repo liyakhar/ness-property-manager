@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { type NextRequest, NextResponse } from 'next/server';
-import { freeStorage } from '@/lib/free-storage';
+import { getImagePath } from '@/lib/local-image-storage';
 
 // GET /api/images/[filename]
 export async function GET(
@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const { filename } = await context.params;
   try {
-    const imagePath = freeStorage.images.getPath(filename);
+    const imagePath = getImagePath(filename);
 
     if (!fs.existsSync(imagePath)) {
       return NextResponse.json({ success: false, error: 'Image not found' }, { status: 404 });
