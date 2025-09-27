@@ -40,3 +40,8 @@ next-env.d.ts
 
 # local data storage
 /data/images/
+
+# database files
+prisma/dev.db
+prisma/*.db
+*.db
