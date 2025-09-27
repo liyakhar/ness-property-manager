@@ -68,12 +68,6 @@ export async function uploadImage(file: File, propertyId: string): Promise<Image
     const fileName = `${propertyId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
     const filePath = path.join(IMAGES_DIR, fileName);
 
-    // Ensure property directory exists
-    const propertyDir = path.join(IMAGES_DIR, propertyId);
-    if (!fs.existsSync(propertyDir)) {
-      fs.mkdirSync(propertyDir, { recursive: true });
-    }
-
     // Convert file to buffer and save
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -140,16 +134,17 @@ export function imageExists(filename: string): boolean {
  * Get all images for a property
  */
 export function getPropertyImages(propertyId: string): string[] {
-  const propertyDir = path.join(IMAGES_DIR, propertyId);
-
-  if (!fs.existsSync(propertyDir)) {
+  if (!fs.existsSync(IMAGES_DIR)) {
     return [];
   }
 
   return fs
-    .readdirSync(propertyDir)
-    .filter((file) => /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file))
-    .map((file) => `/api/images/${propertyId}/${file}`);
+    .readdirSync(IMAGES_DIR)
+    .filter((file) => {
+      // Check if file starts with propertyId and is an image
+      return file.startsWith(`${propertyId}_`) && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file);
+    })
+    .map((file) => `/api/images/${file}`);
 }
 
 /**
@@ -157,14 +152,25 @@ export function getPropertyImages(propertyId: string): string[] {
  */
 export function deletePropertyImages(propertyId: string): boolean {
   try {
-    const propertyDir = path.join(IMAGES_DIR, propertyId);
-
-    if (fs.existsSync(propertyDir)) {
-      fs.rmSync(propertyDir, { recursive: true, force: true });
-      return true;
+    if (!fs.existsSync(IMAGES_DIR)) {
+      return false;
     }
 
-    return false;
+    const files = fs.readdirSync(IMAGES_DIR);
+    const propertyFiles = files.filter(
+      (file) => file.startsWith(`${propertyId}_`) && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file)
+    );
+
+    let deletedCount = 0;
+    for (const file of propertyFiles) {
+      const filePath = path.join(IMAGES_DIR, file);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        deletedCount++;
+      }
+    }
+
+    return deletedCount > 0;
   } catch (error) {
     console.error('Error deleting property images:', error);
     return false;
