@@ -23,7 +23,18 @@ import {
 } from './vercel-blob-storage';
 
 // Check if we're in production (Vercel environment)
-const isProduction = process.env.NODE_ENV === 'production' && process.env.VERCEL === '1';
+// Use BLOB_READ_WRITE_TOKEN as the primary indicator since it's only available in production
+const isProduction = !!process.env.BLOB_READ_WRITE_TOKEN;
+
+// Debug logging
+console.log('Storage detection:', {
+  NODE_ENV: process.env.NODE_ENV,
+  VERCEL: process.env.VERCEL,
+  VERCEL_ENV: process.env.VERCEL_ENV,
+  BLOB_READ_WRITE_TOKEN: !!process.env.BLOB_READ_WRITE_TOKEN,
+  isProduction,
+  storageMethod: isProduction ? 'vercel' : 'local',
+});
 
 // Use Vercel Blob in production, local storage in development
 export const STORAGE_CONFIG = isProduction ? VERCEL_CONFIG : LOCAL_CONFIG;
