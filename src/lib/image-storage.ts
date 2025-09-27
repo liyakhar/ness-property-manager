@@ -1,22 +1,22 @@
-// Re-export from local image storage
+// Re-export from hybrid image storage (local for dev, Vercel Blob for production)
 export {
   deleteImage,
   deletePropertyImages,
-  getImagePath,
   getPropertyImages,
+  getStorageMethod,
   getStorageStats,
   type ImageDeleteResult,
   type ImageUploadResult,
   imageExists,
   STORAGE_CONFIG,
   uploadImage,
-} from './local-image-storage';
+} from './hybrid-image-storage';
 
 /**
  * Validate image file before upload
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  const { STORAGE_CONFIG } = require('./local-image-storage');
+  const { STORAGE_CONFIG } = require('./hybrid-image-storage');
 
   // Check file type
   if (

@@ -2,13 +2,27 @@ import fs from 'node:fs';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getImagePath } from '@/lib/local-image-storage';
 
+// Check if we're in production (Vercel environment)
+const isProduction = process.env.NODE_ENV === 'production' && process.env.VERCEL === '1';
+
 // GET /api/images/[filename]
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ filename: string }> }
 ) {
   const { filename } = await context.params;
+
   try {
+    // In production, redirect to Vercel Blob URLs directly
+    if (isProduction) {
+      // This shouldn't be called in production as images are served directly from Vercel Blob
+      return NextResponse.json(
+        { success: false, error: 'Image serving not supported in production' },
+        { status: 404 }
+      );
+    }
+
+    // In development, serve from local file system
     const imagePath = getImagePath(filename);
 
     if (!fs.existsSync(imagePath)) {
