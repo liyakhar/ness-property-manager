@@ -1,6 +1,28 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Ensure proper CSS loading order and prevent HMR issues */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground overscroll-none;
+  }
+
+  /* Prevent layout shifts during HMR */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Ensure consistent font rendering */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 /* Theme preset styles: these override CSS variables based on the selected data-theme-preset */
 @import "../styles/presets/brutalist.css";
 @import "../styles/presets/soft-pop.css";
@@ -148,16 +170,6 @@ These serve as the fallback; there is no separate default.css file. */
 
   [data-theme-preset]:not([data-theme-preset="default"]) .shadow-2xl {
     box-shadow: var(--shadow-2xl);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground overscroll-none;
   }
 }
 
