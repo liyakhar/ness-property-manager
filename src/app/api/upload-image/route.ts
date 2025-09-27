@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { findExistingImageByHash, generateImageHash } from '@/lib/image-hash';
 import { deleteImage, STORAGE_CONFIG, uploadImage } from '@/lib/image-storage';
 import { prisma } from '@/lib/prisma';
 
@@ -47,7 +48,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Upload file to local storage
+    // Generate hash for deduplication
+    const imageHash = await generateImageHash(file);
+    console.log('Generated image hash:', imageHash);
+
+    // Check for existing images with the same hash
+    const property = await prisma.property.findUnique({
+      where: { id: propertyId },
+      select: { images: true },
+    });
+
+    const currentImages = (property?.images as string[]) || [];
+    const existingImage = findExistingImageByHash(currentImages, imageHash);
+
+    if (existingImage) {
+      console.log('Duplicate image detected, returning existing URL:', existingImage);
+      return NextResponse.json({
+        success: true,
+        url: existingImage,
+        path: existingImage,
+        duplicate: true,
+        message: 'Image already exists',
+      });
+    }
+
+    // Upload file to storage
     const result = await uploadImage(file, propertyId);
 
     if (!result.success) {
@@ -63,18 +88,12 @@ export async function POST(request: NextRequest) {
     console.log('Upload successful:', {
       path: result.path,
       url: result.url,
+      hash: imageHash,
     });
 
     // Update the database with the new image URL
     try {
-      // Get current images for the property
-      const property = await prisma.property.findUnique({
-        where: { id: propertyId },
-        select: { images: true },
-      });
-
-      const currentImages = (property?.images as string[]) || [];
-      const updatedImages = [...currentImages, result.url!];
+      const updatedImages = [...currentImages, result.url as string];
 
       // Update the property with the new image URL
       await prisma.property.update({

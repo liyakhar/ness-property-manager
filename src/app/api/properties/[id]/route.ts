@@ -1,7 +1,7 @@
 import { type Property, ReadinessStatus } from '@prisma/client';
 import { err, ok, type Result } from 'neverthrow';
 import { type NextRequest, NextResponse } from 'next/server';
-
+import { cleanPropertyImages } from '@/lib/image-deduplication';
 import { prisma } from '@/lib/prisma';
 
 type ApiResponse<T> = Result<T, { message: string; status: number }>;
@@ -12,7 +12,18 @@ async function getPropertyById(id: string): Promise<ApiResponse<Property | null>
       where: { id },
       include: { tenants: true },
     });
-    return ok(property);
+
+    if (!property) {
+      return ok(null);
+    }
+
+    // Deduplicate images for the property
+    const cleanedProperty = {
+      ...property,
+      images: cleanPropertyImages(property.images as string[]),
+    };
+
+    return ok(cleanedProperty);
   } catch {
     return err({ message: 'Failed to fetch property', status: 500 });
   }

@@ -2,7 +2,7 @@ import { OccupancyStatus, type Property, PropertyType, ReadinessStatus } from '@
 import { err, ok, type Result } from 'neverthrow';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-
+import { cleanPropertyImages } from '@/lib/image-deduplication';
 import { prisma } from '@/lib/prisma';
 
 type ApiResponse<T> = Result<T, { message: string; status: number }>;
@@ -14,7 +14,14 @@ async function getProperties(): Promise<ApiResponse<Property[]>> {
         tenants: true,
       },
     });
-    return ok(properties);
+
+    // Deduplicate images for each property
+    const cleanedProperties = properties.map((property) => ({
+      ...property,
+      images: cleanPropertyImages(property.images as string[]),
+    }));
+
+    return ok(cleanedProperties);
   } catch (_error) {
     return err({ message: 'Failed to fetch properties', status: 500 });
   }

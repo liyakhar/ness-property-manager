@@ -29,6 +29,7 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
   const [images, setImages] = React.useState<string[]>(value ?? []);
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
   const [previewIndex, setPreviewIndex] = React.useState<number>(0);
+  const [duplicateMessage, setDuplicateMessage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { uploadImage, deleteImage, isUploading, error } = useImageUpload();
@@ -51,21 +52,31 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
     const fileList = event.target.files;
     if (!fileList || fileList.length === 0) return;
 
-    // Upload each file to local storage
+    // Upload each file to storage
     const uploadPromises = Array.from(fileList).map(async (file) => {
       const result = await uploadImage(file, propertyId);
-      return result.success ? result.url : null;
+      return result;
     });
 
     try {
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const validUrls = uploadedUrls.filter(Boolean) as string[];
+      const uploadResults = await Promise.all(uploadPromises);
+      const validUrls = uploadResults
+        .filter((result) => result.success && result.url)
+        .map((result) => result.url as string);
+
+      const duplicates = uploadResults.filter((result) => result.duplicate);
 
       if (validUrls.length > 0) {
         const next = [...images, ...validUrls];
         setImages(next);
         onSave(next.length ? next : undefined);
         setIsEditing(false);
+      }
+
+      // Show duplicate message if any duplicates were detected
+      if (duplicates.length > 0) {
+        setDuplicateMessage(`${duplicates.length} duplicate image(s) were skipped`);
+        setTimeout(() => setDuplicateMessage(null), 3000); // Clear after 3 seconds
       }
     } catch (err) {
       console.error('Upload error:', err);
@@ -76,6 +87,12 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
 
   const handleRemoveAt = async (idx: number) => {
     const imageUrl = images[idx];
+
+    // Confirm deletion
+    if (!confirm('Вы уверены, что хотите удалить это изображение?')) {
+      return;
+    }
+
     const next = images.filter((_, i) => i !== idx);
 
     // Try to delete from storage
@@ -151,6 +168,7 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
           ✕
         </Button>
         {error && <span className="text-xs text-red-500">{error}</span>}
+        {duplicateMessage && <span className="text-xs text-yellow-600">{duplicateMessage}</span>}
       </div>
     );
   }
@@ -185,9 +203,10 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
                   variant="destructive"
                   size="sm"
                   onClick={() => handleRemoveAt(idx)}
-                  className="absolute -top-1 -right-1 h-4 w-4 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100"
+                  title="Удалить изображение"
                 >
-                  <X className="h-2 w-2" />
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
             ))}
@@ -221,7 +240,26 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="max-h-[90vh] max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Просмотр изображений</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Просмотр изображений</span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  handleRemoveAt(previewIndex);
+                  if (previewIndex >= images.length - 1 && previewIndex > 0) {
+                    setPreviewIndex(previewIndex - 1);
+                  }
+                  if (images.length <= 1) {
+                    setIsPreviewOpen(false);
+                  }
+                }}
+                className="h-8 px-3"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Удалить
+              </Button>
+            </DialogTitle>
           </DialogHeader>
           <div className="relative">
             {images[previewIndex] && (

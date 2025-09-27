@@ -5,6 +5,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { generateUniqueFilename } from './image-hash';
 
 // Storage configuration
 const STORAGE_DIR = path.join(process.cwd(), 'data');
@@ -66,9 +67,8 @@ export async function uploadImage(file: File, propertyId: string): Promise<Image
       };
     }
 
-    // Generate unique filename
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${propertyId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+    // Generate unique filename with hash for deduplication
+    const fileName = await generateUniqueFilename(file, propertyId);
     const filePath = path.join(IMAGES_DIR, fileName);
 
     // Convert file to buffer and save

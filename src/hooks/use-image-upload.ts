@@ -5,6 +5,8 @@ interface UploadResult {
   url?: string;
   path?: string;
   error?: string;
+  duplicate?: boolean;
+  message?: string;
 }
 
 export const useImageUpload = () => {
@@ -63,6 +65,13 @@ export const useImageUpload = () => {
       }
 
       console.log('Upload successful:', result);
+
+      // Handle duplicate detection
+      if (result.duplicate) {
+        console.log('Duplicate image detected:', result.message);
+        // Don't treat duplicates as errors, but log them
+      }
+
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Upload failed';
