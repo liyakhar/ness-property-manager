@@ -78,15 +78,19 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
     const imageUrl = images[idx];
     const next = images.filter((_, i) => i !== idx);
 
-    // Try to delete from local storage
+    // Try to delete from storage
     try {
-      const url = new URL(imageUrl);
-      const pathParts = url.pathname.split('/');
-
-      // Extract filename from local storage URL
-      if (pathParts.includes('api') && pathParts.includes('images')) {
-        const filename = pathParts[pathParts.length - 1];
-        await deleteImage(filename);
+      // For Vercel Blob URLs, use the full URL
+      if (imageUrl.includes('.public.blob.vercel-storage.com')) {
+        await deleteImage(imageUrl, propertyId);
+      } else {
+        // For local storage URLs, extract filename
+        const url = new URL(imageUrl);
+        const pathParts = url.pathname.split('/');
+        if (pathParts.includes('api') && pathParts.includes('images')) {
+          const filename = pathParts[pathParts.length - 1];
+          await deleteImage(filename, propertyId);
+        }
       }
     } catch (err) {
       console.error('Delete error:', err);

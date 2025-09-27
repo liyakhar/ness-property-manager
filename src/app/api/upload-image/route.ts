@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { deleteImage, STORAGE_CONFIG, uploadImage } from '@/lib/image-storage';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,6 +65,29 @@ export async function POST(request: NextRequest) {
       url: result.url,
     });
 
+    // Update the database with the new image URL
+    try {
+      // Get current images for the property
+      const property = await prisma.property.findUnique({
+        where: { id: propertyId },
+        select: { images: true },
+      });
+
+      const currentImages = (property?.images as string[]) || [];
+      const updatedImages = [...currentImages, result.url!];
+
+      // Update the property with the new image URL
+      await prisma.property.update({
+        where: { id: propertyId },
+        data: { images: updatedImages },
+      });
+
+      console.log('Database updated with new image URL:', result.url);
+    } catch (dbError) {
+      console.error('Failed to update database:', dbError);
+      // Don't fail the upload if database update fails
+    }
+
     return NextResponse.json({
       success: true,
       url: result.url,
@@ -84,17 +108,46 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const imagePath = searchParams.get('path');
+    const propertyId = searchParams.get('propertyId');
 
     if (!imagePath) {
       return NextResponse.json({ error: 'Image path is required' }, { status: 400 });
     }
 
-    // Delete file from local storage
+    // Delete file from storage
     const result = await deleteImage(imagePath);
 
     if (!result.success) {
       console.error('Delete error:', result.error);
       return NextResponse.json({ error: result.error || 'Failed to delete file' }, { status: 500 });
+    }
+
+    // Update the database to remove the image URL
+    if (propertyId) {
+      try {
+        // Get current images for the property
+        const property = await prisma.property.findUnique({
+          where: { id: propertyId },
+          select: { images: true },
+        });
+
+        const currentImages = (property?.images as string[]) || [];
+        // Remove the image URL that matches the path or URL
+        const updatedImages = currentImages.filter(
+          (img) => !img.includes(imagePath) && img !== imagePath
+        );
+
+        // Update the property with the filtered images
+        await prisma.property.update({
+          where: { id: propertyId },
+          data: { images: updatedImages },
+        });
+
+        console.log('Database updated, removed image URL:', imagePath);
+      } catch (dbError) {
+        console.error('Failed to update database:', dbError);
+        // Don't fail the delete if database update fails
+      }
     }
 
     return NextResponse.json({ success: true });

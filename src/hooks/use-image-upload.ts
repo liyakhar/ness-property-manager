@@ -74,9 +74,15 @@ export const useImageUpload = () => {
     }
   };
 
-  const deleteImage = async (imagePath: string): Promise<boolean> => {
+  const deleteImage = async (imagePath: string, propertyId?: string): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/upload-image?path=${encodeURIComponent(imagePath)}`, {
+      const url = new URL('/api/upload-image', window.location.origin);
+      url.searchParams.set('path', imagePath);
+      if (propertyId) {
+        url.searchParams.set('propertyId', propertyId);
+      }
+
+      const response = await fetch(url.toString(), {
         method: 'DELETE',
       });
 
