@@ -10,13 +10,16 @@ import path from 'node:path';
 const STORAGE_DIR = path.join(process.cwd(), 'data');
 const IMAGES_DIR = path.join(STORAGE_DIR, 'images');
 
-// Ensure storage directory exists
-if (!fs.existsSync(STORAGE_DIR)) {
-  fs.mkdirSync(STORAGE_DIR, { recursive: true });
-}
+// Ensure storage directory exists (only in development)
+// Skip directory creation in production to avoid ENOENT errors
+if (process.env.NODE_ENV !== 'production') {
+  if (!fs.existsSync(STORAGE_DIR)) {
+    fs.mkdirSync(STORAGE_DIR, { recursive: true });
+  }
 
-if (!fs.existsSync(IMAGES_DIR)) {
-  fs.mkdirSync(IMAGES_DIR, { recursive: true });
+  if (!fs.existsSync(IMAGES_DIR)) {
+    fs.mkdirSync(IMAGES_DIR, { recursive: true });
+  }
 }
 
 // Storage configuration constants
@@ -119,6 +122,10 @@ export async function deleteImage(imagePath: string): Promise<ImageDeleteResult>
  * Get the local file path for an image
  */
 export function getImagePath(filename: string): string {
+  // In production, this function shouldn't be called, but return a safe path
+  if (process.env.NODE_ENV === 'production') {
+    return path.join('/tmp', filename);
+  }
   return path.join(IMAGES_DIR, filename);
 }
 
@@ -126,6 +133,10 @@ export function getImagePath(filename: string): string {
  * Check if an image exists
  */
 export function imageExists(filename: string): boolean {
+  // In production, this function shouldn't be called
+  if (process.env.NODE_ENV === 'production') {
+    return false;
+  }
   const filePath = path.join(IMAGES_DIR, filename);
   return fs.existsSync(filePath);
 }
@@ -134,6 +145,11 @@ export function imageExists(filename: string): boolean {
  * Get all images for a property
  */
 export function getPropertyImages(propertyId: string): string[] {
+  // In production, this function shouldn't be called
+  if (process.env.NODE_ENV === 'production') {
+    return [];
+  }
+
   if (!fs.existsSync(IMAGES_DIR)) {
     return [];
   }
@@ -151,6 +167,11 @@ export function getPropertyImages(propertyId: string): string[] {
  * Delete all images for a property
  */
 export function deletePropertyImages(propertyId: string): boolean {
+  // In production, this function shouldn't be called
+  if (process.env.NODE_ENV === 'production') {
+    return true;
+  }
+
   try {
     if (!fs.existsSync(IMAGES_DIR)) {
       return false;
@@ -181,6 +202,14 @@ export function deletePropertyImages(propertyId: string): boolean {
  * Get storage statistics
  */
 export function getStorageStats() {
+  // In production, this function shouldn't be called
+  if (process.env.NODE_ENV === 'production') {
+    return {
+      totalImages: 0,
+      totalSize: 0,
+    };
+  }
+
   const imageFiles = fs
     .readdirSync(IMAGES_DIR)
     .filter((file) => /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file));
