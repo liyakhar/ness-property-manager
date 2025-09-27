@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { isVercelBlobUrl } from '@/lib/image-utils';
 import { cn } from '@/lib/utils';
 
 interface PaymentAttachmentCellProps {
@@ -246,7 +247,7 @@ export const PaymentAttachmentCell: React.FC<PaymentAttachmentCellProps> = ({
                     alt={fileName}
                     width={800}
                     height={600}
-                    unoptimized
+                    unoptimized={isVercelBlobUrl(value)}
                     className="max-h-[70vh] max-w-full rounded-lg border object-contain"
                     onError={(e) => {
                       const target = e.target as unknown as HTMLImageElement;

@@ -7,6 +7,17 @@ const nextConfig = {
     // Ignore ESLint errors during production builds to avoid build failures
     ignoreDuringBuilds: true,
   },
+  // Image optimization configuration
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   // Optimize for hot module reload
   experimental: {
     optimizePackageImports: ['lucide-react'],

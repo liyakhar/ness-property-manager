@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useImageUpload } from '@/hooks/use-image-upload';
+import { isVercelBlobUrl } from '@/lib/image-utils';
 import { cn } from '@/lib/utils';
 
 interface PropertyImagesCellProps {
@@ -225,6 +226,7 @@ export const PropertyImagesCell: React.FC<PropertyImagesCellProps> = ({
                 alt={`Property ${previewIndex + 1}`}
                 width={800}
                 height={600}
+                unoptimized={isVercelBlobUrl(images[previewIndex])}
                 className="h-auto max-h-[70vh] w-full object-contain"
               />
             )}
