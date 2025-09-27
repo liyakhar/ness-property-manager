@@ -1,10 +1,13 @@
 {
-  "buildCommand": "npm run migrate && next build",
-  "installCommand": "npm install",
+  "buildCommand": "bun run build",
+  "installCommand": "bun install",
   "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
+  },
+  "env": {
+    "BLOB_READ_WRITE_TOKEN": "@blob_read_write_token"
   }
 }
