@@ -16,19 +16,24 @@ async function getProperties(): Promise<ApiResponse<Property[]>> {
     });
 
     // Deduplicate images for each property
-    const cleanedProperties = properties.map((property) => ({
-      ...property,
-      images: cleanPropertyImages(property.images as string[]),
-    }));
+    const cleanedProperties = properties.map((property) => {
+      const images = property.images;
+      const cleanedImages = cleanPropertyImages(images);
+      return {
+        ...property,
+        images: cleanedImages,
+      };
+    });
 
     return ok(cleanedProperties);
-  } catch (_error) {
+  } catch (error) {
+    console.error('Error fetching properties:', error);
     return err({ message: 'Failed to fetch properties', status: 500 });
   }
 }
 
 const createPropertySchema = z.object({
-  apartmentNumber: z.number().int().nonnegative(),
+  apartmentNumber: z.string().min(1),
   location: z.string().min(1),
   rooms: z.number().int().positive(),
   readinessStatus: z.nativeEnum(ReadinessStatus).default('unfurnished'),

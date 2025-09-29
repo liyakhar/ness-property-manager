@@ -48,7 +48,12 @@ export function deduplicateImages(imageUrls: string[]): {
  * Clean up duplicate images from a property's image array
  */
 export function cleanPropertyImages(images: string[] | null | undefined): string[] {
-  if (!images || !Array.isArray(images)) {
+  if (!images) {
+    return [];
+  }
+
+  if (!Array.isArray(images)) {
+    console.warn('Images is not an array:', images);
     return [];
   }
 

@@ -47,7 +47,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
   const form = useForm<AddPropertyFormData>({
     resolver: zodResolver(addPropertySchema),
     defaultValues: {
-      apartmentNumber: undefined,
+      apartmentNumber: '',
       location: '',
       rooms: 1,
       readinessStatus: 'немеблированная',
@@ -93,7 +93,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                   <FormItem>
                     <FormLabel>Номер Квартиры</FormLabel>
                     <FormControl>
-                      <Input type="text" placeholder="101, 2A, 3B, etc." {...field} />
+                      <Input type="text" placeholder="101" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

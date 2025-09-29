@@ -20,7 +20,7 @@ async function getPropertyById(id: string): Promise<ApiResponse<Property | null>
     // Deduplicate images for the property
     const cleanedProperty = {
       ...property,
-      images: cleanPropertyImages(property.images as string[]),
+      images: cleanPropertyImages(property.images),
     };
 
     return ok(cleanedProperty);

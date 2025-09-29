@@ -481,7 +481,7 @@ export function EditableCell({
         return (
           <Input
             ref={inputRef}
-            type="text"
+            type="number"
             value={
               typeof editValue === 'string' || typeof editValue === 'number'
                 ? String(editValue)
@@ -490,7 +490,7 @@ export function EditableCell({
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             className="w-full"
-            placeholder="Введите номер квартиры (например: 101, 2A, 3B)..."
+            placeholder="Введите номер квартиры..."
           />
         );
 

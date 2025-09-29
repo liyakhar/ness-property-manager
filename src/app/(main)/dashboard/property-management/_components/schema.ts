@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const propertySchema = z
   .object({
     id: z.string(),
-    apartmentNumber: z.string().min(1, 'Apartment number is required'),
+    apartmentNumber: z.string().min(1),
     location: z.string().min(1),
     rooms: z.number().min(1).max(10),
     readinessStatus: z.enum(['меблированная', 'немеблированная']),
