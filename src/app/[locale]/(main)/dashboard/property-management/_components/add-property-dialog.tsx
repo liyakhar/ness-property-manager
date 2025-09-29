@@ -87,12 +87,7 @@ export function AddPropertyDialog({ open, onOpenChange, onAddProperty }: AddProp
                   <FormItem>
                     <FormLabel>Номер Квартиры</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="101"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value, 10) || undefined)}
-                      />
+                      <Input type="text" placeholder="101, 2A, 3B, etc." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

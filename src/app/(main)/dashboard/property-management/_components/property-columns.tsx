@@ -72,7 +72,7 @@ export const createPropertyColumns = (
         <EditableCell
           value={row.original.apartmentNumber}
           onSave={(newValue: unknown) => {
-            updateProperty(row.original.id, { apartmentNumber: newValue as number });
+            updateProperty(row.original.id, { apartmentNumber: newValue as string });
           }}
           type="apartmentNumber"
         />

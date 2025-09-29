@@ -3,14 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model Property {
   id                String          @id @default(cuid())
-  apartmentNumber   Int             @unique
+  apartmentNumber   String          @unique
   location          String
   rooms             Int
   readinessStatus   ReadinessStatus @default(unfurnished)
