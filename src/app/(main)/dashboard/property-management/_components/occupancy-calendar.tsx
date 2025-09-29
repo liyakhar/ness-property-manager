@@ -64,7 +64,7 @@ export function OccupancyCalendar({ searchQuery = '' }: OccupancyCalendarProps) 
   // Helper function to check if property matches search query
   const isPropertyMatch = React.useCallback(
     (
-      property: { apartmentNumber: number; location: string; readinessStatus: string },
+      property: { apartmentNumber: string; location: string; readinessStatus: string },
       query: string
     ) => {
       return (

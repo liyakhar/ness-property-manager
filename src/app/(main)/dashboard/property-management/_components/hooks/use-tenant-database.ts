@@ -20,7 +20,7 @@ interface UseTenantDatabaseReturn {
   allTenants: Tenant[];
   filteredTenants: Tenant[];
   hiddenTenants: Tenant[];
-  properties: Array<{ id: string; location: string; apartmentNumber: number }>;
+  properties: Array<{ id: string; location: string; apartmentNumber: string }>;
 
   // Loading states
   isLoading: boolean;

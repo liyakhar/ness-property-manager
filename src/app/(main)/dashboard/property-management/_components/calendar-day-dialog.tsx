@@ -15,7 +15,7 @@ interface CalendarDayDialogProps {
     entryDate: Date;
     exitDate?: Date;
   }>;
-  filteredProperties: Array<{ id: string; apartmentNumber: number }>;
+  filteredProperties: Array<{ id: string; apartmentNumber: string }>;
 }
 
 export function CalendarDayDialog({

@@ -22,7 +22,7 @@ import type { Tenant } from './schema';
 
 export const createTenantColumns = (
   onUpdateTenant: (id: string, updates: Partial<Tenant>) => void,
-  properties: Array<{ id: string; location: string; apartmentNumber: number }>,
+  properties: Array<{ id: string; location: string; apartmentNumber: string }>,
   onDeleteTenant?: (id: string) => void,
   onAddStatus?: (status: { value: string; label: string }) => void,
   onDeleteStatus?: (statusValue: string) => void,

@@ -44,7 +44,7 @@ interface EditableCellProps {
     | 'propertyType'
     | 'readiness';
   options?: { value: string; label: string }[];
-  properties?: Array<{ id: string; apartmentNumber: number; location: string }>;
+  properties?: Array<{ id: string; apartmentNumber: string; location: string }>;
   onAddStatus?: (status: { value: string; label: string }) => void;
   onDeleteStatus?: (statusValue: string) => void;
 }

@@ -12,7 +12,7 @@ interface CalendarDayCellProps {
     entryDate: Date;
     exitDate?: Date;
   }>;
-  filteredProperties: Array<{ id: string; apartmentNumber: number }>;
+  filteredProperties: Array<{ id: string; apartmentNumber: string }>;
   getPropertyColor: (propertyId: string) => string;
   onShowMore: (
     day: Date,

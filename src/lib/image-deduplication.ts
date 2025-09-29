@@ -47,7 +47,7 @@ export function deduplicateImages(imageUrls: string[]): {
 /**
  * Clean up duplicate images from a property's image array
  */
-export function cleanPropertyImages(images: string[] | null | undefined): string[] {
+export function cleanPropertyImages(images: unknown): string[] {
   if (!images) {
     return [];
   }
@@ -57,7 +57,10 @@ export function cleanPropertyImages(images: string[] | null | undefined): string
     return [];
   }
 
-  const { uniqueImages } = deduplicateImages(images);
+  // Ensure all items in the array are strings
+  const stringImages = images.filter((img): img is string => typeof img === 'string');
+
+  const { uniqueImages } = deduplicateImages(stringImages);
   return uniqueImages;
 }
 
