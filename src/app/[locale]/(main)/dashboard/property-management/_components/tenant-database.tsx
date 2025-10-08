@@ -1,6 +1,5 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
 import { Plus, Users } from 'lucide-react';
 import * as React from 'react';
 
@@ -10,8 +9,15 @@ import { DataTableViewOptions } from '@/components/data-table/data-table-view-op
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  useCreateCustomFieldMutation,
+  useCustomFieldsQuery,
+  useDeleteCustomFieldMutation,
+} from '@/hooks/use-custom-fields-query';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
+import { createCustomFieldColumns } from '@/lib/custom-field-utils';
 import { usePropertyManagementStore } from '@/stores/property-management';
+import { EntityType } from '@/types/custom-field.schema';
 
 import { AddTenantDialog } from './add-tenant-dialog';
 import type { AddTenantFormData, Tenant } from './schema';
@@ -26,57 +32,51 @@ export function TenantDatabase() {
     setAddTenantDialogOpen,
   } = usePropertyManagementStore();
 
-  // State for custom columns
-  const [customColumns, setCustomColumns] = React.useState<ColumnDef<Tenant>[]>(() => {
-    // Load custom columns from localStorage on component mount
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('tenant-custom-columns');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error('Failed to parse saved custom columns:', e);
-        }
-      }
-    }
-    return [];
-  });
+  // Custom fields queries and mutations
+  const { data: customFields = [] } = useCustomFieldsQuery(EntityType.TENANT);
+  const createCustomFieldMutation = useCreateCustomFieldMutation();
+  const deleteCustomFieldMutation = useDeleteCustomFieldMutation();
 
   // Function to handle adding new columns
-  const handleAddColumn = (columnData: { id: string; header: string; type: string }) => {
-    const newColumn: ColumnDef<Tenant> = {
-      id: columnData.id,
-      accessorKey: columnData.id,
-      header: () => <div className="font-medium">{columnData.header}</div>,
-      cell: () => {
-        // For now, show placeholder data based on type
-        switch (columnData.type) {
-          case 'text':
-            return <div className="text-muted-foreground text-sm">-</div>;
-          case 'number':
-            return <div className="text-muted-foreground text-sm">0</div>;
-          case 'date':
-            return <div className="text-muted-foreground text-sm">-</div>;
-          case 'select':
-            return <div className="text-muted-foreground text-sm">-</div>;
-          case 'boolean':
-            return <div className="text-muted-foreground text-sm">Нет</div>;
-          default:
-            return <div className="text-muted-foreground text-sm">-</div>;
-        }
-      },
-      enableSorting: true,
-      enableHiding: true,
-    };
-
-    const updatedColumns = [...customColumns, newColumn];
-    setCustomColumns(updatedColumns);
-
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('tenant-custom-columns', JSON.stringify(updatedColumns));
+  const handleAddColumn = async (columnData: { id: string; header: string; type: string }) => {
+    try {
+      // Create custom field definition in database
+      await createCustomFieldMutation.mutateAsync({
+        fieldId: columnData.id,
+        header: columnData.header,
+        type: columnData.type as 'text' | 'number' | 'date' | 'select' | 'boolean',
+        entityType: EntityType.TENANT,
+        order: customFields.length,
+      });
+    } catch (error) {
+      console.error('Failed to add custom column:', error);
     }
   };
+
+  // Function to handle deleting custom columns
+  const handleDeleteColumn = async (columnId: string) => {
+    try {
+      // Find the custom field definition to get its ID
+      const customField = customFields.find((field) => field.fieldId === columnId);
+      if (!customField) {
+        console.error('Custom field not found:', columnId);
+        return;
+      }
+
+      // Delete custom field definition from database (with data cleanup)
+      await deleteCustomFieldMutation.mutateAsync({
+        id: customField.id,
+        cleanupData: true,
+      });
+    } catch (error) {
+      console.error('Failed to delete custom column:', error);
+    }
+  };
+
+  // Create custom field columns from database definitions
+  const customColumns = React.useMemo(() => {
+    return createCustomFieldColumns<Tenant>(customFields);
+  }, [customFields]);
 
   // Combine default columns with custom columns
   const allColumns = React.useMemo(() => {
@@ -134,7 +134,11 @@ export function TenantDatabase() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <DataTableViewOptions table={table} onAddColumn={handleAddColumn} />
+              <DataTableViewOptions
+                table={table}
+                onAddColumn={handleAddColumn}
+                onDeleteColumn={handleDeleteColumn}
+              />
               <Button variant="default" size="default" onClick={() => setAddTenantDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить Арендатора

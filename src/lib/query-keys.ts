@@ -18,4 +18,11 @@ export const queryKeys = {
     details: () => [...queryKeys.tenants.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.tenants.details(), id] as const,
   },
+
+  // Custom Fields
+  customFields: {
+    all: ['customFields'] as const,
+    lists: () => [...queryKeys.customFields.all, 'list'] as const,
+    list: (entityType?: string) => [...queryKeys.customFields.lists(), { entityType }] as const,
+  },
 } as const;

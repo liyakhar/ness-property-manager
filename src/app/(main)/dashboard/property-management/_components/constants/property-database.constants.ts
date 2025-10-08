@@ -1,7 +1,4 @@
 export const PROPERTY_DATABASE_CONSTANTS = {
-  STORAGE_KEYS: {
-    CUSTOM_COLUMNS: 'property-custom-columns',
-  },
   UI: {
     SKELETON_ROWS_COUNT: 5,
   },
@@ -37,7 +34,6 @@ export const PROPERTY_DATABASE_CONSTANTS = {
     LOADING: 'Loading properties...',
     ERROR: 'Error:',
     NOT_FOUND: 'Property not found',
-    FAILED_TO_PARSE: 'Не удалось разобрать сохраненные пользовательские колонки:',
     PROPERTY_DATABASE: 'Обзор Недвижимости',
     FOUND: 'Найдено:',
     AVAILABLE: 'Свободна',

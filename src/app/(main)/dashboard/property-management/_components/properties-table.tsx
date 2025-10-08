@@ -1,7 +1,5 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
-
 import { Building2, Plus } from 'lucide-react';
 import * as React from 'react';
 import { DataTable } from '@/components/data-table/data-table';
@@ -9,6 +7,11 @@ import { DataTablePagination } from '@/components/data-table/data-table-paginati
 import { DataTableViewOptions } from '@/components/data-table/data-table-view-options';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  useCreateCustomFieldMutation,
+  useCustomFieldsQuery,
+  useDeleteCustomFieldMutation,
+} from '@/hooks/use-custom-fields-query';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
 import {
   useCreatePropertyMutation,
@@ -16,10 +19,11 @@ import {
   usePropertiesQuery,
   useUpdatePropertyMutation,
 } from '@/hooks/use-properties-query';
+import { createCustomFieldColumns } from '@/lib/custom-field-utils';
 import { usePropertyManagementStore } from '@/stores/property-management';
+import { EntityType } from '@/types/custom-field.schema';
 import { AddPropertyDialog } from './add-property-dialog';
 import { PropertyStats } from './components/property-stats';
-import { PROPERTY_DATABASE_CONSTANTS } from './constants/property-database.constants';
 import { createPropertyColumns } from './property-columns';
 import type { AddPropertyFormData, Property } from './schema';
 import { propertyDatabaseService } from './services/property-database.service';
@@ -89,10 +93,15 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const updatePropertyMutation = useUpdatePropertyMutation();
   const deletePropertyMutation = useDeletePropertyMutation();
 
+  // Custom fields queries and mutations
+  const { data: customFields = [], isLoading: isLoadingCustomFields } = useCustomFieldsQuery(
+    EntityType.PROPERTY
+  );
+  const createCustomFieldMutation = useCreateCustomFieldMutation();
+  const deleteCustomFieldMutation = useDeleteCustomFieldMutation();
+
   const { isAddPropertyDialogOpen, setAddPropertyDialogOpen } = usePropertyManagementStore();
 
-  // State for custom columns
-  const [customColumns, setCustomColumns] = React.useState<ColumnDef<Property>[]>([]);
   const [isMounted, setIsMounted] = React.useState(false);
 
   // State for custom status options
@@ -109,53 +118,9 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
     return () => setIsMounted(false);
   }, []);
 
-  // Load custom columns from localStorage on component mount
+  // Load custom status options from localStorage (keeping this for now)
   React.useEffect(() => {
     if (!isMounted || typeof window === 'undefined') return;
-
-    const saved = localStorage.getItem(PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS);
-    if (saved) {
-      try {
-        const parsedColumns = JSON.parse(saved) as ColumnDef<Property>[];
-
-        // Migrate any English headers to Russian
-        const migratedColumns = parsedColumns.map((column: ColumnDef<Property>) => {
-          if (column.header && typeof column.header === 'string') {
-            // Check if header is in English and needs translation
-            const englishToRussian: Record<string, string> = {
-              'Apartment Number': 'Номер Квартиры',
-              Location: 'Расположение',
-              Rooms: 'Комнаты',
-              'Readiness Status': 'Готовность',
-              'Property Type': 'Тип',
-              'Occupancy Status': 'Статус',
-              'Urgent Matter': 'Срочные Вопросы',
-              Test: 'Тест',
-              Created: 'Создано',
-              Updated: 'Обновлено',
-              Actions: 'Действия',
-            };
-
-            if (englishToRussian[column.header]) {
-              return { ...column, header: englishToRussian[column.header] };
-            }
-          }
-          return column;
-        });
-
-        if (isMounted) {
-          setCustomColumns(migratedColumns);
-
-          // Save migrated columns back to localStorage
-          localStorage.setItem(
-            PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
-            JSON.stringify(migratedColumns)
-          );
-        }
-      } catch (e) {
-        console.error(PROPERTY_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, e);
-      }
-    }
 
     const savedStatusOptions = localStorage.getItem('property-custom-status-options');
     if (savedStatusOptions) {
@@ -202,81 +167,55 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
   const handleAddColumn = async (columnData: AddColumnData) => {
     if (!isMounted) return;
 
-    const result = await propertyDatabaseService.addCustomColumnToProperties(
-      allProperties,
-      columnData,
-      async (id: string, updates: Partial<Property>) => {
-        if (isMounted) {
-          await updatePropertyMutation.mutateAsync({ id, updates });
+    try {
+      // Create custom field definition in database
+      await createCustomFieldMutation.mutateAsync({
+        fieldId: columnData.id,
+        header: columnData.header,
+        type: columnData.type as 'text' | 'number' | 'date' | 'select' | 'boolean',
+        entityType: EntityType.PROPERTY,
+        order: customFields.length,
+      });
+
+      // Add default values to all existing properties
+      const result = await propertyDatabaseService.addCustomColumnToProperties(
+        allProperties,
+        columnData,
+        async (id: string, updates: Partial<Property>) => {
+          if (isMounted) {
+            await updatePropertyMutation.mutateAsync({ id, updates });
+          }
         }
+      );
+
+      if (result.isErr()) {
+        console.error('Failed to add custom column to properties:', result.error.message);
       }
-    );
-
-    result.match(
-      () => {
-        if (!isMounted) return;
-
-        const newColumn: ColumnDef<Property> = {
-          id: columnData.id,
-          accessorKey: columnData.id,
-          header: columnData.header,
-          cell: ({ row }) => {
-            const customFields = (row.original.customFields as Record<string, unknown>) || {};
-            const value = customFields[columnData.id];
-            return String(value || '');
-          },
-          enableSorting: true,
-          enableHiding: true,
-        };
-
-        const updatedColumns = [...customColumns, newColumn];
-        setCustomColumns(updatedColumns);
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(
-            PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
-            JSON.stringify(updatedColumns)
-          );
-        }
-      },
-      (error) => {
-        console.error('Failed to add custom column:', error.message);
-      }
-    );
+    } catch (error) {
+      console.error('Failed to add custom column:', error);
+    }
   };
 
   // Function to handle deleting custom columns
   const handleDeleteColumn = async (columnId: string) => {
     if (!isMounted) return;
 
-    const result = await propertyDatabaseService.deleteCustomColumnFromProperties(
-      allProperties,
-      columnId,
-      async (id: string, updates: Partial<Property>) => {
-        if (isMounted) {
-          await updatePropertyMutation.mutateAsync({ id, updates });
-        }
+    try {
+      // Find the custom field definition to get its ID
+      const customField = customFields.find((field) => field.fieldId === columnId);
+      if (!customField) {
+        console.error('Custom field not found:', columnId);
+        return;
       }
-    );
 
-    result.match(
-      () => {
-        if (!isMounted) return;
-
-        const updatedColumns = customColumns.filter((column) => column.id !== columnId);
-        setCustomColumns(updatedColumns);
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(
-            PROPERTY_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
-            JSON.stringify(updatedColumns)
-          );
-        }
-      },
-      (error) => {
-        console.error('Failed to delete custom column:', error.message);
-      }
-    );
+      // Delete custom field definition from database (with data cleanup)
+      await deleteCustomFieldMutation.mutateAsync({
+        id: customField.id,
+        cleanupData: true,
+      });
+    } catch (error) {
+      console.error('Failed to delete custom column:', error);
+    }
   };
 
   // Create property columns with update function
@@ -304,6 +243,11 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
     handleDeleteStatus,
     customStatusOptions,
   ]);
+
+  // Create custom field columns from database definitions
+  const customColumns = React.useMemo(() => {
+    return createCustomFieldColumns<Property>(customFields);
+  }, [customFields]);
 
   // Combine default columns with custom columns
   const allColumns = React.useMemo(() => {
@@ -401,7 +345,7 @@ export function PropertiesTable({ searchQuery = '' }: PropertiesTableProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingCustomFields) {
     return <PropertiesTableSkeleton />;
   }
 

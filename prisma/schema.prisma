@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -81,4 +81,31 @@ enum TenantStatus {
   past
   future
   upcoming
+}
+
+enum EntityType {
+  PROPERTY
+  TENANT
+}
+
+enum CustomFieldType {
+  text
+  number
+  date
+  select
+  boolean
+}
+
+model CustomFieldDefinition {
+  id         String          @id @default(cuid())
+  fieldId    String          @unique
+  header     String
+  type       CustomFieldType
+  entityType EntityType
+  order      Int             @default(0)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([entityType])
+  @@map("custom_field_definitions")
 }

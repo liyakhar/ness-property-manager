@@ -1,7 +1,4 @@
 export const TENANT_DATABASE_CONSTANTS = {
-  STORAGE_KEYS: {
-    CUSTOM_COLUMNS: 'tenant-custom-columns',
-  },
   UI: {
     SKELETON_ROWS_COUNT: 5,
     DATE_FORMATS: {
@@ -47,7 +44,6 @@ export const TENANT_DATABASE_CONSTANTS = {
     LOADING: 'Loading user profile...',
     ERROR: 'Error:',
     NOT_FOUND: 'User not found',
-    FAILED_TO_PARSE: 'Не удалось разобрать сохраненные пользовательские колонки:',
     TENANT_DATABASE: 'База Данных Арендаторов',
     FOUND: 'Найдено:',
     CURRENT: 'Текущие',

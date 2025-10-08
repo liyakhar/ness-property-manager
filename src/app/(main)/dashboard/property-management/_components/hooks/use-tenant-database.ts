@@ -1,5 +1,10 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import React, { useCallback, useMemo, useState } from 'react';
+import {
+  useCreateCustomFieldMutation,
+  useCustomFieldsQuery,
+  useDeleteCustomFieldMutation,
+} from '@/hooks/use-custom-fields-query';
 import { useDataTableInstance } from '@/hooks/use-data-table-instance';
 import { usePropertiesQuery } from '@/hooks/use-properties-query';
 import {
@@ -8,7 +13,9 @@ import {
   useTenantsQuery,
   useUpdateTenantMutation,
 } from '@/hooks/use-tenants-query';
+import { createCustomFieldColumns } from '@/lib/custom-field-utils';
 import { usePropertyManagementStore } from '@/stores/property-management';
+import { EntityType } from '@/types/custom-field.schema';
 import { TENANT_DATABASE_CONSTANTS } from '../constants/tenant-database.constants';
 import type { AddTenantFormData, Tenant } from '../schema';
 import { tenantDatabaseService } from '../services/tenant-database.service';
@@ -61,8 +68,10 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
   const { data: properties = [] } = usePropertiesQuery();
   const { setAddTenantDialogOpen } = usePropertyManagementStore();
 
-  // State for custom columns
-  const [customColumns, setCustomColumns] = useState<ColumnDef<Tenant>[]>([]);
+  // Custom fields queries and mutations
+  const { data: customFields = [] } = useCustomFieldsQuery(EntityType.TENANT);
+  const createCustomFieldMutation = useCreateCustomFieldMutation();
+  const deleteCustomFieldMutation = useDeleteCustomFieldMutation();
 
   // State for custom status options
   const [customStatusOptions, setCustomStatusOptions] = useState<
@@ -72,55 +81,9 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
   // State for status filtering
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
 
-  // Load custom columns from localStorage on component mount
+  // Load custom status options from localStorage (keeping this for now)
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS);
-      if (saved) {
-        try {
-          const parsedColumns = JSON.parse(saved) as ColumnDef<Tenant>[];
-
-          // Migrate any English headers to Russian
-          const migratedColumns = parsedColumns.map((column: ColumnDef<Tenant>) => {
-            if (column.header && typeof column.header === 'string') {
-              // Check if header is in English and needs translation
-              const englishToRussian: Record<string, string> = {
-                'Receive Payment Date': 'Платеж за аренду',
-                'Utility Payment Date': 'Платеж за счета',
-                'Internet Payment Date': 'Платеж за интернет',
-                'Is Paid': 'Оплачено',
-                Test: 'Тест',
-                'Payment Attachment': 'Вложение Платежа',
-                Apartment: 'Квартира',
-                Location: 'Расположение',
-                Status: 'Статус',
-                'Entry Date': 'Дата Заезда',
-                'Exit Date': 'Дата Выезда',
-                Notes: 'Заметки',
-                Created: 'Создано',
-                Updated: 'Обновлено',
-                Actions: 'Действия',
-              };
-
-              if (englishToRussian[column.header]) {
-                return { ...column, header: englishToRussian[column.header] };
-              }
-            }
-            return column;
-          });
-
-          setCustomColumns(migratedColumns);
-
-          // Save migrated columns back to localStorage
-          localStorage.setItem(
-            TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
-            JSON.stringify(migratedColumns)
-          );
-        } catch (error) {
-          console.error(TENANT_DATABASE_CONSTANTS.MESSAGES.FAILED_TO_PARSE, error);
-        }
-      }
-
       const savedStatusOptions = localStorage.getItem('tenant-custom-status-options');
       if (savedStatusOptions) {
         try {
@@ -187,6 +150,11 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
     handleDeleteStatus,
     customStatusOptions,
   ]);
+
+  // Create custom field columns from database definitions
+  const customColumns = useMemo(() => {
+    return createCustomFieldColumns<Tenant>(customFields);
+  }, [customFields]);
 
   // Combine default columns with custom columns
   const allColumns = useMemo(() => {
@@ -346,71 +314,51 @@ export const useTenantDatabase = (searchQuery = ''): UseTenantDatabaseReturn => 
 
   // Function to handle adding new columns
   const handleAddColumn = async (columnData: AddColumnData) => {
-    const result = await tenantDatabaseService.addCustomColumnToTenants(
-      allTenants,
-      columnData,
-      async (id: string, updates: Partial<Tenant>) => {
-        await updateTenantMutation.mutateAsync({ id, updates });
-      }
-    );
+    try {
+      // Create custom field definition in database
+      await createCustomFieldMutation.mutateAsync({
+        fieldId: columnData.id,
+        header: columnData.header,
+        type: columnData.type as 'text' | 'number' | 'date' | 'select' | 'boolean',
+        entityType: EntityType.TENANT,
+        order: customFields.length,
+      });
 
-    result.match(
-      () => {
-        const newColumn: ColumnDef<Tenant> = {
-          id: columnData.id,
-          accessorKey: columnData.id,
-          header: columnData.header,
-          cell: ({ row }) => {
-            const customFields = (row.original.customFields as Record<string, unknown>) || {};
-            const value = customFields[columnData.id];
-            return String(value || '');
-          },
-          enableSorting: true,
-          enableHiding: true,
-        };
-
-        const updatedColumns = [...customColumns, newColumn];
-        setCustomColumns(updatedColumns);
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(
-            TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
-            JSON.stringify(updatedColumns)
-          );
+      // Add default values to all existing tenants
+      const result = await tenantDatabaseService.addCustomColumnToTenants(
+        allTenants,
+        columnData,
+        async (id: string, updates: Partial<Tenant>) => {
+          await updateTenantMutation.mutateAsync({ id, updates });
         }
-      },
-      (error) => {
-        console.error('Failed to add custom column:', error.message);
+      );
+
+      if (result.isErr()) {
+        console.error('Failed to add custom column to tenants:', result.error.message);
       }
-    );
+    } catch (error) {
+      console.error('Failed to add custom column:', error);
+    }
   };
 
   // Function to handle deleting custom columns
   const handleDeleteColumn = async (columnId: string) => {
-    const result = await tenantDatabaseService.deleteCustomColumnFromTenants(
-      allTenants,
-      columnId,
-      async (id: string, updates: Partial<Tenant>) => {
-        await updateTenantMutation.mutateAsync({ id, updates });
+    try {
+      // Find the custom field definition to get its ID
+      const customField = customFields.find((field) => field.fieldId === columnId);
+      if (!customField) {
+        console.error('Custom field not found:', columnId);
+        return;
       }
-    );
 
-    result.match(
-      () => {
-        const updatedColumns = customColumns.filter((column) => column.id !== columnId);
-        setCustomColumns(updatedColumns);
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(
-            TENANT_DATABASE_CONSTANTS.STORAGE_KEYS.CUSTOM_COLUMNS,
-            JSON.stringify(updatedColumns)
-          );
-        }
-      },
-      (error) => {
-        console.error('Failed to delete custom column:', error.message);
-      }
-    );
+      // Delete custom field definition from database (with data cleanup)
+      await deleteCustomFieldMutation.mutateAsync({
+        id: customField.id,
+        cleanupData: true,
+      });
+    } catch (error) {
+      console.error('Failed to delete custom column:', error);
+    }
   };
 
   const handleToggleHideSelected = async () => {
